@@ -1,4 +1,4 @@
-/vendor/
-/test/
 composer.lock
 queue.sublime-project
+/vendor/
+/test/
