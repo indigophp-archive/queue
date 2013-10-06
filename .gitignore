@@ -1,0 +1,4 @@
+/vendor/
+/test/
+composer.lock
+queue.sublime-project
