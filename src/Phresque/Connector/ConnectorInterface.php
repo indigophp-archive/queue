@@ -8,7 +8,8 @@ interface ConnectorInterface
     * Establish a queue connection.
     *
     * @param array $config
-    * @return \Illuminate\Queue\QueueInterface
+    * @return \Phresque\Connector\ConnectorInterface
     */
     public function connect(array $config);
+
 }

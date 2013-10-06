@@ -3,7 +3,7 @@
 namespace Phresque;
 
 use Phresque\Queue\QueueInterface;
-use Phresque\Connector\ConnectorInterface;
+use Phresque\Connector\BeanstalkdConnector;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
@@ -17,12 +17,12 @@ class Worker implements LoggerAwareInterface
      */
     protected $logger;
 
-    public function __construct($queue, $driver = null, $connection = array())
+    public function __construct($queue, $driver = null, $connector = null)
     {
         if ($queue instanceof QueueInterface) {
-            $this->setQueue($queue);
+            $this->setQueue($queue, true);
         } else {
-            $this->resolveQueue($queue, $driver, $connection);
+            $this->resolveQueue($queue, $driver, $connector);
         }
     }
 
@@ -31,10 +31,10 @@ class Worker implements LoggerAwareInterface
         return $this->queue;
     }
 
-    public function setQueue(QueueInterface $queue)
+    public function setQueue(QueueInterface $queue, $setLogger = false)
     {
         $this->queue = $queue;
-        if (empty($this->logger)) {
+        if ($setLogger) {
             $logger = $queue->getLogger();
 
             if ($logger instanceof LoggerInterface) {
@@ -43,12 +43,12 @@ class Worker implements LoggerAwareInterface
         }
     }
 
-    public function resolveQueue($queue, $driver, $connection = array())
+    public function resolveQueue($queue, $driver, $connector = null)
     {
         $driver = 'Phresque\\Queue\\' . trim(ucfirst(strtolower($driver))) . 'Queue';
         $queue  = strtolower($queue);
 
-        $driver = new $driver($queue, $connection);
+        $driver = new $driver($queue, $connector);
         $this->setQueue($driver);
     }
 

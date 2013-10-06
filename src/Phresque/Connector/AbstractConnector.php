@@ -2,19 +2,28 @@
 
 namespace Phresque\Connector;
 
-abstract class AbstractConnector
+abstract class AbstractConnector implements ConnectorInterface
 {
     /**
-     * Variable holding connection object
+     * Variable holding client object
      *
      * @var object
      */
-    protected $connection;
+    protected $client;
 
     public function __call($method, $params)
     {
-        $callable = array($this->connection, $method);
+        $callable = array($this->client, $method);
         return call_user_func_array($callable, $params);
     }
 
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    public function setClient($client)
+    {
+        $this->client = $client;
+    }
 }

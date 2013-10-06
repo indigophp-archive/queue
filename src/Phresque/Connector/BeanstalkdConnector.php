@@ -4,24 +4,24 @@ namespace Phresque\Connector;
 
 use Pheanstalk_Pheanstalk as Pheanstalk;
 
-class BeanstalkdConnector extends AbstractConnector implements ConnectorInterface
+class BeanstalkdConnector extends AbstractConnector
 {
-    public function __construct($connection = array())
+    public function __construct($host, $port = Pheanstalk::DEFAULT_PORT)
     {
-        if ($connection instanceof Pheanstalk)
-        {
-            $this->connection = $connection;
-        }
-        elseif(is_array($connection))
-        {
-            $this->connection = $this->connect($connection);
+        if ($host instanceof Pheanstalk) {
+            $this->connection = $host;
+        } else {
+            $this->connect(array('host' => $host, 'port' => $port));
         }
     }
 
     public function connect(array $config)
     {
-        $host = isset($config['host']) ? $config['host'] : 'localhost';
-        $port = isset($config['port']) ? $config['port'] : '11300';
-        return new Pheanstalk($host, $port);
+        $this->client =  new Pheanstalk($config['host'], $config['port']);
+    }
+
+    public function setClient(Pheanstalk $client)
+    {
+        $this->client = $client;
     }
 }

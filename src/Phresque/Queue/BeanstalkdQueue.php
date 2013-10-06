@@ -8,9 +8,17 @@ use Phresque\Connector\BeanstalkdConnector;
 
 class BeanstalkdQueue extends AbstractQueue
 {
-    public function __construct($queue, $connection)
+    public function __construct($queue, $connector)
     {
-        $this->connector = new BeanstalkdConnector($connection);
+        if ($connector instanceof BeanstalkdConnector) {
+            $this->setConnector($connector);
+        } elseif(is_array($connector)) {
+            $host = $connector['host'];
+            $port = @$connector['port'] ?: Pheanstalk::DEFAULT_PORT;
+            $this->setConnector(new BeanstalkdConnector($host, $port));
+        } else {
+            $this->setConnector(new BeanstalkdConnector($connector));
+        }
         $this->queue = $queue;
     }
 
@@ -33,7 +41,7 @@ class BeanstalkdQueue extends AbstractQueue
 
     public function pop($timeout = null)
     {
-        $job = $this->connector->reserveFromTube($queue ?: $this->queue, $timeout);
+        $job = $this->connector->reserveFromTube($this->queue, $timeout);
 
         if ($job instanceof Pheanstalk_Job)
         {

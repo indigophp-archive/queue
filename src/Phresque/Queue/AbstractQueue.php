@@ -10,6 +10,7 @@
 
 namespace Phresque\Queue;
 
+use Phresque\Connector\ConnectorInterface;
 use Closure;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -67,6 +68,11 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
     public function getConnector()
     {
         return $this->connector;
+    }
+
+    public function setConnector(ConnectorInterface $connector)
+    {
+        $this->connector = $connector;
     }
 
     /**
