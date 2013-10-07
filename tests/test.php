@@ -8,7 +8,11 @@ use Phresque\Queue\BeanstalkdQueue;
 
 $queue = new BeanstalkdQueue('default', 'localhost');
 
-$queue->push('asd');
+// $queue->push('asd');
+
+$job = $queue->pop();
+
+var_dump($job); exit;
 
 // $worker = new Worker($queue, 'beanstalkd');
 // $worker->setQueue($queue);

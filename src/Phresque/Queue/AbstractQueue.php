@@ -10,17 +10,15 @@
 
 namespace Phresque\Queue;
 
-use Phresque\Connector\ConnectorInterface;
 use Closure;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
+use Phresque\LoggerEventAbstract;
 
 /**
  * Abstract queue class
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
+abstract class AbstractQueue extends LoggerEventAbstract implements QueueInterface
 {
     /**
      * Object holding Connector
@@ -35,12 +33,6 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
      * @var QueueInterface
      */
     protected $queue;
-
-    /**
-     * Logger instance
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     /**
     * Create serialized payload
@@ -83,32 +75,5 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
     public function getQueue()
     {
         return $this->queue;
-    }
-
-    /**
-     * Gets a logger instance from the object
-     *
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * Sets a logger instance on the object
-     *
-     * @param LoggerInterface $logger
-     * @return null
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    public function __call($method, $params)
-    {
-        $callable = array($this->connector, $method);
-        return call_user_func_array($callable, $params);
     }
 }

@@ -4,7 +4,7 @@ namespace Phresque\Queue;
 
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
-use Phresque\Connector\BeanstalkdConnector;
+use Phresque\Job\BeanstalkdJob;
 
 class BeanstalkdQueue extends AbstractQueue
 {
@@ -25,9 +25,7 @@ class BeanstalkdQueue extends AbstractQueue
     {
         if ($host instanceof Pheanstalk) {
             $this->connector = $host;
-        }
-        else
-        {
+        } else {
             $this->connector = new Pheanstalk($host, $port);
         }
     }
@@ -54,12 +52,11 @@ class BeanstalkdQueue extends AbstractQueue
         return $this->push($job, $data, $delay);
     }
 
-    public function pop($timeout = null)
+    public function pop($timeout = 0)
     {
         $job = $this->connector->reserveFromTube($this->queue, $timeout);
 
-        if ($job instanceof Pheanstalk_Job)
-        {
+        if ($job instanceof Pheanstalk_Job) {
             return new BeanstalkdJob($this->connector, $job);
         }
     }

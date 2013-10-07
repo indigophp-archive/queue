@@ -3,20 +3,11 @@
 namespace Phresque;
 
 use Phresque\Queue\QueueInterface;
-use Phresque\Connector\BeanstalkdConnector;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
+use Phresque\Job\JobInterface as Job;
 
-class Worker implements LoggerAwareInterface
+class Worker extends LoggerEventAbstract
 {
     protected $queue;
-
-    /**
-     * Logger instance
-     *
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     public function __construct($queue, $driver = null, $connector = null)
     {
@@ -62,34 +53,8 @@ class Worker implements LoggerAwareInterface
         }
     }
 
-    /**
-     * Gets a logger instance from the object
-     *
-     * @return LoggerInterface
-     */
-    public function getLogger()
+    public function work()
     {
-        return $this->logger;
-    }
-
-    /**
-     * Sets a logger instance on the object
-     *
-     * @param LoggerInterface $logger
-     * @return null
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    public function setEventHandler(callable $handler)
-    {
-        $this->eventHandler = $handler;
-    }
-
-    public function trigger($event, $data = array())
-    {
-        call_user_func_array($this->eventHandler, array($event, $data));
+        $job = $this->queue->pop();
     }
 }
