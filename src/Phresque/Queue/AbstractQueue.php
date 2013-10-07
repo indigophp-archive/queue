@@ -86,17 +86,6 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
     }
 
     /**
-     * Sets the queue instance on the object
-     *
-     * @param QueueInterface $queue
-     * @return null
-     */
-    public function setQueue($queue)
-    {
-        $this->queue = $queue;
-    }
-
-    /**
      * Gets a logger instance from the object
      *
      * @return LoggerInterface
@@ -115,5 +104,11 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+
+    public function __call($method, $params)
+    {
+        $callable = array($this->connector, $method);
+        return call_user_func_array($callable, $params);
     }
 }

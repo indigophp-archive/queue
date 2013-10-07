@@ -18,6 +18,20 @@ namespace Phresque\Queue;
 interface QueueInterface
 {
     /**
+     * Connect to backend
+     *
+     * @return void
+     */
+    public function connect($connector);
+
+    /**
+     * Checks whether connection is available
+     *
+     * @return boolean
+     */
+    public function isAvailable();
+
+    /**
     * Push a new job onto the queue.
     *
     * @param  string $job

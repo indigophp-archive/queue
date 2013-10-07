@@ -8,18 +8,33 @@ use Phresque\Connector\BeanstalkdConnector;
 
 class BeanstalkdQueue extends AbstractQueue
 {
-    public function __construct($queue, $connector)
+    public function __construct($queue, $connector = null)
     {
-        if ($connector instanceof BeanstalkdConnector) {
-            $this->setConnector($connector);
-        } elseif(is_array($connector)) {
+        if(is_array($connector)) {
             $host = $connector['host'];
             $port = @$connector['port'] ?: Pheanstalk::DEFAULT_PORT;
-            $this->setConnector(new BeanstalkdConnector($host, $port));
+            $this->connect($host, $port);
         } else {
-            $this->setConnector(new BeanstalkdConnector($connector));
+            $this->connect($connector);
         }
+
         $this->queue = $queue;
+    }
+
+    public function connect($host, $port = Pheanstalk::DEFAULT_PORT)
+    {
+        if ($host instanceof Pheanstalk) {
+            $this->connector = $host;
+        }
+        else
+        {
+            $this->connector = new Pheanstalk($host, $port);
+        }
+    }
+
+    public function isAvailable()
+    {
+        return ($this->connector instanceof Pheanstalk) ? $this->connector->getConnection()->isServiceListening() : false;
     }
 
     public function push(

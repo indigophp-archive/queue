@@ -13,6 +13,7 @@ class Worker implements LoggerAwareInterface
 
     /**
      * Logger instance
+     *
      * @var LoggerInterface
      */
     protected $logger;
@@ -20,7 +21,7 @@ class Worker implements LoggerAwareInterface
     public function __construct($queue, $driver = null, $connector = null)
     {
         if ($queue instanceof QueueInterface) {
-            $this->setQueue($queue, true);
+            $this->setQueue($queue);
         } else {
             $this->resolveQueue($queue, $driver, $connector);
         }
@@ -31,16 +32,9 @@ class Worker implements LoggerAwareInterface
         return $this->queue;
     }
 
-    public function setQueue(QueueInterface $queue, $setLogger = false)
+    public function setQueue(QueueInterface $queue)
     {
         $this->queue = $queue;
-        if ($setLogger) {
-            $logger = $queue->getLogger();
-
-            if ($logger instanceof LoggerInterface) {
-                $this->setLogger($logger);
-            }
-        }
     }
 
     public function resolveQueue($queue, $driver, $connector = null)
@@ -57,10 +51,14 @@ class Worker implements LoggerAwareInterface
         return $this->queue->pop();
     }
 
-    public function listen($delay, $memory, $timeout = 60)
+    public function listen($delay, $memory)
     {
         while (true) {
-            $job = $this->pop($delay, $memory, $timeout);
+            $job = $this->pop();
+
+            if ((memory_get_usage() / 1024 / 1024) > $memory) {
+                die;
+            }
         }
     }
 
@@ -83,5 +81,15 @@ class Worker implements LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+
+    public function setEventHandler(callable $handler)
+    {
+        $this->eventHandler = $handler;
+    }
+
+    public function trigger($event, $data = array())
+    {
+        call_user_func_array($this->eventHandler, array($event, $data));
     }
 }
