@@ -51,6 +51,7 @@ abstract class AbstractQueue implements QueueInterface
     */
     protected function createPayload($job, $data = null)
     {
+        // Create special payload if it is a Closure
         if ($job instanceof Closure) {
             $payload = $this->createClosurePayload($job, $data);
         } else {
@@ -62,7 +63,7 @@ abstract class AbstractQueue implements QueueInterface
 
     public function createClosurePayload($job, $data = null)
     {
-        throw new Exception('Pushing closures on a queue is not yet implemented');
+        throw new \Exception('Pushing closures on a queue is not yet implemented');
     }
 
     public function getConnector()

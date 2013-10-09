@@ -10,6 +10,7 @@ class BeanstalkdQueue extends AbstractQueue
 {
     public function __construct($queue, $connector = null)
     {
+        // In case of array get host and port, otherwise it is just the host
         if(is_array($connector)) {
             $host = $connector['host'];
             $port = @$connector['port'] ?: Pheanstalk::DEFAULT_PORT;
@@ -21,8 +22,16 @@ class BeanstalkdQueue extends AbstractQueue
         $this->queue = $queue;
     }
 
+    /**
+     * Connect to queue
+     *
+     * @param  string $host Hostname
+     * @param  string $port Port number
+     * @return null
+     */
     public function connect($host, $port = Pheanstalk::DEFAULT_PORT)
     {
+        // Is it an instance of Pheanstalk or host and port number?
         if ($host instanceof Pheanstalk) {
             $this->connector = $host;
         } else {
