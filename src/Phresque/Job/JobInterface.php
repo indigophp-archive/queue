@@ -33,4 +33,6 @@ interface JobInterface
     * @return int
     */
     public function attempts();
+
+    public function getPayload();
 }

@@ -44,7 +44,7 @@ class BeanstalkdQueue extends AbstractQueue
     ) {
         $payload = $this->createPayload($job, $data);
 
-        return $this->connector->putInTube($this->queue, $payload);
+        return $this->connector->putInTube($this->queue, $payload, $priority, $delay, $ttr);
     }
 
     public function delayed($delay, $job, $data = null)

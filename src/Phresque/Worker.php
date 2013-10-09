@@ -3,7 +3,7 @@
 namespace Phresque;
 
 use Phresque\Queue\QueueInterface;
-use Phresque\Job\JobInterface as Job;
+use Phresque\Job\JobInterface;
 
 class Worker extends LoggerEventAbstract
 {
@@ -42,7 +42,7 @@ class Worker extends LoggerEventAbstract
         return $this->queue->pop();
     }
 
-    public function listen($delay, $memory)
+    public function listen($memory = 128)
     {
         while (true) {
             $job = $this->pop();
@@ -56,5 +56,8 @@ class Worker extends LoggerEventAbstract
     public function work()
     {
         $job = $this->queue->pop();
+        if ($job instanceof JobInterface) {
+            $job->execute();
+        }
     }
 }

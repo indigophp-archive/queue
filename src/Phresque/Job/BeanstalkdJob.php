@@ -16,15 +16,36 @@ class BeanstalkdJob extends AbstractJob
 
     public function execute()
     {
-        $job = json_decode($this->job->getData(), true);
+        $job = $this->getPayload();
         $this->resolve($job);
 
         try {
-            call_user_func_array($this->execute, array($job['data'], $this));
-            isset($instance->delete) and $this->delete();
+            call_user_func_array($this->execute, array($this, $job['data']));
+            empty($this->instance->delete) or $this->delete();
         } catch (\Exception $e) {
             if (is_callable($this->failure)) {
-                call_user_func_array($this->failure, array($e, $this));
+                $failure = call_user_func_array($this->failure, array($this, $e));
+            }
+
+            if ($failure !== false) {
+                if (isset($this->instance->retry)) {
+                    if (is_int($this->instance->retry) and $this->attempts() >= $this->instance->retry) {
+                        if (isset($this->instance->bury)) {
+                            $this->bury();
+                        } elseif (isset($this->instance->delete)) {
+                            $this->delete();
+                        }
+                    } else {
+                        $delay = ! empty($this->instance->delay) ? $this->instance->delay: 0;
+                        $this->release($delay);
+                    }
+                } else {
+                    if (isset($this->instance->bury)) {
+                        $this->bury();
+                    } elseif (isset($this->instance->delete)) {
+                        $this->delete();
+                    }
+                }
             }
         }
     }
@@ -32,6 +53,11 @@ class BeanstalkdJob extends AbstractJob
     public function delete()
     {
         $this->connector->delete($this->job);
+    }
+
+    public function bury()
+    {
+        $this->connector->bury($this->job);
     }
 
     public function release($delay = 0, $priority = Pheanstalk::DEFAULT_PRIORITY)
@@ -44,6 +70,11 @@ class BeanstalkdJob extends AbstractJob
         $stats = $this->connector->statsJob($this->job);
 
         return (int) $stats->reserves;
+    }
+
+    public function getPayload()
+    {
+        return json_decode($this->job->getData(), true);
     }
 
     public function __call($method, $params)

@@ -41,13 +41,9 @@ abstract class AbstractJob extends LoggerEventAbstract implements JobInterface
 
     public function resolve($payload)
     {
-        $job = preg_split('/[:@]/', $job);
+        $job = preg_split('/[:@]/', $payload['job']);
 
-        if (class_exists($job[0])) {
-            # code...
-        }
-
-        $this->instance = new $job[0]($payload['data'], $this);
+        $this->instance = new $job[0]($this, $payload['data']);
 
         $this->execute = $this->failure = array($this->instance);
 
