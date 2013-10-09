@@ -2,9 +2,10 @@
 
 namespace Phresque\Job;
 
-use Phresque\LoggerEventAbstract;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 
-abstract class AbstractJob extends LoggerEventAbstract implements JobInterface
+abstract class AbstractJob implements JobInterface
 {
     /**
      * Job object
@@ -22,12 +23,14 @@ abstract class AbstractJob extends LoggerEventAbstract implements JobInterface
 
     /**
      * Execute callback
+     *
      * @var callback
      */
     protected $execute;
 
     /**
      * Failure callback
+     *
      * @var callback
      */
     protected $failure;
@@ -39,6 +42,19 @@ abstract class AbstractJob extends LoggerEventAbstract implements JobInterface
      */
     protected $connector;
 
+    /**
+     * Logger instance
+     *
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * Resolve the job
+     *
+     * @param  array $payload  Job payload
+     * @return object          Resolved job class
+     */
     public function resolve($payload)
     {
         $job = preg_split('/[:@]/', $payload['job']);
@@ -49,36 +65,38 @@ abstract class AbstractJob extends LoggerEventAbstract implements JobInterface
 
         $this->execute[] = @$job[1] ?: 'execute';
         $this->failure[] = @$job[2] ?: 'failure';
+
+        return $this->instance;
     }
 
     public function _execute(array $payload)
     {
-        $this->resolve($payload);
+        $instance = $this->resolve($payload);
 
         try {
             call_user_func_array($this->execute, array($this, $payload['data']));
-            empty($this->instance->delete) or $this->delete();
+            empty($instance->delete) or $this->delete();
         } catch (\Exception $e) {
             if (is_callable($this->failure)) {
                 $failure = call_user_func_array($this->failure, array($this, $e));
             }
 
             if ($failure !== false) {
-                if (isset($this->instance->retry)) {
-                    if (is_int($this->instance->retry) and $this->attempts() >= $this->instance->retry) {
-                        if (isset($this->instance->bury)) {
+                if (isset($instance->retry)) {
+                    if (is_int($instance->retry) and $this->attempts() >= $instance->retry) {
+                        if (isset($instance->bury)) {
                             $this->bury();
-                        } elseif (isset($this->instance->delete)) {
+                        } elseif (isset($instance->delete)) {
                             $this->delete();
                         }
                     } else {
-                        $delay = ! empty($this->instance->delay) ? $this->instance->delay: 0;
+                        $delay = ! empty($instance->delay) ? $instance->delay: 0;
                         $this->release($delay);
                     }
                 } else {
-                    if (isset($this->instance->bury)) {
+                    if (isset($instance->bury)) {
                         $this->bury();
-                    } elseif (isset($this->instance->delete)) {
+                    } elseif (isset($instance->delete)) {
                         $this->delete();
                     }
                 }
@@ -94,5 +112,16 @@ abstract class AbstractJob extends LoggerEventAbstract implements JobInterface
     public function getJob()
     {
         return $this->job;
+    }
+
+    /**
+     * Sets a logger instance on the object
+     *
+     * @param LoggerInterface $logger
+     * @return null
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 }

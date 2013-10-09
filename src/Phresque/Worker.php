@@ -4,10 +4,19 @@ namespace Phresque;
 
 use Phresque\Queue\QueueInterface;
 use Phresque\Job\JobInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 
-class Worker extends LoggerEventAbstract
+class Worker
 {
     protected $queue;
+
+    /**
+     * Logger instance
+     *
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     public function __construct($queue, $driver = null, $connector = null)
     {
@@ -59,5 +68,16 @@ class Worker extends LoggerEventAbstract
         if ($job instanceof JobInterface) {
             $job->execute();
         }
+    }
+
+    /**
+     * Sets a logger instance on the object
+     *
+     * @param LoggerInterface $logger
+     * @return null
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 }

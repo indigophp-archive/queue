@@ -19,6 +19,13 @@ interface JobInterface
     public function delete();
 
     /**
+    * Bury the job for further inspection.
+    *
+    * @return void
+    */
+    public function bury();
+
+    /**
     * Release the job back into the queue.
     *
     * @param  int      $delay
@@ -34,5 +41,10 @@ interface JobInterface
     */
     public function attempts();
 
+    /**
+     * Return the payload
+     *
+     * @return array Payload array
+     */
     public function getPayload();
 }
