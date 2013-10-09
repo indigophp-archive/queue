@@ -57,9 +57,11 @@ class Worker
      */
     public function resolveQueue($queue, $driver, $connector = null)
     {
+        // Get driver class name and queue name
         $driver = 'Phresque\\Queue\\' . trim(ucfirst(strtolower($driver))) . 'Queue';
         $queue  = strtolower($queue);
 
+        // Instantiate class
         $driver = new $driver($queue, $connector);
         $this->setQueue($driver);
     }
@@ -73,8 +75,10 @@ class Worker
     public function listen($memory = null)
     {
         while (true) {
+            // Process the current job if available
             $this->work();
 
+            // Check whether max memory reached
             if ( ! is_null($memory) and (memory_get_usage() / 1024 / 1024) > $memory) {
                 die;
             }
@@ -83,7 +87,10 @@ class Worker
 
     public function work()
     {
+        // Pop job from the queue
         $job = $this->queue->pop();
+
+        // Only run when valid job object returned
         if ($job instanceof JobInterface) {
             $job->execute();
         }
