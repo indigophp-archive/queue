@@ -44,4 +44,9 @@ class DirectJob extends AbstractJob
     {
         return 1;
     }
+
+    public function getPayload()
+    {
+        return $this->payload;
+    }
 }
