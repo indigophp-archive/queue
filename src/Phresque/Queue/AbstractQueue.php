@@ -96,4 +96,9 @@ abstract class AbstractQueue implements QueueInterface
     {
         $this->logger = $logger;
     }
+
+    public function __tostring()
+    {
+        return $this->queue;
+    }
 }

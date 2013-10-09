@@ -9,6 +9,11 @@ use Psr\Log\LoggerInterface;
 
 class Worker
 {
+    /**
+     * Current queue object
+     *
+     * @var QueueInterface
+     */
     protected $queue;
 
     /**
@@ -92,6 +97,7 @@ class Worker
 
         // Only run when valid job object returned
         if ($job instanceof JobInterface) {
+            $job->setLogger($this->logger);
             $job->execute();
         }
     }
