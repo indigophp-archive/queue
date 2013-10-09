@@ -111,7 +111,7 @@ abstract class AbstractJob implements JobInterface
         // Try to execute the job
         try {
             // Execute the job and catch the return value
-            $execute = call_user_func_array($this->execute, array($this, $payload['data']));
+            $execute = is_callable($this->execute) ? call_user_func_array($this->execute, array($this, $payload['data'])) : false;
             is_null($execute) and $execute = true;
 
             // Throw an error on false return value
@@ -123,7 +123,7 @@ abstract class AbstractJob implements JobInterface
             empty($instance->delete) or $this->delete();
         } catch (\Exception $e) {
             // Execute failure callable
-            $failure = call_user_func_array($this->failure, array($this, $e));
+            $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
             is_null($failure) and $failure = true;
 
             // Do further processing when it returns with false or error
