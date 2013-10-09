@@ -17,7 +17,7 @@ class BeanstalkdJob extends AbstractJob
     public function execute()
     {
         $payload = $this->getPayload();
-        $this->_execute($payload);
+        $this->runJob($payload);
     }
 
     public function delete()

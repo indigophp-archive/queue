@@ -69,7 +69,13 @@ abstract class AbstractJob implements JobInterface
         return $this->instance;
     }
 
-    public function _execute(array $payload)
+    /**
+     * Run execute callable
+     *
+     * @param  array  $payload Payload array
+     * @return null
+     */
+    public function runJob(array $payload)
     {
         $instance = $this->resolve($payload);
 
@@ -104,11 +110,21 @@ abstract class AbstractJob implements JobInterface
         }
     }
 
+    /**
+     * Get queue connector
+     *
+     * @return object
+     */
     public function getConnector()
     {
         return $this->connector;
     }
 
+    /**
+     * Get job object
+     *
+     * @return object
+     */
     public function getJob()
     {
         return $this->job;

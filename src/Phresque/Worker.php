@@ -27,16 +27,34 @@ class Worker
         }
     }
 
+    /**
+     * Get current queue
+     *
+     * @return QueueInterface
+     */
     public function getQueue()
     {
         return $this->queue;
     }
 
+    /**
+     * Set queue
+     *
+     * @param QueueInterface $queue
+     */
     public function setQueue(QueueInterface $queue)
     {
         $this->queue = $queue;
     }
 
+    /**
+     * Resolve queue
+     *
+     * @param  string $queue     Queue name
+     * @param  string $driver    Driver name
+     * @param  mixed  $connector Array of connector data or connector object itself
+     * @return null
+     */
     public function resolveQueue($queue, $driver, $connector = null)
     {
         $driver = 'Phresque\\Queue\\' . trim(ucfirst(strtolower($driver))) . 'Queue';
@@ -46,17 +64,18 @@ class Worker
         $this->setQueue($driver);
     }
 
-    public function pop()
-    {
-        return $this->queue->pop();
-    }
-
-    public function listen($memory = 128)
+    /**
+     * Listen for queue
+     *
+     * @param  integer $memory Max memory allowed for a worker
+     * @return null
+     */
+    public function listen($memory = null)
     {
         while (true) {
-            $job = $this->pop();
+            $this->work();
 
-            if ((memory_get_usage() / 1024 / 1024) > $memory) {
+            if ( ! is_null($memory) and (memory_get_usage() / 1024 / 1024) > $memory) {
                 die;
             }
         }

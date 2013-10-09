@@ -70,7 +70,7 @@ abstract class AbstractQueue implements QueueInterface
         return $this->connector;
     }
 
-    public function setConnector(ConnectorInterface $connector)
+    public function setConnector($connector)
     {
         $this->connector = $connector;
     }
