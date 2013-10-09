@@ -104,6 +104,7 @@ abstract class AbstractJob implements JobInterface
         $instance = $this->resolve($payload);
 
         if ($instance === false) {
+            $this->delete();
             return false;
         }
 
