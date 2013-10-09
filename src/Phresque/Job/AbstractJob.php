@@ -51,6 +51,41 @@ abstract class AbstractJob extends LoggerEventAbstract implements JobInterface
         $this->failure[] = @$job[2] ?: 'failure';
     }
 
+    public function _execute(array $payload)
+    {
+        $this->resolve($payload);
+
+        try {
+            call_user_func_array($this->execute, array($this, $payload['data']));
+            empty($this->instance->delete) or $this->delete();
+        } catch (\Exception $e) {
+            if (is_callable($this->failure)) {
+                $failure = call_user_func_array($this->failure, array($this, $e));
+            }
+
+            if ($failure !== false) {
+                if (isset($this->instance->retry)) {
+                    if (is_int($this->instance->retry) and $this->attempts() >= $this->instance->retry) {
+                        if (isset($this->instance->bury)) {
+                            $this->bury();
+                        } elseif (isset($this->instance->delete)) {
+                            $this->delete();
+                        }
+                    } else {
+                        $delay = ! empty($this->instance->delay) ? $this->instance->delay: 0;
+                        $this->release($delay);
+                    }
+                } else {
+                    if (isset($this->instance->bury)) {
+                        $this->bury();
+                    } elseif (isset($this->instance->delete)) {
+                        $this->delete();
+                    }
+                }
+            }
+        }
+    }
+
     public function getConnector()
     {
         return $this->connector;
