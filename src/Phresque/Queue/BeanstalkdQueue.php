@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Phresque package.
+ *
+ * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Phresque\Queue;
 
@@ -6,6 +14,11 @@ use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
 use Phresque\Job\BeanstalkdJob;
 
+/**
+ * Beanstalkd driver
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
 class BeanstalkdQueue extends AbstractQueue
 {
     public function __construct($queue, $connector = null)

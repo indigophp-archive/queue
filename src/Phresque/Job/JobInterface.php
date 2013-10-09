@@ -1,7 +1,20 @@
 <?php
+/*
+ * This file is part of the Phresque package.
+ *
+ * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Phresque\Job;
 
+/**
+ * Job Inteface
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
 interface JobInterface
 {
 	/**

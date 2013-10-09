@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Phresque package.
+ *
+ * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Phresque;
 
@@ -7,6 +15,11 @@ use Phresque\Job\JobInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Worker class
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
 class Worker
 {
     /**

@@ -1,10 +1,23 @@
 <?php
+/*
+ * This file is part of the Phresque package.
+ *
+ * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Phresque\Job;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Abstract Job class
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
 abstract class AbstractJob implements JobInterface
 {
     /**
