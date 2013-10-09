@@ -15,21 +15,21 @@ abstract class AbstractJob implements JobInterface
     protected $job;
 
     /**
-     * Job handler instance
+     * Resolved job instance
      *
      * @var object
      */
     protected $instance;
 
     /**
-     * Execute callback
+     * Execute callable
      *
      * @var callback
      */
     protected $execute;
 
     /**
-     * Failure callback
+     * Failure callable
      *
      * @var callback
      */
@@ -57,15 +57,20 @@ abstract class AbstractJob implements JobInterface
      */
     public function resolve($payload)
     {
+        // Resolve execute and failure callables
         $job = preg_split('/[:@]/', $payload['job']);
 
+        // Instantiate job class itself
         $this->instance = new $job[0]($this, $payload['data']);
 
+        // Initialize callables
         $this->execute = $this->failure = array($this->instance);
 
+        // Resolve callable names
         $this->execute[] = @$job[1] ?: 'execute';
         $this->failure[] = @$job[2] ?: 'failure';
 
+        // Return job class
         return $this->instance;
     }
 
@@ -77,25 +82,41 @@ abstract class AbstractJob implements JobInterface
      */
     public function runJob(array $payload)
     {
+        // Resolve job class and callables
         $instance = $this->resolve($payload);
 
+        // Try to execute the job
         try {
-            call_user_func_array($this->execute, array($this, $payload['data']));
-            empty($instance->delete) or $this->delete();
-        } catch (\Exception $e) {
-            if (is_callable($this->failure)) {
-                $failure = call_user_func_array($this->failure, array($this, $e));
+            // Execute the job and catch the return value
+            $execute = call_user_func_array($this->execute, array($this, $payload['data']));
+            is_null($execute) and $execute = true;
+
+            // Throw an error on false return value
+            if ($execute === false) {
+                throw new \Exception($this->execute[1] . 'method on ' . $payload['job'] . 'class cannot be run.');
             }
 
-            if ($failure !== false) {
+            // Auto-delete it if it is enabled
+            empty($instance->delete) or $this->delete();
+        } catch (\Exception $e) {
+            // Execute failure callable
+            $failure = call_user_func_array($this->failure, array($this, $e));
+            is_null($failure) and $failure = true;
+
+            // Do further processing when it returns with false or error
+            if ($failure === false) {
+                // Should it be automatically retried or just remove it?
                 if (isset($instance->retry)) {
+                    // Limit or max attempts reached
                     if (is_int($instance->retry) and $this->attempts() >= $instance->retry) {
+                        // Bury or delete it if enabled
                         if (isset($instance->bury)) {
                             $this->bury();
                         } elseif (isset($instance->delete)) {
                             $this->delete();
                         }
                     } else {
+                        // Release it with a delay
                         $delay = ! empty($instance->delay) ? $instance->delay: 0;
                         $this->release($delay);
                     }
