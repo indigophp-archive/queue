@@ -45,7 +45,7 @@ interface JobInterface
     * @param  int|null $priority
     * @return void
     */
-    public function release($delay = 0, $priority = null);
+    public function release($delay = 0);
 
     /**
     * Get the number of times the job has been attempted.
