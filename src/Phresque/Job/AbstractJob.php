@@ -73,6 +73,11 @@ abstract class AbstractJob implements JobInterface
         // Resolve execute and failure callables
         $job = preg_split('/[:@]/', $payload['job']);
 
+        // Check if class exists
+        if ( ! class_exists($job[0], true)) {
+            return false;
+        }
+
         // Instantiate job class itself
         $this->instance = new $job[0]($this, $payload['data']);
 
@@ -97,6 +102,10 @@ abstract class AbstractJob implements JobInterface
     {
         // Resolve job class and callables
         $instance = $this->resolve($payload);
+
+        if ($instance === false) {
+            return false;
+        }
 
         // Try to execute the job
         try {
