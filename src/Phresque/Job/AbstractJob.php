@@ -82,10 +82,11 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         // Instantiate job class itself
         $this->instance = new $job[0]($this, $payload['data']);
 
-        // Resolve callable names
+        // Resolve callables
         isset($job[1]) or $job[1] = 'execute';
         $this->execute = [$this->instance, $job[1]];
-        isset($job[2]) and $this->failure = [$this->instance, $job[2]];
+        isset($job[2]) or $job[2] = 'failure';
+        $this->failure = [$this->instance, $job[2]];
 
         // Check if execute is callable
         if ( ! is_callable($this->execute)) {
@@ -124,15 +125,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
             return $execute;
         } catch (\Exception $e) {
-            // Do further processing by default
-            $failure = false;
-
-            // Is there a failure callback?
-            if (isset($this->failure)) {
-                // Are we sure that we want to do further processing?
-                $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
-                is_callable($this->failure) or $this->logger->debug('Failure callback in ' . $payload['job'] . ' is not found.', array('payload' => $payload));
-            }
+            // Are we sure that we want to do further processing?
+            $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
+            is_callable($this->failure) or $this->logger->debug('Failure callback in ' . $payload['job'] . ' is not found.', array('payload' => $payload));
 
             // Do further processing when it returns with false or error
             if ($failure === false) {
