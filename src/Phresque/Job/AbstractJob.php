@@ -127,6 +127,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             // Execute failure callable
             $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
 
+            // No return value means do further processing
+            is_null($failure) and $failure = false;
+
             is_callable($this->failure) or $this->logger->debug('Failure callback in ' . $payload['job'] . ' is not found.', array('payload' => $payload));
 
             // Do further processing when it returns with false or error
