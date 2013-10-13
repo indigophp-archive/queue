@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class Worker
+class Worker implements LoggerAwareInterface
 {
     /**
      * Current queue object

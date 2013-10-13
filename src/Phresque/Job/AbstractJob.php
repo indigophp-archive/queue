@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractJob implements JobInterface
+abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 {
     /**
      * Job object
