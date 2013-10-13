@@ -75,6 +75,7 @@ abstract class AbstractJob implements JobInterface
 
         // Check if class exists
         if ( ! class_exists($job[0], true)) {
+            $this->logger->critical($payload['job'] . ' is not found.', array('payload' => $payload));
             return false;
         }
 
@@ -87,6 +88,12 @@ abstract class AbstractJob implements JobInterface
         // Resolve callable names
         $this->execute[] = @$job[1] ?: 'execute';
         $this->failure[] = @$job[2] ?: 'failure';
+
+        // Check if execute is callable
+        if ( ! is_callable($this->execute)) {
+            $this->logger->critical($this->execute[1] . 'method in ' . $payload['job'] . ' cannot be called.', array('payload' => $payload));
+            return false;
+        }
 
         // Return job class
         return $this->instance;
@@ -103,6 +110,7 @@ abstract class AbstractJob implements JobInterface
         // Resolve job class and callables
         $instance = $this->resolve($payload);
 
+        // Do not do anything when instance is false or execute is not callable
         if ($instance === false) {
             $this->delete();
             return false;
@@ -111,20 +119,15 @@ abstract class AbstractJob implements JobInterface
         // Try to execute the job
         try {
             // Execute the job and catch the return value
-            $execute = is_callable($this->execute) ? call_user_func_array($this->execute, array($this, $payload['data'])) : false;
-            is_null($execute) and $execute = true;
-
-            // Throw an error on false return value
-            if ($execute === false) {
-                throw new \Exception($this->execute[1] . 'method on ' . $payload['job'] . 'class cannot be run.');
-            }
+            $execute = call_user_func_array($this->execute, array($this, $payload['data']));
 
             // Auto-delete it if it is enabled
             empty($instance->delete) or $this->delete();
         } catch (\Exception $e) {
             // Execute failure callable
             $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
-            is_null($failure) and $failure = true;
+
+            is_callable($this->failure) or $this->logger->debug('Failure callback in ' . $payload['job'] . ' is not found.', array('payload' => $payload));
 
             // Do further processing when it returns with false or error
             if ($failure === false) {
@@ -140,7 +143,7 @@ abstract class AbstractJob implements JobInterface
                         }
                     } else {
                         // Release it with a delay
-                        $delay = ! empty($instance->delay) ? $instance->delay: 0;
+                        $delay = ! empty($instance->delay) ? $instance->delay : 0;
                         $this->release($delay);
                     }
                 } else {
@@ -172,6 +175,16 @@ abstract class AbstractJob implements JobInterface
     public function getJob()
     {
         return $this->job;
+    }
+
+    /**
+     * Gets a logger instance on the object
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 
     /**
