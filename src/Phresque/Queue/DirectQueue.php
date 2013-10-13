@@ -30,6 +30,7 @@ class DirectQueue extends AbstractQueue
     public function push($job, $data = null)
     {
         $job = new DirectJob($job, $data);
+        $job->setLogger($this->logger);
         return $job->execute();
     }
 
