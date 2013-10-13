@@ -34,11 +34,12 @@ class DirectQueue extends AbstractQueue
     public function push($job, $data = null)
     {
         $job = new DirectJob($job, $data);
-        $job->execute();
+        return $job->execute();
     }
 
     public function delayed($delay, $job, $data = null)
     {
+        sleep($delay);
         return $this->push($job, $data);
     }
 
