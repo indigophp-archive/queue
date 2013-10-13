@@ -11,6 +11,7 @@
 namespace Phresque\Queue;
 
 use Phresque\Job\JobInterface;
+use Phresque\Job\DirectJob;
 
 /**
  * Direct driver for running jobs immediately
