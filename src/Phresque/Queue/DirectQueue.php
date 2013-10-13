@@ -19,12 +19,7 @@ use Phresque\Job\JobInterface;
  */
 class DirectQueue extends AbstractQueue
 {
-    /**
-     * Connect to queue
-     *
-     * @return null
-     */
-    public function connect() { }
+    public function connect($connector = null) { }
 
     public function isAvailable()
     {
