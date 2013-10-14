@@ -28,7 +28,7 @@ class BeanstalkdQueue extends AbstractQueue
             $host = $connector['host'];
             $port = @$connector['port'] ?: Pheanstalk::DEFAULT_PORT;
             $this->connect($host, $port);
-        } else {
+        } elseif( ! is_null($connector)) {
             $this->connect($connector);
         }
 
@@ -57,21 +57,32 @@ class BeanstalkdQueue extends AbstractQueue
         return ($this->connector instanceof Pheanstalk) ? $this->connector->getConnection()->isServiceListening() : false;
     }
 
-    public function push(
-        $job,
-        $data = null,
-        $delay = Pheanstalk::DEFAULT_DELAY,
-        $ttr = Pheanstalk::DEFAULT_TTR,
-        $priority = Pheanstalk::DEFAULT_PRIORITY
-    ) {
+    public function push($job, $data = null, array $options = array())
+    {
         $payload = $this->createPayload($job, $data);
 
-        return $this->connector->putInTube($this->queue, $payload, $priority, $delay, $ttr);
+        // Set default options
+        $default = array(
+            'delay'    => Pheanstalk::DEFAULT_DELAY,
+            'ttr'      => Pheanstalk::DEFAULT_TTR,
+            'priority' => Pheanstalk::DEFAULT_PRIORITY
+        );
+        $options = array_merge($default, $options);
+
+        return $this->connector->putInTube($this->queue, $payload, $options['priority'], $options['delay'], $options['ttr']);
     }
 
-    public function delayed($delay, $job, $data = null)
+    public function delayed($delay, $job, $data = null, array $options = array())
     {
-        return $this->push($job, $data, $delay);
+        // Set default options
+        $default = array(
+            'ttr'      => Pheanstalk::DEFAULT_TTR,
+            'priority' => Pheanstalk::DEFAULT_PRIORITY
+        );
+        $options = array_merge($default, $options);
+        $options['delay'] = $delay;
+
+        return $this->push($job, $data, $options);
     }
 
     public function pop($timeout = 0)

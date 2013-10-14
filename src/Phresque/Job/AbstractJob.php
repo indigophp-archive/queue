@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractJob implements JobInterface
+abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 {
     /**
      * Job object
@@ -73,15 +73,26 @@ abstract class AbstractJob implements JobInterface
         // Resolve execute and failure callables
         $job = preg_split('/[:@]/', $payload['job']);
 
+        // Check if class exists
+        if ( ! class_exists($job[0], true)) {
+            $this->logger->critical($payload['job'] . ' is not found.', array('payload' => $payload));
+            return false;
+        }
+
         // Instantiate job class itself
         $this->instance = new $job[0]($this, $payload['data']);
 
-        // Initialize callables
-        $this->execute = $this->failure = array($this->instance);
+        // Resolve callables
+        isset($job[1]) or $job[1] = 'execute';
+        $this->execute = [$this->instance, $job[1]];
+        isset($job[2]) or $job[2] = 'failure';
+        $this->failure = [$this->instance, $job[2]];
 
-        // Resolve callable names
-        $this->execute[] = @$job[1] ?: 'execute';
-        $this->failure[] = @$job[2] ?: 'failure';
+        // Check if execute is callable
+        if ( ! is_callable($this->execute)) {
+            $this->logger->critical($this->execute[1] . 'method in ' . $payload['job'] . ' cannot be called.', array('payload' => $payload));
+            return false;
+        }
 
         // Return job class
         return $this->instance;
@@ -98,47 +109,37 @@ abstract class AbstractJob implements JobInterface
         // Resolve job class and callables
         $instance = $this->resolve($payload);
 
+        // Do not do anything when instance is false or execute is not callable
+        if ($instance === false) {
+            $this->delete();
+            return false;
+        }
+
         // Try to execute the job
         try {
             // Execute the job and catch the return value
             $execute = call_user_func_array($this->execute, array($this, $payload['data']));
-            is_null($execute) and $execute = true;
-
-            // Throw an error on false return value
-            if ($execute === false) {
-                throw new \Exception($this->execute[1] . 'method on ' . $payload['job'] . 'class cannot be run.');
-            }
 
             // Auto-delete it if it is enabled
             empty($instance->delete) or $this->delete();
+
+            return $execute;
         } catch (\Exception $e) {
-            // Execute failure callable
-            $failure = call_user_func_array($this->failure, array($this, $e));
-            is_null($failure) and $failure = true;
+            // Are we sure that we want to do further processing?
+            $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
+            is_callable($this->failure) or $this->logger->debug('Failure callback in ' . $payload['job'] . ' is not found.', array('payload' => $payload));
 
             // Do further processing when it returns with false or error
             if ($failure === false) {
-                // Should it be automatically retried or just remove it?
-                if (isset($instance->retry)) {
-                    // Limit or max attempts reached
-                    if (is_int($instance->retry) and $this->attempts() >= $instance->retry) {
-                        // Bury or delete it if enabled
-                        if (isset($instance->bury)) {
-                            $this->bury();
-                        } elseif (isset($instance->delete)) {
-                            $this->delete();
-                        }
-                    } else {
-                        // Release it with a delay
-                        $delay = ! empty($instance->delay) ? $instance->delay: 0;
-                        $this->release($delay);
-                    }
-                } else {
-                    if (isset($instance->bury)) {
-                        $this->bury();
-                    } elseif (isset($instance->delete)) {
-                        $this->delete();
-                    }
+                // Should it be automatically retried or just bury/remove it?
+                if (isset($instance->retry) and $this->attempts() <= $instance->retry) {
+                    // Release it with a delay
+                    $delay = ! empty($instance->delay) ? $instance->delay : 0;
+                    $this->release($delay);
+                } elseif (isset($instance->bury)) {
+                    $this->bury();
+                } elseif (isset($instance->delete)) {
+                    $this->delete();
                 }
             }
         }
@@ -162,6 +163,16 @@ abstract class AbstractJob implements JobInterface
     public function getJob()
     {
         return $this->job;
+    }
+
+    /**
+     * Gets a logger instance on the object
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 
     /**

@@ -17,6 +17,9 @@
     "require-dev": {
         "pda/pheanstalk": "2.1.0"
     },
+    "suggest": {
+        "pda/pheanstalk": "Used for Beanstalkd queues"
+    },
     "autoload": {
         "psr-0": {"Phresque": "src/"}
     }

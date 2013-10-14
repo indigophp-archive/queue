@@ -11,6 +11,7 @@
 namespace Phresque\Queue;
 
 use Phresque\Job\JobInterface;
+use Phresque\Job\DirectJob;
 
 /**
  * Direct driver for running jobs immediately
@@ -19,12 +20,7 @@ use Phresque\Job\JobInterface;
  */
 class DirectQueue extends AbstractQueue
 {
-    /**
-     * Connect to queue
-     *
-     * @return null
-     */
-    public function connect() { }
+    public function connect($connector = null) { }
 
     public function isAvailable()
     {
@@ -34,11 +30,13 @@ class DirectQueue extends AbstractQueue
     public function push($job, $data = null)
     {
         $job = new DirectJob($job, $data);
-        $job->execute();
+        $job->setLogger($this->logger);
+        return $job->execute();
     }
 
     public function delayed($delay, $job, $data = null)
     {
+        sleep($delay);
         return $this->push($job, $data);
     }
 

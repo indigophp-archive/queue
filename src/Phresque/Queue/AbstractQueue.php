@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractQueue implements QueueInterface
+abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
 {
     /**
      * Object holding Connector
