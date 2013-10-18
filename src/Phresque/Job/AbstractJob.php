@@ -84,9 +84,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         // Resolve callables
         isset($job[1]) or $job[1] = 'execute';
-        $this->execute = [$this->instance, $job[1]];
+        $this->execute = array($this->instance, $job[1]);
         isset($job[2]) or $job[2] = 'failure';
-        $this->failure = [$this->instance, $job[2]];
+        $this->failure = array($this->instance, $job[2]);
 
         // Check if execute is callable
         if ( ! is_callable($this->execute)) {
