@@ -31,7 +31,7 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
     /**
      * Queue name
      *
-     * @var QueueInterface
+     * @var string
      */
     protected $queue;
 
@@ -79,7 +79,7 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
     /**
      * Gets a queue instance from the object
      *
-     * @return QueueInterface
+     * @return string
      */
     public function getQueue()
     {
