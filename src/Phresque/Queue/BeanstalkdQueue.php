@@ -26,7 +26,7 @@ class BeanstalkdQueue extends AbstractQueue
         // In case of array get host and port, otherwise it is just the host
         if(is_array($connector)) {
             $host = $connector['host'];
-            $port = @$connector['port'] ?: Pheanstalk::DEFAULT_PORT;
+            $port = empty($connector['port']) ? Pheanstalk::DEFAULT_PORT : $connector['port'];
             $this->connect($host, $port);
         } elseif( ! is_null($connector)) {
             $this->connect($connector);
