@@ -36,13 +36,9 @@ class Worker implements LoggerAwareInterface
      */
     protected $logger;
 
-    public function __construct($queue, $driver = null, $connector = null)
+    public function __construct(QueueInterface $queue)
     {
-        if ($queue instanceof QueueInterface) {
-            $this->setQueue($queue);
-        } else {
-            $this->resolveQueue($queue, $driver, $connector);
-        }
+        $this->setQueue($queue);
     }
 
     /**
@@ -66,25 +62,6 @@ class Worker implements LoggerAwareInterface
     }
 
     /**
-     * Resolve queue
-     *
-     * @param  string $queue     Queue name
-     * @param  string $driver    Driver name
-     * @param  mixed  $connector Array of connector data or connector object itself
-     * @return null
-     */
-    public function resolveQueue($queue, $driver, $connector = null)
-    {
-        // Get driver class name and queue name
-        $driver = 'Phresque\\Queue\\' . trim(ucfirst(strtolower($driver))) . 'Queue';
-        $queue  = strtolower($queue);
-
-        // Instantiate class
-        $driver = new $driver($queue, $connector);
-        $this->setQueue($driver);
-    }
-
-    /**
      * Listen for queue
      *
      * @param  integer $memory Max memory allowed for a worker
@@ -98,11 +75,16 @@ class Worker implements LoggerAwareInterface
 
             // Check whether max memory reached
             if ( ! is_null($memory) and (memory_get_usage() / 1024 / 1024) > $memory) {
-                die;
+                die('Memory usage (' . $memory . 'MB) reached');
             }
         }
     }
 
+    /**
+     * Process one job from the queue
+     *
+     * @return null
+     */
     public function work()
     {
         // Pop job from the queue
@@ -124,5 +106,40 @@ class Worker implements LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+
+    /**
+     * Create new instance of a queue worker
+     *
+     * @param  mixed  $queue     Queue instance or queue name
+     * @param  string $driver    Driver name
+     * @param  mixed  $connector Array of connector data or connector object itself
+     * @return new static
+     */
+    public static function forge($queue, $driver = null, $connector = null)
+    {
+        if ( ! $queue instanceof QueueInterface) {
+            $queue = static::resolveQueue($queue, $driver, $connector)
+        }
+
+        return new static($queue);
+    }
+
+    /**
+     * Resolve queue
+     *
+     * @param  string $queue     Queue name
+     * @param  string $driver    Driver name
+     * @param  mixed  $connector Array of connector data or connector object itself
+     * @return QueueInterface
+     */
+    public static function resolveQueue($queue, $driver, $connector = null)
+    {
+        // Get driver class name and queue name
+        $driver = 'Phresque\\Queue\\' . trim(ucfirst(strtolower($driver))) . 'Queue';
+        $queue  = strtolower($queue);
+
+        // Instantiate class
+        return new $driver($queue, $connector);
     }
 }
