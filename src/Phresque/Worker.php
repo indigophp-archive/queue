@@ -36,9 +36,10 @@ class Worker implements LoggerAwareInterface
      */
     protected $logger;
 
-    public function __construct(QueueInterface $queue)
+    public function __construct(QueueInterface $queue, LoggerInterface $logger = null)
     {
         $this->setQueue($queue);
+        is_null($logger) or $this->setLogger($logger);
     }
 
     /**
