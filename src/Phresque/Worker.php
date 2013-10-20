@@ -121,7 +121,7 @@ class Worker implements LoggerAwareInterface
     public static function forge($queue, $driver = null, $connector = null)
     {
         if ( ! $queue instanceof QueueInterface) {
-            $queue = static::resolveQueue($queue, $driver, $connector)
+            $queue = static::resolveQueue($queue, $driver, $connector);
         }
 
         return new static($queue);
