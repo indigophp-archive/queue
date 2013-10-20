@@ -87,6 +87,16 @@ abstract class AbstractQueue implements QueueInterface, LoggerAwareInterface
     }
 
     /**
+     * Gets a logger instance on the object
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
      * Sets a logger instance on the object
      *
      * @param LoggerInterface $logger
