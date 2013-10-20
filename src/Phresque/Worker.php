@@ -76,6 +76,7 @@ class Worker implements LoggerAwareInterface
 
             // Check whether max memory reached
             if ( ! is_null($memory) and (memory_get_usage() / 1024 / 1024) > $memory) {
+                $this->logger->info('Memory usage limit (' . $memory . 'MB) reached, worker is going to die.');
                 die('Memory usage (' . $memory . 'MB) reached');
             }
         }
