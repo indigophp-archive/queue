@@ -75,6 +75,7 @@ class Worker implements LoggerAwareInterface
             $job = $this->queue->pop($timeout);
 
             // Process the current job if available
+            // or (u)sleep for a certain time
             if ($job instanceof JobInterface) {
                 $job->setLogger($this->logger);
                 $job->execute();
