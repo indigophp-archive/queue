@@ -68,11 +68,29 @@ class Worker implements LoggerAwareInterface
      * @param  integer $memory Max memory allowed for a worker
      * @return null
      */
-    public function listen($memory = null)
+    public function listen($interval = 5, $memory = null)
     {
         while (true) {
+            // Pop job from the queue
+            $job = $this->queue->pop($timeout);
+
             // Process the current job if available
-            $this->work();
+            if ($job instanceof JobInterface) {
+                $job->setLogger($this->logger);
+                $job->execute();
+            }
+            elseif($interval > 0)
+            {
+                if ($interval < 1)
+                {
+                    $interval = $interval / 1000000;
+                    usleep($interval);
+                }
+                else
+                {
+                    sleep($interval);
+                }
+            }
 
             // Check whether max memory reached
             if ( ! is_null($memory) and (memory_get_usage() / 1024 / 1024) > $memory) {
@@ -87,10 +105,10 @@ class Worker implements LoggerAwareInterface
      *
      * @return null
      */
-    public function work()
+    public function work($timeout = 0)
     {
         // Pop job from the queue
-        $job = $this->queue->pop();
+        $job = $this->queue->pop($timeout);
 
         // Only run when valid job object returned
         if ($job instanceof JobInterface) {
