@@ -65,10 +65,12 @@ class Worker implements LoggerAwareInterface
     /**
      * Listen for queue
      *
-     * @param  integer $memory Max memory allowed for a worker
+     * @param  integer $interval Sleep for certain time if no job is available
+     * @param  integer $memory   Max memory allowed for a worker
+     * @param  integer $timeout  Wait timeout for pop
      * @return null
      */
-    public function listen($interval = 5, $memory = null)
+    public function listen($interval = 5, $memory = null, $timeout = 0)
     {
         while (true) {
             // Pop job from the queue
