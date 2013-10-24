@@ -28,6 +28,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected $job;
 
     /**
+     * Queue object
+     *
+     * @var QueueInterface
+     */
+    protected $queue;
+
+    /**
      * Resolved job instance
      *
      * @var object
@@ -63,6 +70,18 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected $logger;
 
     /**
+     * Config values
+     *
+     * @var array
+     */
+    protected $config = array(
+        'retry'  => 0,
+        'delay'  => 0,
+        'bury'   => false,
+        'delete' => false
+    );
+
+    /**
      * Resolve the job
      *
      * @param  array $payload  Job payload
@@ -87,6 +106,17 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         $this->execute = array($this->instance, $job[1]);
         isset($job[2]) or $job[2] = 'failure';
         $this->failure = array($this->instance, $job[2]);
+
+        // Get configuration from job
+        if (isset($instance->config) and is_array($instance->config))
+        {
+            $this->config = array_merge($this->config, $instance->config);
+        }
+
+        // Support old method: do not have to use config array
+        foreach ($config as $key => $value) {
+            isset($instance->{$key}) and $config[$key] = $instance->{$key};
+        }
 
         // Check if execute is callable
         if ( ! is_callable($this->execute)) {
@@ -132,13 +162,12 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             // Do further processing when it returns with false or error
             if ($failure === false) {
                 // Should it be automatically retried or just bury/remove it?
-                if (isset($instance->retry) and $this->attempts() <= $instance->retry) {
+                if ($this->attempts() <= $this->config['retry']) {
                     // Release it with a delay
-                    $delay = ! empty($instance->delay) ? $instance->delay : 0;
-                    $this->release($delay);
-                } elseif (isset($instance->bury)) {
+                    $this->release($this->config['delay']);
+                } elseif ($this->config['bury']) {
                     $this->bury();
-                } elseif (isset($instance->delete)) {
+                } elseif ($this->config['delete']) {
                     $this->delete();
                 }
             }
