@@ -110,7 +110,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         // Get configuration from job
         if (isset($instance->config) and is_array($instance->config))
         {
-            $this->config = array_merge($this->config, $instance->config);
+            $config = array_intersect_key($instance->config, $this->config);
+            $this->config = array_merge($this->config, $config);
         }
 
         // Support old method: do not have to use config array
@@ -151,7 +152,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             $execute = call_user_func_array($this->execute, array($this, $payload['data']));
 
             // Auto-delete it if it is enabled
-            empty($instance->delete) or $this->delete();
+            empty($this->config['delete']) or $this->delete();
 
             return $execute;
         } catch (\Exception $e) {
