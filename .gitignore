@@ -2,4 +2,3 @@ composer.lock
 *.sublime-project
 *.sublime-workspace
 /vendor/
-/tests/
