@@ -108,15 +108,15 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         $this->failure = array($this->instance, $job[2]);
 
         // Get configuration from job
-        if (isset($instance->config) and is_array($instance->config))
+        if (isset($this->instance->config) and is_array($this->instance->config))
         {
-            $config = array_intersect_key($instance->config, $this->config);
+            $config = array_intersect_key($this->instance->config, $this->config);
             $this->config = array_merge($this->config, $config);
         }
 
         // Support old method: do not have to use config array
-        foreach ($config as $key => $value) {
-            isset($instance->{$key}) and $config[$key] = $instance->{$key};
+        foreach ($this->config as $key => $value) {
+            isset($this->instance->{$key}) and $config[$key] = $this->instance->{$key};
         }
 
         // Check if execute is callable
@@ -153,6 +153,10 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
             // Auto-delete it if it is enabled
             empty($this->config['delete']) or $this->delete();
+
+            // Log Cube-compatible message of success
+            $payload['type'] = (string) $this->queue;
+            $this->logger->debug($payload['job'] . ' finished', $payload);
 
             return $execute;
         } catch (\Exception $e) {
