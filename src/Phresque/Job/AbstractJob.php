@@ -116,7 +116,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         // Support old method: do not have to use config array
         foreach ($this->config as $key => $value) {
-            isset($this->instance->{$key}) and $config[$key] = $this->instance->{$key};
+            isset($this->instance->{$key}) and $this->config[$key] = $this->instance->{$key};
         }
 
         // Check if execute is callable
