@@ -94,7 +94,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         // Check if class exists
         if ( ! class_exists($job[0], true)) {
-            $this->logger->critical($payload['job'] . ' is not found.', array('payload' => $payload));
+            $this->logger->critical('Job {job} is not found.', $payload);
             return false;
         }
 
@@ -121,7 +121,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         // Check if execute is callable
         if ( ! is_callable($this->execute)) {
-            $this->logger->critical($this->execute[1] . 'method in ' . $payload['job'] . ' cannot be called.', array('payload' => $payload));
+            $this->logger->critical($this->execute[1] . 'method in job {job} cannot be called.', $payload);
             return false;
         }
 
@@ -156,13 +156,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
             // Log Cube-compatible message of success
             $payload['type'] = (string) $this->queue;
-            $this->logger->debug($payload['job'] . ' finished', $payload);
+            $this->logger->debug('Job {job} finished', $payload);
 
             return $execute;
         } catch (\Exception $e) {
             // Are we sure that we want to do further processing?
             $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
-            is_callable($this->failure) or $this->logger->debug('Failure callback in ' . $payload['job'] . ' is not found.', array('payload' => $payload));
+            is_callable($this->failure) or $this->logger->debug('Failure callback in job {job} is not found.', $payload);
 
             // Do further processing when it returns with false or error
             if ($failure === false) {
