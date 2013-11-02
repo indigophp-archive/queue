@@ -155,8 +155,12 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             empty($this->config['delete']) or $this->delete();
 
             // Log Cube-compatible message of success
-            $payload['type'] = (string) $this->queue;
-            $this->logger->debug('Job {job} finished', $payload);
+            $log = array(
+                'handler' => 'CubeHandler',
+                'type' => (string) $this->queue,
+                'data' => $payload
+            );
+            $this->logger->debug('Job ' . $payload['job'] . ' finished', $log);
 
             return $execute;
         } catch (\Exception $e) {
