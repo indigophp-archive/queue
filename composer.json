@@ -1,5 +1,5 @@
 {
-    "name": "indigo-soft/phresque",
+    "name": "indigophp/phresque",
     "description": "Package to manage queues",
     "type": "library",
     "keywords": ["queue", "worker", "job"],
