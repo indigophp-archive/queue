@@ -12,6 +12,7 @@ namespace Phresque\Job;
 
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
+use Phresque\Queue\BeanstalkdQueue;
 
 /**
  * Beanstalkd Job
@@ -20,10 +21,11 @@ use Pheanstalk_Pheanstalk as Pheanstalk;
  */
 class BeanstalkdJob extends AbstractJob
 {
-    public function __construct(Pheanstalk $connector, Pheanstalk_Job $job)
+    public function __construct(BeanstalkdQueue $queue, Pheanstalk_Job $job)
     {
         $this->job = $job;
-        $this->connector = $connector;
+        $this->queue = $queue;
+        $this->connector = $queue->getConnector();
     }
 
     public function execute()

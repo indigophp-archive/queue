@@ -28,6 +28,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected $job;
 
     /**
+     * Queue object
+     *
+     * @var QueueInterface
+     */
+    protected $queue;
+
+    /**
      * Resolved job instance
      *
      * @var object
@@ -63,6 +70,18 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected $logger;
 
     /**
+     * Config values
+     *
+     * @var array
+     */
+    protected $config = array(
+        'retry'  => 0,
+        'delay'  => 0,
+        'bury'   => false,
+        'delete' => false
+    );
+
+    /**
      * Resolve the job
      *
      * @param  array $payload  Job payload
@@ -75,7 +94,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         // Check if class exists
         if ( ! class_exists($job[0], true)) {
-            $this->logger->critical($payload['job'] . ' is not found.', array('payload' => $payload));
+            $this->logger->critical('Job {job} is not found.', $payload);
             return false;
         }
 
@@ -88,9 +107,21 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         isset($job[2]) or $job[2] = 'failure';
         $this->failure = array($this->instance, $job[2]);
 
+        // Get configuration from job
+        if (isset($this->instance->config) and is_array($this->instance->config))
+        {
+            $config = array_intersect_key($this->instance->config, $this->config);
+            $this->config = array_merge($this->config, $config);
+        }
+
+        // Support old method: do not have to use config array
+        foreach ($this->config as $key => $value) {
+            isset($this->instance->{$key}) and $this->config[$key] = $this->instance->{$key};
+        }
+
         // Check if execute is callable
         if ( ! is_callable($this->execute)) {
-            $this->logger->critical($this->execute[1] . 'method in ' . $payload['job'] . ' cannot be called.', array('payload' => $payload));
+            $this->logger->critical($this->execute[1] . 'method in job {job} cannot be called.', $payload);
             return false;
         }
 
@@ -121,24 +152,31 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             $execute = call_user_func_array($this->execute, array($this, $payload['data']));
 
             // Auto-delete it if it is enabled
-            empty($instance->delete) or $this->delete();
+            empty($this->config['delete']) or $this->delete();
+
+            // Log Cube-compatible message of success
+            $log = array(
+                'handler' => 'CubeHandler',
+                'type' => (string) $this->queue,
+                'data' => $payload
+            );
+            $this->logger->debug('Job ' . $payload['job'] . ' finished', $log);
 
             return $execute;
         } catch (\Exception $e) {
             // Are we sure that we want to do further processing?
             $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
-            is_callable($this->failure) or $this->logger->debug('Failure callback in ' . $payload['job'] . ' is not found.', array('payload' => $payload));
+            is_callable($this->failure) or $this->logger->debug('Failure callback in job {job} is not found.', $payload);
 
             // Do further processing when it returns with false or error
             if ($failure === false) {
                 // Should it be automatically retried or just bury/remove it?
-                if (isset($instance->retry) and $this->attempts() <= $instance->retry) {
+                if ($this->attempts() <= $this->config['retry']) {
                     // Release it with a delay
-                    $delay = ! empty($instance->delay) ? $instance->delay : 0;
-                    $this->release($delay);
-                } elseif (isset($instance->bury)) {
+                    $this->release($this->config['delay']);
+                } elseif ($this->config['bury']) {
                     $this->bury();
-                } elseif (isset($instance->delete)) {
+                } elseif ($this->config['delete']) {
                     $this->delete();
                 }
             }
