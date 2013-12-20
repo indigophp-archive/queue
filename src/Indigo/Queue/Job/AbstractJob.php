@@ -171,6 +171,14 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     }
 
     /**
+     * Get logger instance
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
      * Sets a logger instance on the object
      *
      * @param LoggerInterface $logger
