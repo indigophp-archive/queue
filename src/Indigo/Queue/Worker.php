@@ -46,6 +46,10 @@ class Worker implements LoggerAwareInterface
 
     public function __construct($queue, ConnectorInterface $connector, LoggerInterface $logger = null)
     {
+        if ($connector instanceof \Indigo\Queue\Connector\DirectConnector) {
+            throw new \InvalidArgumentException('DirectConnector should not be used in a Worker');
+        }
+
         $this->queue = $queue;
         $this->connector = $connector;
 
