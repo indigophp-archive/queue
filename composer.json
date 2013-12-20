@@ -1,6 +1,6 @@
 {
     "name": "indigophp/queue",
-    "description": "Package to manage queues",
+    "description": "Queue system for PHP jobs",
     "type": "library",
     "keywords": ["queue", "worker", "job"],
     "license": "MIT",
@@ -21,8 +21,8 @@
         "mockery/mockery": "0.8.0"
     },
     "suggest": {
-        "pda/pheanstalk": "Used for Beanstalkd queues",
-        "monolog/monolog": "Monolog PSR-3 logging library"
+        "pda/pheanstalk": "PHP client for beanstalkd queue",
+        "monolog/monolog": "Sends your logs to files, sockets, inboxes, databases and various web services"
     },
     "autoload": {
         "psr-0": {"Indigo\\Queue": "src/"}

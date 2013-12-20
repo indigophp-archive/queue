@@ -1,7 +1,7 @@
 Queue management for PHP 5.3+
 =============================
 
-Phresque manages your queues and processes the jobs you put onto them.
+Indigo Queue manages your queues and processes the jobs you put onto them.
 
 
 Why this is not and cannot be a complete solution?
