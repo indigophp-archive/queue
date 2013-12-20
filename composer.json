@@ -1,5 +1,5 @@
 {
-    "name": "indigophp/phresque",
+    "name": "indigophp/queue",
     "description": "Package to manage queues",
     "type": "library",
     "keywords": ["queue", "worker", "job"],
@@ -12,17 +12,19 @@
     ],
     "require": {
         "php": ">=5.3.0",
-        "psr/log": "~1.0"
+        "psr/log": "~1.0",
+        "jeremeamia/SuperClosure": "1.0.1"
     },
     "require-dev": {
         "pda/pheanstalk": "2.1.0",
-        "monolog/monolog": "dev-master"
+        "monolog/monolog": "dev-master",
+        "mockery/mockery": "0.8.0"
     },
     "suggest": {
         "pda/pheanstalk": "Used for Beanstalkd queues",
         "monolog/monolog": "Monolog PSR-3 logging library"
     },
     "autoload": {
-        "psr-0": {"Phresque": "src/"}
+        "psr-0": {"Indigo\\Queue": "src/"}
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the Phresque package.
+ * This file is part of the Indigo Queue package.
  *
  * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Phresque\Job;
+namespace Indigo\Queue\Job;
 
 /**
  * Job Inteface
@@ -50,7 +50,7 @@ interface JobInterface
     /**
     * Get the number of times the job has been attempted.
     *
-    * @return int
+    * @return integer
     */
     public function attempts();
 

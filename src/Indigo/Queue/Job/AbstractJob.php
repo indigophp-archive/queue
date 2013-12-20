@@ -1,14 +1,14 @@
 <?php
 /*
- * This file is part of the Phresque package.
+ * This file is part of the Indigo Queue package.
  *
- * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * (c) IndigoPHP Development Team
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Phresque\Job;
+namespace Indigo\Queue\Job;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -21,18 +21,11 @@ use Psr\Log\LoggerInterface;
 abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 {
     /**
-     * Job object
+     * Connector object
      *
-     * @var object
+     * @var ConnectorInterface
      */
-    protected $job;
-
-    /**
-     * Queue object
-     *
-     * @var QueueInterface
-     */
-    protected $queue;
+    protected $connector;
 
     /**
      * Resolved job instance
@@ -42,25 +35,18 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected $instance;
 
     /**
-     * Execute callable
+     * Execute callback
      *
-     * @var callback
+     * @var string
      */
     protected $execute;
 
     /**
-     * Failure callable
+     * Failure callback
      *
-     * @var callback
+     * @var string
      */
     protected $failure;
-
-    /**
-     * Connector object
-     *
-     * @var object
-     */
-    protected $connector;
 
     /**
      * Logger instance
@@ -84,89 +70,90 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     /**
      * Resolve the job
      *
-     * @param  array $payload  Job payload
-     * @return object          Resolved job class
+     * @param  array  $payload  Job payload
+     * @return object           Resolved job class
      */
-    public function resolve($payload)
+    public function resolve(array $payload)
     {
         // Resolve execute and failure callables
         $job = preg_split('/[:@]/', $payload['job']);
 
         // Check if class exists
         if ( ! class_exists($job[0], true)) {
-            $this->logger->critical('Job {job} is not found.', $payload);
+            $this->logger->critical('Job ' . $payload['job'] . ' is not found.', $payload);
             return false;
         }
 
         // Instantiate job class itself
-        $this->instance = new $job[0]($this, $payload['data']);
+        $instance = new $job[0]($this, $payload['data']);
 
         // Resolve callables
-        isset($job[1]) or $job[1] = 'execute';
-        $this->execute = array($this->instance, $job[1]);
-        isset($job[2]) or $job[2] = 'failure';
-        $this->failure = array($this->instance, $job[2]);
+        $this->execute = isset($job[1]) ? $job[1] : 'execute';
+        $failure = isset($job[2]) ? $job[2] : 'failure';
 
-        // Get configuration from job
-        if (isset($this->instance->config) and is_array($this->instance->config))
-        {
-            $config = array_intersect_key($this->instance->config, $this->config);
-            $this->config = array_merge($this->config, $config);
-        }
-
-        // Support old method: do not have to use config array
-        foreach ($this->config as $key => $value) {
-            isset($this->instance->{$key}) and $this->config[$key] = $this->instance->{$key};
+        if ( ! is_callable(array($instance, $failure))) {
+            $this->logger->debug('Failure callback in job ' . $payload['job'] . ' is not found.', $payload);
+        } else {
+            $this->failure = $failure;
         }
 
         // Check if execute is callable
-        if ( ! is_callable($this->execute)) {
-            $this->logger->critical($this->execute[1] . 'method in job {job} cannot be called.', $payload);
+        if ( ! is_callable(array($instance, $this->execute))) {
+            $this->logger->critical($this->execute . 'method in job ' . $payload['job'] . ' cannot be called.', $payload);
             return false;
         }
 
+        // Get configuration from job
+        if (isset($instance->config) and is_array($instance->config))
+        {
+            $this->config = array_merge($this->config, $instance->config);
+        }
+
         // Return job class
-        return $this->instance;
+        return $this->instance = $instance;
     }
 
     /**
-     * Run execute callable
+     * Execute job
      *
-     * @param  array  $payload Payload array
+     * @param  array $payload Payload array
      * @return null
      */
-    public function runJob(array $payload)
+    public function executeJob(array $payload)
     {
         // Resolve job class and callables
         $instance = $this->resolve($payload);
 
-        // Do not do anything when instance is false or execute is not callable
+        // Do nothing when instance is false or execute is not callable
         if ($instance === false) {
             $this->delete();
             return false;
         }
 
+        // Callables
+        $execute = array($instance, $this->execute);
+        $failure = array($instance, $this->failure);
+
         // Try to execute the job
         try {
             // Execute the job and catch the return value
-            $execute = call_user_func_array($this->execute, array($this, $payload['data']));
+            $execute = call_user_func($execute, $this, $payload['data']);
 
             // Auto-delete it if it is enabled
             empty($this->config['delete']) or $this->delete();
 
             // Log Cube-compatible message of success
             $log = array(
-                'handler' => 'CubeHandler',
-                'type' => (string) $this->queue,
+                'type' => $payload['queue'],
                 'data' => $payload
             );
+
             $this->logger->debug('Job ' . $payload['job'] . ' finished', $log);
 
             return $execute;
         } catch (\Exception $e) {
             // Are we sure that we want to do further processing?
-            $failure = is_callable($this->failure) ? call_user_func_array($this->failure, array($this, $e)) : false;
-            is_callable($this->failure) or $this->logger->debug('Failure callback in job {job} is not found.', $payload);
+            $failure = isset($this->failure) ? call_user_func(array($instance, $this->failure), $this, $e, $payload['data']) : false;
 
             // Do further processing when it returns with false or error
             if ($failure === false) {
@@ -184,40 +171,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     }
 
     /**
-     * Get queue connector
-     *
-     * @return object
-     */
-    public function getConnector()
-    {
-        return $this->connector;
-    }
-
-    /**
-     * Get job object
-     *
-     * @return object
-     */
-    public function getJob()
-    {
-        return $this->job;
-    }
-
-    /**
-     * Gets a logger instance on the object
-     *
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
      * Sets a logger instance on the object
      *
      * @param LoggerInterface $logger
-     * @return null
      */
     public function setLogger(LoggerInterface $logger)
     {

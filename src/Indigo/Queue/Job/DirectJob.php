@@ -1,14 +1,14 @@
 <?php
 /*
- * This file is part of the Phresque package.
+ * This file is part of the Indigo Queue package.
  *
- * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * (c) IndigoPHP Development Team
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Phresque\Job;
+namespace Indigo\Queue\Job;
 
 /**
  * Direct Job
@@ -24,14 +24,14 @@ class DirectJob extends AbstractJob
      */
     protected $payload;
 
-    public function __construct($job, $data = null)
+    public function __construct(array $payload)
     {
-        $this->payload = array('job' => $job, 'data' => $data);
+        $this->payload = $payload;
     }
 
     public function execute()
     {
-        $this->runJob($this->payload);
+        $this->executeJob($this->payload);
     }
 
     public function delete() { }

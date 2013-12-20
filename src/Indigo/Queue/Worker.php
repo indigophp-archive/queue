@@ -1,19 +1,20 @@
 <?php
 /*
- * This file is part of the Phresque package.
+ * This file is part of the Indigo Queue package.
  *
- * (c) Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * (c) IndigoPHP Development Team
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Phresque;
+namespace Indigo\Queue;
 
-use Phresque\Queue\QueueInterface;
-use Phresque\Job\JobInterface;
+use Indigo\Queue\Connector\ConnectorInterface;
+use Indigo\Queue\Job\JobInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Worker class
@@ -23,11 +24,18 @@ use Psr\Log\LoggerInterface;
 class Worker implements LoggerAwareInterface
 {
     /**
-     * Current queue object
+     * Queue name
      *
-     * @var QueueInterface
+     * @var string
      */
     protected $queue;
+
+    /**
+     * Connector
+     *
+     * @var ConnectorInterface
+     */
+    protected $connector;
 
     /**
      * Logger instance
@@ -36,45 +44,27 @@ class Worker implements LoggerAwareInterface
      */
     protected $logger;
 
-    public function __construct(QueueInterface $queue, LoggerInterface $logger = null)
-    {
-        $this->setQueue($queue);
-        is_null($logger) or $this->setLogger($logger);
-    }
-
-    /**
-     * Get current queue
-     *
-     * @return QueueInterface
-     */
-    public function getQueue()
-    {
-        return $this->queue;
-    }
-
-    /**
-     * Set queue
-     *
-     * @param QueueInterface $queue
-     */
-    public function setQueue(QueueInterface $queue)
+    public function __construct($queue, ConnectorInterface $connector, LoggerInterface $logger = null)
     {
         $this->queue = $queue;
+        $this->connector = $connector;
+
+        is_null($logger) and $logger = new NullLogger;
+        $this->setLogger($logger);
     }
 
     /**
-     * Listen for queue
+     * Listen to queue
      *
      * @param  integer $interval Sleep for certain time if no job is available
      * @param  integer $memory   Max memory allowed for a worker
      * @param  integer $timeout  Wait timeout for pop
-     * @return null
      */
     public function listen($interval = 5, $memory = null, $timeout = 0)
     {
         while (true) {
             // Pop job from the queue
-            $job = $this->queue->pop($timeout);
+            $job = $this->connector->pop($queue, $timeout);
 
             // Process the current job if available
             // or (u)sleep for a certain time
@@ -105,18 +95,16 @@ class Worker implements LoggerAwareInterface
 
     /**
      * Process one job from the queue
-     *
-     * @return null
      */
     public function work($timeout = 0)
     {
         // Pop job from the queue
-        $job = $this->queue->pop($timeout);
+        $job = $this->connector->pop($this->queue, $timeout);
 
         // Only run when valid job object returned
         if ($job instanceof JobInterface) {
             $job->setLogger($this->logger);
-            $job->execute();
+            return $job->execute();
         }
     }
 
@@ -129,40 +117,5 @@ class Worker implements LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
-    }
-
-    /**
-     * Create new instance of a queue worker
-     *
-     * @param  mixed  $queue     Queue instance or queue name
-     * @param  string $driver    Driver name
-     * @param  mixed  $connector Array of connector data or connector object itself
-     * @return new static
-     */
-    public static function forge($queue, $driver = null, $connector = null)
-    {
-        if ( ! $queue instanceof QueueInterface) {
-            $queue = static::resolveQueue($queue, $driver, $connector);
-        }
-
-        return new static($queue);
-    }
-
-    /**
-     * Resolve queue
-     *
-     * @param  string $queue     Queue name
-     * @param  string $driver    Driver name
-     * @param  mixed  $connector Array of connector data or connector object itself
-     * @return QueueInterface
-     */
-    public static function resolveQueue($queue, $driver, $connector = null)
-    {
-        // Get driver class name and queue name
-        $driver = 'Phresque\\Queue\\' . trim(ucfirst(strtolower($driver))) . 'Queue';
-        $queue  = strtolower($queue);
-
-        // Instantiate class
-        return new $driver($queue, $connector);
     }
 }
