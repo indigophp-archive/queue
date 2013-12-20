@@ -68,7 +68,7 @@ class Worker implements LoggerAwareInterface
     {
         while (true) {
             // Pop job from the queue
-            $job = $this->connector->pop($queue, $timeout);
+            $job = $this->connector->pop($this->queue, $timeout);
 
             // Process the current job if available
             // or (u)sleep for a certain time
