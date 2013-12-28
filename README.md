@@ -1,5 +1,6 @@
 Queue management for PHP 5.3+
 =============================
+[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=f4430a96533eeeb1ada9724d747411427649189a)](https://scrutinizer-ci.com/g/indigophp/queue/)
 
 Indigo Queue manages your queues and processes the jobs you put onto them.
 
