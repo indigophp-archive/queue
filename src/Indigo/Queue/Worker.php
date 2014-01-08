@@ -59,10 +59,9 @@ class Worker implements LoggerAwareInterface
      * Listen to queue
      *
      * @param  integer $interval Sleep for certain time if no job is available
-     * @param  integer $memory   Max memory allowed for a worker
      * @param  integer $timeout  Wait timeout for pop
      */
-    public function listen($interval = 5, $memory = null, $timeout = 0)
+    public function listen($interval = 5, $timeout = 0)
     {
         while (true) {
             // Pop job from the queue
@@ -85,12 +84,6 @@ class Worker implements LoggerAwareInterface
                 {
                     sleep($interval);
                 }
-            }
-
-            // Check whether max memory reached
-            if ( ! is_null($memory) and (memory_get_usage() / 1024 / 1024) > $memory) {
-                $this->logger->info('Memory usage limit (' . $memory . 'MB) reached, worker is going to die.');
-                die('Memory usage (' . $memory . 'MB) reached');
             }
         }
     }
