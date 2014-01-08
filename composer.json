@@ -1,6 +1,6 @@
 {
     "name": "indigophp/queue",
-    "description": "Queue system for PHP jobs",
+    "description": "Manage queues with PHP",
     "type": "library",
     "keywords": ["queue", "worker", "job"],
     "license": "MIT",
@@ -17,12 +17,10 @@
     },
     "require-dev": {
         "pda/pheanstalk": "2.1.0",
-        "monolog/monolog": "dev-master",
-        "mockery/mockery": "0.8.0"
+        "mockery/mockery": "dev-master@dev"
     },
     "suggest": {
-        "pda/pheanstalk": "PHP client for beanstalkd queue",
-        "monolog/monolog": "Sends your logs to files, sockets, inboxes, databases and various web services"
+        "pda/pheanstalk": "PHP client for beanstalkd queue"
     },
     "autoload": {
         "psr-0": {"Indigo\\Queue": "src/"}

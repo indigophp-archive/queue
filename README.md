@@ -1,15 +1,41 @@
-Queue management for PHP 5.3+
-=============================
+# Indigo Queue
+
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=f4430a96533eeeb1ada9724d747411427649189a)](https://scrutinizer-ci.com/g/indigophp/queue/)
 
-Indigo Queue manages your queues and processes the jobs you put onto them.
+**Indigo Queue manages your queues and processes the jobs you put onto them.**
 
 
-Why this is not and cannot be a complete solution?
---------------------------------------------------
+## Install
 
-It is hard to implement this logic fully framework independent way as a complete solution.
+Via Composer
 
-First of all you probably will run your Workers from console. Every framework has its own and quite useful way to create console applications (eg. Fuel's `oil` or Laravel's `artisan`). There is no sense in creating a platform independent console application but without it this is not complete. You have to create your own wrapper around this package to be able to run Workers in console.
+``` json
+{
+    "require": {
+        "indigophp/queue": "dev-master"
+    }
+}
+```
 
-__Note__: This will probably change in future versions.
+
+## Testing
+
+``` bash
+$ phpunit
+```
+
+
+## Contributing
+
+Please see [CONTRIBUTING](https://github.com/indigophp/queue/blob/develop/CONTRIBUTING.md) for details.
+
+
+## Credits
+
+- [Márk Sági-Kazár](https://github.com/sagikazarmark)
+- [All Contributors](https://github.com/indigophp/queue/contributors)
+
+
+## License
+
+The MIT License (MIT). Please see [License File](https://github.com/indigophp/queue/blob/develop/LICENSE) for more information.

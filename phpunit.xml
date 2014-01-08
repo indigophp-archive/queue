@@ -1,9 +1,0 @@
-<phpunit
-         bootstrap="tests/bootstrap.php"
-         colors="true">
-    <testsuites>
-        <testsuite name="Indigo Queue Test Suite">
-            <directory>tests/Indigo/Queue</directory>
-        </testsuite>
-    </testsuites>
-</phpunit>

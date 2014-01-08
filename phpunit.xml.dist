@@ -1,0 +1,12 @@
+<phpunit bootstrap="tests/bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="Indigo Queue Test Suite">
+            <directory>tests/Indigo/Queue</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src/Indigo/Queue</directory>
+        </whitelist>
+    </filter>
+</phpunit>
