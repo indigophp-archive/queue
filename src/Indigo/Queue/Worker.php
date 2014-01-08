@@ -58,7 +58,7 @@ class Worker implements LoggerAwareInterface
     /**
      * Listen to queue
      *
-     * @param  integer $interval Sleep for certain time if no job is available
+     * @param  float   $interval Sleep for certain time if no job is available
      * @param  integer $timeout  Wait timeout for pop
      */
     public function listen($interval = 5, $timeout = 0)
@@ -75,21 +75,16 @@ class Worker implements LoggerAwareInterface
             }
             elseif($interval > 0)
             {
-                if ($interval < 1)
-                {
-                    $interval = $interval / 1000000;
-                    usleep($interval);
-                }
-                else
-                {
-                    sleep($interval);
-                }
+                $this->sleep($interval);
             }
         }
     }
 
     /**
      * Process one job from the queue
+     *
+     * @param  integer $timeout  Wait timeout for pop
+     * @return mixed Job return value
      */
     public function work($timeout = 0)
     {
@@ -100,6 +95,24 @@ class Worker implements LoggerAwareInterface
         if ($job instanceof JobInterface) {
             $job->setLogger($this->logger);
             return $job->execute();
+        }
+    }
+
+    /**
+     * Sleep for a certain time
+     *
+     * @param float $interval
+     */
+    protected function sleep($interval)
+    {
+        if ($interval < 1)
+        {
+            $interval = $interval / 1000000;
+            usleep($interval);
+        }
+        else
+        {
+            sleep($interval);
         }
     }
 
