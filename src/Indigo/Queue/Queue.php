@@ -23,7 +23,7 @@ use Psr\Log\LoggerInterface;
 class Queue implements LoggerAwareInterface
 {
     /**
-     * Object holding Connector
+     * Connector object
      *
      * @var ConnectorInterface
      */
@@ -66,8 +66,8 @@ class Queue implements LoggerAwareInterface
 
         // Create special payload if it is a Closure
         if ($job instanceof \Closure) {
-            $payload['job'] = 'Indigo\\Queue\\Closure';
             $payload['closure'] = serialize(new SerializableClosure($job));
+            $payload['job'] = 'Indigo\\Queue\\Closure';
         }
 
         return $payload;
@@ -122,6 +122,8 @@ class Queue implements LoggerAwareInterface
     public function setConnector(ConnectorInterface $connector)
     {
         $this->connector = $connector;
+
+        return $this;
     }
 
     /**
