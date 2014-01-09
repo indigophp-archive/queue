@@ -20,21 +20,17 @@ interface JobInterface
 	/**
     * Execute the job.
     *
-    * @return void
+    * @return mixed Job return value
     */
     public function execute();
 
     /**
     * Delete the job from the queue.
-    *
-    * @return void
     */
     public function delete();
 
     /**
     * Bury the job for further inspection.
-    *
-    * @return void
     */
     public function bury();
 
@@ -43,12 +39,11 @@ interface JobInterface
     *
     * @param  int      $delay
     * @param  int|null $priority
-    * @return void
     */
     public function release($delay = 0);
 
     /**
-    * Get the number of times the job has been attempted.
+    * Get the number of times the job has been attempted to execute.
     *
     * @return integer
     */

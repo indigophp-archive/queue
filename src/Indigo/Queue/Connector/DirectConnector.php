@@ -20,11 +20,17 @@ use Indigo\Queue\Job\DirectJob;
  */
 class DirectConnector extends AbstractConnector
 {
+    /**
+     * {@inheritdoc}
+     */
     public function isConnected()
     {
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function push(array $payload = array(), array $options = array())
     {
         $job = new DirectJob($payload);
@@ -32,11 +38,17 @@ class DirectConnector extends AbstractConnector
         return $job->execute();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delayed($delay, array $payload = array(), array $options = array())
     {
         sleep($delay);
         return $this->push($payload, $options);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function pop($queue, $timeout = 0) { }
 }
