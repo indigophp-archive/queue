@@ -10,9 +10,10 @@
 
 namespace Indigo\Queue\Connector;
 
+use Indigo\Queue\Job\BeanstalkdJob;
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
-use Indigo\Queue\Job\BeanstalkdJob;
+use Pheanstalk_PheanstalkInterface as PheanstalkInterface;
 
 /**
  * Beanstalkd connector
@@ -28,10 +29,10 @@ class BeanstalkdConnector extends AbstractConnector
      */
     protected $pheanstalk = null;
 
-    public function __construct($host, $port = Pheanstalk::DEFAULT_PORT, $timeout = null)
+    public function __construct($host, $port = PheanstalkInterface::DEFAULT_PORT, $timeout = null)
     {
         // Don't worry, Pheanstalk object injected
-        if ($host instanceof Pheanstalk) {
+        if ($host instanceof PheanstalkInterface) {
             $this->pheanstalk = $host;
         } else {
             $this->pheanstalk = new Pheanstalk($host, $port, $timeout);
@@ -53,14 +54,20 @@ class BeanstalkdConnector extends AbstractConnector
     {
         // Set default options
         $default = array(
-            'delay'    => Pheanstalk::DEFAULT_DELAY,
-            'ttr'      => Pheanstalk::DEFAULT_TTR,
-            'priority' => Pheanstalk::DEFAULT_PRIORITY
+            'delay'    => PheanstalkInterface::DEFAULT_DELAY,
+            'ttr'      => PheanstalkInterface::DEFAULT_TTR,
+            'priority' => PheanstalkInterface::DEFAULT_PRIORITY
         );
 
         $options = array_merge($default, $options);
 
-        return $this->pheanstalk->putInTube($payload['queue'], json_encode($payload), $options['priority'], $options['delay'], $options['ttr']);
+        return $this->pheanstalk->putInTube(
+            $payload['queue'],
+            json_encode($payload),
+            $options['priority'],
+            $options['delay'],
+            $options['ttr']
+        );
     }
 
     /**
@@ -93,5 +100,18 @@ class BeanstalkdConnector extends AbstractConnector
     public function getPheanstalk()
     {
         return $this->pheanstalk;
+    }
+
+    /**
+     * Set Pheanstalk object
+     *
+     * @param  PheanstalkInterface $pheanstalk
+     * @return BeanstalkdConnector
+     */
+    public function setPheanstalk(PheanstalkInterface $pheanstalk)
+    {
+        $this->pheanstalk = $pheanstalk;
+
+        return $this;
     }
 }
