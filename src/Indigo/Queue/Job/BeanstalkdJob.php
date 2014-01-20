@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the Indigo Queue package.
  *
@@ -10,9 +11,10 @@
 
 namespace Indigo\Queue\Job;
 
+use Indigo\Queue\Connector\BeanstalkdConnector;
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
-use Indigo\Queue\Connector\BeanstalkdConnector;
+use Pheanstalk_PheanstalkInterface as PheanstalkInterface;
 
 /**
  * Beanstalkd Job
@@ -26,7 +28,7 @@ class BeanstalkdJob extends AbstractJob
      *
      * @var Pheanstalk_Job
      */
-    protected $job;
+    protected $pheanstalkJob;
 
     public function __construct(Pheanstalk_Job $job, BeanstalkdConnector $connector)
     {
@@ -39,8 +41,7 @@ class BeanstalkdJob extends AbstractJob
      */
     public function execute()
     {
-        $payload = $this->getPayload();
-        return $this->executeJob($payload);
+        return $this->executeJob($this->payload);
     }
 
     /**
@@ -48,7 +49,7 @@ class BeanstalkdJob extends AbstractJob
      */
     public function delete()
     {
-        $this->connector->getPheanstalk()->delete($this->job);
+        $this->connector->getPheanstalk()->delete($this->pheanstalkJob);
     }
 
     /**
@@ -56,15 +57,15 @@ class BeanstalkdJob extends AbstractJob
      */
     public function bury()
     {
-        $this->connector->getPheanstalk()->bury($this->job);
+        $this->connector->getPheanstalk()->bury($this->pheanstalkJob);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function release($delay = 0, $priority = Pheanstalk::DEFAULT_PRIORITY)
+    public function release($delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
     {
-        $this->connector->getPheanstalk()->release($this->job, $priority, $delay);
+        $this->connector->getPheanstalk()->release($this->pheanstalkJob, $priority, $delay);
     }
 
     /**
@@ -72,26 +73,33 @@ class BeanstalkdJob extends AbstractJob
      */
     public function attempts()
     {
-        $stats = $this->connector->getPheanstalk()->statsJob($this->job);
+        $stats = $this->connector->getPheanstalk()->statsJob($this->pheanstalkJob);
 
         return (int) $stats->reserves;
     }
 
     /**
-     * {@inheritdoc}
+     * Get Pheanstalk Job
+     *
+     * @return Pheanstalk_Job
      */
-    public function getPayload()
+    public function getPheanstalkJob()
     {
-        return json_decode($this->job->getData(), true);
+        return $this->pheanstalkJob;
     }
 
     /**
-     * Get job object
+     * {@inheritdoc}
+     * Get/Regenerate payload
      *
-     * @return object
+     * @param boolean $regenerate
      */
-    public function getJob()
+    public function getPayload($regenerate = false)
     {
-        return $this->job;
+        if ($regenerate === true or empty($this->payload)) {
+            return $this->payload = json_decode($this->pheanstalkJob->getData(), true);
+        }
+
+        return $this->payload;
     }
 }

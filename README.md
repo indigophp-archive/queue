@@ -12,7 +12,7 @@ Via Composer
 ``` json
 {
     "require": {
-        "indigophp/queue": "dev-master"
+        "indigophp/queue": "@stable"
     }
 }
 ```

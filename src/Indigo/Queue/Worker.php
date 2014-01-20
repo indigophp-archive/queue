@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the Indigo Queue package.
  *
@@ -12,6 +13,7 @@ namespace Indigo\Queue;
 
 use Indigo\Queue\Connector\ConnectorInterface;
 use Indigo\Queue\Job\JobInterface;
+use Indigo\Queue\Connector\DirectConnector;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -46,7 +48,7 @@ class Worker implements LoggerAwareInterface
 
     public function __construct($queue, ConnectorInterface $connector)
     {
-        if ($connector instanceof \Indigo\Queue\Connector\DirectConnector) {
+        if ($connector instanceof DirectConnector) {
             throw new \InvalidArgumentException('DirectConnector should not be used in a Worker');
         }
 
@@ -64,13 +66,9 @@ class Worker implements LoggerAwareInterface
     public function listen($interval = 5, $timeout = 0)
     {
         while (true) {
-            // Pop job from the queue
-            $job = $this->connector->pop($this->queue, $timeout);
-
             // Process the current job if available
             // or (u)sleep for a certain time
-            if ($job instanceof JobInterface) {
-                $job->setLogger($this->logger);
+            if ($job = $this->getJob($timeout)) {
                 $job->execute();
             }
             elseif($interval > 0)
@@ -88,14 +86,30 @@ class Worker implements LoggerAwareInterface
      */
     public function work($timeout = 0)
     {
+        // Only run when valid job object returned
+        if ($job = $this->getJob($timeout)) {
+            return $job->execute();
+        }
+    }
+
+    /**
+     * Get JobInterface
+     *
+     * @param  integer           $timeout Wait timeout for pop
+     * @return JobInterface|null Return null if $job is not a valid JobIterface
+     */
+    protected function getJob($timeout = 0)
+    {
         // Pop job from the queue
         $job = $this->connector->pop($this->queue, $timeout);
 
-        // Only run when valid job object returned
         if ($job instanceof JobInterface) {
             $job->setLogger($this->logger);
-            return $job->execute();
+        } else {
+            $job = null;
         }
+
+        return $job;
     }
 
     /**
@@ -117,7 +131,7 @@ class Worker implements LoggerAwareInterface
     }
 
     /**
-     * Sets a logger instance on the object
+     * Sets a logger
      *
      * @param LoggerInterface $logger
      */

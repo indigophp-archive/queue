@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the Indigo Queue package.
  *
@@ -17,13 +18,6 @@ namespace Indigo\Queue\Job;
  */
 class DirectJob extends AbstractJob
 {
-    /**
-     * Payload data
-     *
-     * @var array
-     */
-    protected $payload;
-
     public function __construct(array $payload)
     {
         $this->payload = $payload;
@@ -43,10 +37,5 @@ class DirectJob extends AbstractJob
     public function attempts()
     {
         return 1;
-    }
-
-    public function getPayload()
-    {
-        return $this->payload;
     }
 }
