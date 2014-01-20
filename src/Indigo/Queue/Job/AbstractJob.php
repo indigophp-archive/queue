@@ -124,7 +124,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             return false;
         }
 
-        $this->config  = $this->resolveConfig($this->job);
+        $this->resolveCallbacks($this->job, $this->execute, $this->failure)
+
+        $this->config = $this->resolveConfig($this->job);
 
         return true;
     }
@@ -159,6 +161,24 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         }
 
         return new $job($this, $data);
+    }
+
+    /**
+     * Resolve callbacks from the class
+     *
+     * @param  object $job
+     * @param  string $execute
+     * @param  string $failure
+     */
+    protected function resolveCallbacks($job, & $execute, & $failure)
+    {
+        if (!empty($job->execute) and is_string($execute)) {
+            $execute = $job->execute;
+        }
+
+        if (!empty($job->failure) and is_string($failure)) {
+            $failure = $job->failure;
+        }
     }
 
     /**
