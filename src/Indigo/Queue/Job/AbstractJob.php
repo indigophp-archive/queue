@@ -172,11 +172,11 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function resolveCallbacks($job, & $execute, & $failure)
     {
-        if (!empty($job->execute) and is_string($execute)) {
+        if (!empty($job->execute)) {
             $execute = $job->execute;
         }
 
-        if (!empty($job->failure) and is_string($failure)) {
+        if (!empty($job->failure)) {
             $failure = $job->failure;
         }
     }
