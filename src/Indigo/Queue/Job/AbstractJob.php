@@ -79,6 +79,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     public function execute()
     {
+        // Get payload here, so we can work with the same data
         $payload = $this->getPayload();
 
         // Resolve job and delete on error
@@ -88,22 +89,12 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         }
 
         try {
-            $execute = $this->runExecute($payload['data']);
-
-            return $execute;
+            // Run execute callback
+            return $this->runExecute($payload);
         } catch (\Exception $e) {
-            $failure = $this->runFailure($e, $payload['data']);
-
-            if ($failure === false) {
-                if ($this->attempts() <= $this->config['retry']) {
-                    // Release it with a delay
-                    $this->release($this->config['delay']);
-                } elseif ($this->config['bury']) {
-                    $this->bury();
-                } elseif ($this->config['delete']) {
-                    $this->delete();
-                }
-            }
+            // Catch any Exceptions
+            // Make sure this class does not throw any
+            return $this->runFailure($e, $payload);
         }
     }
 
@@ -118,16 +109,16 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     /**
      * Resolve the job
      *
-     * @param  array   $payload  Job payload
+     * @param  array   $payload Job payload
      * @return boolean
      */
     public function resolve(array $payload)
     {
         $job = $this->parseJob($payload['job']);
 
-        list($this->job, $this->execute, $this->failure) = $job;
+        list($job, $this->execute, $this->failure) = $job;
 
-        $this->job = $this->resolveJob($this->job, $payload['data']);
+        $this->job = $this->setJob($job, $payload['data']);
 
         if (!is_object($this->job)) {
             return false;
@@ -148,6 +139,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     {
         $job = preg_split('/[:@]/', $job);
 
+        // Make sure we have default values
         return $job + array(null, 'execute', 'failure');
     }
 
@@ -158,7 +150,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * @param  array  $data Payload data
      * @return object|null
      */
-    protected function resolveJob($job, $data)
+    protected function resolveJob($job, array $data)
     {
         if (!class_exists($job)) {
             $this->log('error', 'Job ' . $job . ' is not found.');
@@ -167,46 +159,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         }
 
         return new $job($this, $data);
-    }
-
-    /**
-     * Check whether execute is a valid callback
-     *
-     * @param  string $execute
-     * @param  object $job
-     * @return boolean
-     */
-    protected function checkExecute($execute, $job)
-    {
-        if (!$check = is_callable(array($job, $execute))) {
-            $this->log(
-                'error'
-                "Execute callback '" . $execute . "' is not found in job " . get_class($job) . "."
-            );
-        }
-
-        return $check;
-    }
-
-    /**
-     * Resolve failure callback
-     *
-     * @param  string $failure
-     * @param  object $job
-     * @return string|null
-     */
-    protected function resolveFailure($failure, $job)
-    {
-        if (!is_callable(array($job, $failure))) {
-            $this->log(
-                'debug'
-                "Failure callback '" . $failure . "' is not found in job " . get_class($job) . "."
-            );
-
-            return null;
-        }
-
-        return $failure;
     }
 
     /**
@@ -230,47 +182,100 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     /**
      * Run execute callback
      *
-     * @param  array  $data
+     * @param  array  $payload Job payload
      * @return mixed
      */
-    protected function runExecute(array $data)
+    protected function runExecute(array $payload)
     {
-        $execute = array($this->job, $this->execute);
+        // Check whether we have a valid callback
+        if (!$execute = $this->getCallback($this->execute)) {
+            $this->log(
+                'error'
+                "Execute callback '" . $this->execute .
+                "' is not found in job " . get_class($this->job) . "."
+            );
 
-        if (!is_callable($execute)) {
-            # code...
+            return false;
         }
 
-        $execute = call_user_func($execute, $this, $data);
+        // Here comes the funny part: execute the job
+        $execute = call_user_func($execute, $this, $payload['data']);
 
         $this->log('debug', 'Job ' . $payload['job'] . ' finished');
 
+        // Try to delete the job if enabled
         $this->tryDelete();
 
         return $execute;
     }
 
-    protected function runFailure(\Exception $e, array $data)
+    /**
+     * Run failure callback
+     * This should only be run if runExecute throws an exception
+     *
+     * @param  Exception $e
+     * @param  array     $payload Job payload
+     * @return mixed
+     */
+    protected function runFailure(\Exception $e, array $payload)
     {
-        if ($this->failure) {
-            $failure = array($this->job, $this->failure);
-            $failure = call_user_func($failure, $this, $data);
+        if (!$failure = $this->getCallback($this->failure, false)) {
+            $this->log(
+                'debug'
+                "Failure callback '" . $this->failure .
+                "' is not found in job " . get_class($this->job) . "."
+            );
         } else {
-            $failure = false;
+            $failure = call_user_func($failure, $this, $e, $payload['data']);
         }
 
         if ($failure === false) {
-            # code...
+            $this->tryRetry() or $this->tryBury() or $this->tryDelete();
         }
-
-        $this->tryDelete();
-
-        return $failure;
     }
 
-    protected function getCallback()
+    /**
+     * Get callback from string
+     *
+     * @param  string $callback
+     * @param  mixed  $default  Default value
+     * @return mixed Callable if callable, default otherwise
+     */
+    protected function getCallback($callback, $default = null)
     {
-        return array($this->getJob());
+        $callback = array($this->job, $callback);
+
+        return is_callable($callback) ? $callback : $default;
+    }
+
+    /**
+     * Try to retry the job
+     *
+     * @return boolean
+     */
+    protected function tryRetry()
+    {
+        return $this->attempts() <= $this->config['retry'] and $this->release($this->config['delay']);
+    }
+
+    /**
+     * Try to bury the job
+     *
+     * @return boolean
+     */
+    protected function tryBury()
+    {
+        return $this->config['bury'] === true and $this->bury();
+    }
+
+    /**
+     * Try to delete the job
+     *
+     * @return boolean
+     */
+    protected function tryDelete()
+    {
+        return $this->config['delete'] === true and $this->delete();
     }
 
     /**
