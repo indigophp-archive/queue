@@ -32,16 +32,8 @@ class BeanstalkdJob extends AbstractJob
 
     public function __construct(Pheanstalk_Job $job, BeanstalkdConnector $connector)
     {
-        $this->job = $job;
-        $this->connector = $connector;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function execute()
-    {
-        return $this->executeJob($this->payload);
+        $this->pheanstalkJob = $job;
+        $this->connector     = $connector;
     }
 
     /**

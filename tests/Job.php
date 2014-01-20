@@ -5,7 +5,8 @@ use Indigo\Queue\Job\JobInterface;
 class Job
 {
     public $config = array(
-        'delete' => true
+        'delete' => true,
+        'bury' => true,
     );
 
     public function execute(JobInterface $job, array $data)

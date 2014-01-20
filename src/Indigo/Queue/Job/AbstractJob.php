@@ -118,13 +118,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         list($job, $this->execute, $this->failure) = $job;
 
-        $this->job = $this->setJob($job, $payload['data']);
+        $this->job = $this->resolveJob($job, $payload['data']);
 
         if (!is_object($this->job)) {
             return false;
         }
 
-        $this->resolveCallbacks($this->job, $this->execute, $this->failure)
+        $this->resolveCallbacks($this->job, $this->execute, $this->failure);
 
         $this->config = $this->resolveConfig($this->job);
 
@@ -210,7 +210,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         // Check whether we have a valid callback
         if (!$execute = $this->getCallback($this->execute)) {
             $this->log(
-                'error'
+                'error',
                 "Execute callback '" . $this->execute .
                 "' is not found in job " . get_class($this->job) . "."
             );
@@ -241,7 +241,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     {
         if (!$failure = $this->getCallback($this->failure, false)) {
             $this->log(
-                'debug'
+                'debug',
                 "Failure callback '" . $this->failure .
                 "' is not found in job " . get_class($this->job) . "."
             );
@@ -323,6 +323,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function log($level, $message)
     {
-        return $this->logger->log($level, $message, $this->getPayload());
+        if (!is_null($this->logger)) {
+            return $this->logger->log($level, $message, $this->getPayload());
+        }
     }
 }
