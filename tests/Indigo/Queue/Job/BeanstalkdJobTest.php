@@ -47,29 +47,29 @@ class BeanstalkdJobTest extends JobTest
         $this->job = new BeanstalkdJob($job, $this->connector);
     }
 
-    public function testFake()
-    {
-        $job = \Mockery::mock('Pheanstalk_Job');
-        $job->shouldReceive('getData')
-            ->andReturn(
-                json_encode(array(
-                    'job' => 'Fake',
-                    'data' => array(),
-                ))
-            );
-
-        $job = new BeanstalkdJob($job, $this->connector);
-
-        $this->assertFalse($job->execute());
-    }
-
-    public function testAdvanced()
+    public function testJob()
     {
         $job = \Mockery::mock('Pheanstalk_Job');
         $job->shouldReceive('getData')
             ->andReturn(
                 json_encode(array(
                     'job' => 'Job@runThis',
+                    'data' => array(),
+                )),
+                json_encode(array(
+                    'job' => 'Job@failThis',
+                    'data' => array(),
+                )),
+                json_encode(array(
+                    'job' => 'Job@fake',
+                    'data' => array(),
+                )),
+                json_encode(array(
+                    'job' => 'Fake',
+                    'data' => array(),
+                )),
+                json_encode(array(
+                    'job' => 'Job@failThis:failedThis',
                     'data' => array(),
                 ))
             );
@@ -78,17 +78,16 @@ class BeanstalkdJobTest extends JobTest
 
         $this->assertTrue($job->execute());
 
-        $job = \Mockery::mock('Pheanstalk_Job');
-        $job->shouldReceive('getData')
-            ->andReturn(
-                json_encode(array(
-                    'job' => 'Job@failThis',
-                    'data' => array(),
-                ))
-            );
+        $job->getPayload(true);
+        $this->assertNull($job->execute());
 
-        $job = new BeanstalkdJob($job, $this->connector);
+        $job->getPayload(true);
+        $this->assertFalse($job->execute());
 
+        $job->getPayload(true);
+        $this->assertFalse($job->execute());
+
+        $job->getPayload(true);
         $this->assertNull($job->execute());
     }
 }
