@@ -1,6 +1,11 @@
 # Indigo Queue
 
+[![Build Status](https://travis-ci.org/indigophp/queue.png?branch=develop)](https://travis-ci.org/indigophp/queue)
+[![Code Coverage](https://scrutinizer-ci.com/g/indigophp/queue/badges/coverage.png?s=81febd5af1f6e48a370b7753f4c81416d981e924)](https://scrutinizer-ci.com/g/indigophp/queue/)
+[![Latest Stable Version](https://poser.pugx.org/indigophp/queue/v/stable.png)](https://packagist.org/packages/indigophp/queue)
+[![Total Downloads](https://poser.pugx.org/indigophp/queue/downloads.png)](https://packagist.org/packages/indigophp/queue)
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=83208d2af7fe392c2942a17fd1f2641fb0f9032d)](https://scrutinizer-ci.com/g/indigophp/queue/)
+[![License](https://poser.pugx.org/indigophp/queue/license.png)](https://packagist.org/packages/indigophp/queue)
 
 **Indigo Queue manages your queues and processes the jobs you put onto them.**
 
