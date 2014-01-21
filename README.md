@@ -1,6 +1,6 @@
 # Indigo Queue
 
-[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=f4430a96533eeeb1ada9724d747411427649189a)](https://scrutinizer-ci.com/g/indigophp/queue/)
+[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=83208d2af7fe392c2942a17fd1f2641fb0f9032d)](https://scrutinizer-ci.com/g/indigophp/queue/)
 
 **Indigo Queue manages your queues and processes the jobs you put onto them.**
 
