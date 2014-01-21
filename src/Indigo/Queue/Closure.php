@@ -42,5 +42,4 @@ class Closure
 
         return $closure($job, $data);
     }
-
 }

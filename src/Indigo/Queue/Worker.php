@@ -67,7 +67,7 @@ class Worker implements LoggerAwareInterface
     {
         while (true) {
             // Process the current job if available
-            // or (u)sleep for a certain time
+            // or sleep for a certain time
             if ($job = $this->getJob($timeout)) {
                 $job->execute();
             } elseif ($interval > 0) {

@@ -52,5 +52,7 @@ class DirectConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function pop($queue, $timeout = 0) { }
+    public function pop($queue, $timeout = 0)
+    {
+    }
 }

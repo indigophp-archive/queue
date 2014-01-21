@@ -28,12 +28,30 @@ class DirectJob extends AbstractJob
         $this->executeJob($this->payload);
     }
 
-    public function delete() { }
+    /**
+     * {@inheritdoc}
+     */
+    public function delete()
+    {
+    }
 
-    public function bury() { }
+    /**
+     * {@inheritdoc}
+     */
+    public function bury()
+    {
+    }
 
-    public function release($delay = 0) { }
+    /**
+     * {@inheritdoc}
+     */
+    public function release($delay = 0)
+    {
+    }
 
+    /**
+     * {@inheritdoc}
+     */
     public function attempts()
     {
         return 1;
