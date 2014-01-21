@@ -54,18 +54,4 @@ abstract class JobTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($parsedJob, $method->invoke($this->job, $rawJob));
     }
-
-    public function testLogger()
-    {
-        $logger = $this->job->getLogger();
-
-        if (!is_null($logger)) {
-            $this->assertInstanceOf(
-                'Psr\\Log\\LoggerInterface',
-                $logger
-            );
-
-            $this->assertNull($this->job->setLogger($logger));
-        }
-    }
 }

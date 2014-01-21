@@ -12,6 +12,7 @@
 namespace Indigo\Queue\Connector;
 
 use Indigo\Queue\Job\DirectJob;
+use Psr\Log\NullLogger;
 
 /**
  * Direct driver for running jobs immediately
@@ -20,6 +21,11 @@ use Indigo\Queue\Job\DirectJob;
  */
 class DirectConnector extends AbstractConnector
 {
+    public function __construct()
+    {
+        $this->setLogger(new NullLogger);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -33,10 +39,12 @@ class DirectConnector extends AbstractConnector
      */
     public function push(array $payload = array(), array $options = array())
     {
-        $job = new DirectJob($payload);
-        $job->setLogger($this->logger);
+        $this->payload = $payload;
 
-        return $job->execute();
+        if ($job = $this->pop(null)) {
+            return $job->execute();
+        }
+
     }
 
     /**
@@ -54,5 +62,9 @@ class DirectConnector extends AbstractConnector
      */
     public function pop($queue, $timeout = 0)
     {
+        $job = new DirectJob($this->payload);
+        $job->setLogger($this->logger);
+
+        return $job;
     }
 }

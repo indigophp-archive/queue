@@ -38,6 +38,8 @@ class BeanstalkdConnector extends AbstractConnector
         } else {
             $this->pheanstalk = new Pheanstalk($host, $port, $timeout);
         }
+
+        $this->setLogger(new NullLogger);
     }
 
     /**
