@@ -10,10 +10,6 @@ abstract class JobTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
-
-        $this->worker = new Worker('test', $this->connector);
-
-        $this->queue = new Queue('test', $this->connector);
     }
 
     public function tearDown()
@@ -63,11 +59,13 @@ abstract class JobTest extends \PHPUnit_Framework_TestCase
     {
         $logger = $this->job->getLogger();
 
-        $this->assertInstanceOf(
-            'Psr\\Log\\LoggerInterface',
-            $logger
-        );
+        if (!is_null($logger)) {
+            $this->assertInstanceOf(
+                'Psr\\Log\\LoggerInterface',
+                $logger
+            );
 
-        $this->assertNull($this->job->setLogger($logger));
+            $this->assertNull($this->job->setLogger($logger));
+        }
     }
 }

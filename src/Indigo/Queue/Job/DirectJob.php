@@ -23,11 +23,6 @@ class DirectJob extends AbstractJob
         $this->payload = $payload;
     }
 
-    public function execute()
-    {
-        $this->executeJob($this->payload);
-    }
-
     /**
      * {@inheritdoc}
      */
