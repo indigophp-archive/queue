@@ -172,13 +172,24 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function resolveCallbacks($job, & $execute, & $failure)
     {
-        if (!empty($job->execute)) {
+        if ($this->isValidCallback($job->execute)) {
             $execute = $job->execute;
         }
 
-        if (!empty($job->failure)) {
+        if ($this->isValidCallback($job->failure)) {
             $failure = $job->failure;
         }
+    }
+
+    /**
+     * Is string a valid callback
+     *
+     * @param  string  $callback
+     * @return boolean
+     */
+    private function isValidCallback(& $callback)
+    {
+        return !empty($callback) and is_string($callback);
     }
 
     /**
