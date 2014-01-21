@@ -261,8 +261,18 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         }
 
         if ($failure === false) {
-            $this->tryRetry() or $this->tryBury() or $this->tryDelete();
+            $this->failureCallback();
         }
+    }
+
+    /**
+     * Failure callback is not present or returned false
+     *
+     * @return boolean
+     */
+    protected function failureCallback()
+    {
+        return $this->tryRetry() or $this->tryBury() or $this->tryDelete();
     }
 
     /**
