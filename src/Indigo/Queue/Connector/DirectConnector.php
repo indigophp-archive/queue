@@ -11,7 +11,6 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\DirectJob;
 
 /**
@@ -36,6 +35,7 @@ class DirectConnector extends AbstractConnector
     {
         $job = new DirectJob($payload);
         $job->setLogger($this->logger);
+
         return $job->execute();
     }
 
@@ -45,6 +45,7 @@ class DirectConnector extends AbstractConnector
     public function delayed($delay, array $payload = array(), array $options = array())
     {
         sleep($delay);
+
         return $this->push($payload, $options);
     }
 

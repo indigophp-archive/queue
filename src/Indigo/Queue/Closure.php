@@ -39,6 +39,7 @@ class Closure
     {
         $payload = $job->getPayload();
         $closure = unserialize($payload['closure']);
+
         return $closure($job, $data);
     }
 

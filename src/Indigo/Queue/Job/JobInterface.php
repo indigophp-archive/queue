@@ -18,7 +18,7 @@ namespace Indigo\Queue\Job;
  */
 interface JobInterface
 {
-	/**
+    /**
     * Execute the job.
     *
     * @return mixed Job return value

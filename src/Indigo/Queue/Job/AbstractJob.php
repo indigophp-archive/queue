@@ -85,6 +85,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         // Resolve job and delete on error
         if (!$this->resolve($payload)) {
             $this->delete();
+
             return false;
         }
 
@@ -148,8 +149,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     /**
      * Resolve job
      *
-     * @param  string $job
-     * @param  array  $data Payload data
+     * @param  string      $job
+     * @param  array       $data Payload data
      * @return object|null
      */
     protected function resolveJob($job, array $data)
@@ -166,9 +167,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     /**
      * Resolve callbacks from the class
      *
-     * @param  object $job
-     * @param  string $execute
-     * @param  string $failure
+     * @param object $job
+     * @param string $execute
+     * @param string $failure
      */
     protected function resolveCallbacks($job, & $execute, & $failure)
     {
@@ -196,14 +197,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * Get config from job
      *
      * @param  object $job
-     * @return array Resolved config
+     * @return array  Resolved config
      */
     protected function resolveConfig($job)
     {
         $config = $this->config;
 
-        if (isset($job->config) and is_array($job->config))
-        {
+        if (isset($job->config) and is_array($job->config)) {
             $config = array_merge($config, $job->config);
         }
 
@@ -213,7 +213,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     /**
      * Run execute callback
      *
-     * @param  array  $payload Job payload
+     * @param  array $payload Job payload
      * @return mixed
      */
     protected function runExecute(array $payload)
@@ -280,7 +280,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      *
      * @param  string $callback
      * @param  mixed  $default  Default value
-     * @return mixed Callable if callable, default otherwise
+     * @return mixed  Callable if callable, default otherwise
      */
     protected function getCallback($callback, $default = null)
     {
@@ -339,8 +339,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
     /**
      * Always include payload as a context in logger
-     * @param  string $level   Log level
-     * @param  string $message
+     * @param string $level   Log level
+     * @param string $message
      */
     protected function log($level, $message)
     {
