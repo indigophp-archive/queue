@@ -313,8 +313,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function log($level, $message)
     {
-        if (!is_null($this->logger)) {
-            return $this->logger->log($level, $message, $this->getPayload());
-        }
+        return $this->logger->log($level, $message, $this->getPayload());
     }
 }

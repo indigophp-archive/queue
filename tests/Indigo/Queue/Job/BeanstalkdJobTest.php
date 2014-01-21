@@ -2,6 +2,8 @@
 
 namespace Indigo\Queue\Job;
 
+use Jeremeamia\SuperClosure\SerializableClosure;
+
 /**
  * Beanstalkd Job Test
  *
@@ -47,47 +49,58 @@ class BeanstalkdJobTest extends JobTest
         $this->job = new BeanstalkdJob($job, $this->connector);
     }
 
-    public function testJob()
+    public function testJobProvider()
+    {
+        return array(
+            array(array(
+                'job' => 'Job@runThis',
+                'data' => array(),
+            ), true),
+            array(array(
+                'job' => 'Job@failThis',
+                'data' => array(),
+            ), null),
+            array(array(
+                'job' => 'Job@fake',
+                'data' => array(),
+            ), false),
+            array(array(
+                'job' => 'Fake',
+                'data' => array(),
+            ), false),
+            array(array(
+                'job' => 'Job@failThis:failedThis',
+                'data' => array(),
+            ), null),
+            array(array(
+                'job' => 'Indigo\\Queue\\Closure',
+                'data' => array(),
+                'closure' => serialize(new SerializableClosure(function () {
+                    return true;
+                })),
+            ), true),
+        );
+    }
+
+    /**
+     * @dataProvider testJobProvider
+     */
+    public function testJob($payload, $return)
     {
         $job = \Mockery::mock('Pheanstalk_Job');
         $job->shouldReceive('getData')
-            ->andReturn(
-                json_encode(array(
-                    'job' => 'Job@runThis',
-                    'data' => array(),
-                )),
-                json_encode(array(
-                    'job' => 'Job@failThis',
-                    'data' => array(),
-                )),
-                json_encode(array(
-                    'job' => 'Job@fake',
-                    'data' => array(),
-                )),
-                json_encode(array(
-                    'job' => 'Fake',
-                    'data' => array(),
-                )),
-                json_encode(array(
-                    'job' => 'Job@failThis:failedThis',
-                    'data' => array(),
-                ))
-            );
+            ->andReturn(json_encode($payload));
 
         $job = new BeanstalkdJob($job, $this->connector);
 
-        $this->assertTrue($job->execute());
+        $this->assertEquals($return, $job->execute());
+    }
 
-        $job->getPayload(true);
-        $this->assertNull($job->execute());
-
-        $job->getPayload(true);
-        $this->assertFalse($job->execute());
-
-        $job->getPayload(true);
-        $this->assertFalse($job->execute());
-
-        $job->getPayload(true);
-        $this->assertNull($job->execute());
+    public function testPheanstalkJob()
+    {
+        $this->assertInstanceOf(
+            'Pheanstalk_Job',
+            $this->job->getPheanstalkJob()
+        );
     }
 }

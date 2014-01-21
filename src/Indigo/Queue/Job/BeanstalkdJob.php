@@ -15,6 +15,7 @@ use Indigo\Queue\Connector\BeanstalkdConnector;
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
 use Pheanstalk_PheanstalkInterface as PheanstalkInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Beanstalkd Job
@@ -34,6 +35,7 @@ class BeanstalkdJob extends AbstractJob
     {
         $this->pheanstalkJob = $job;
         $this->connector     = $connector;
+        $this->logger        = new NullLogger;
     }
 
     /**
