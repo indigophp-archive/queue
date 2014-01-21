@@ -92,6 +92,6 @@ class BeanstalkdJob extends AbstractJob
             return $this->payload = json_decode($this->pheanstalkJob->getData(), true);
         }
 
-        return $this->payload;
+        return parent::getPayload();
     }
 }

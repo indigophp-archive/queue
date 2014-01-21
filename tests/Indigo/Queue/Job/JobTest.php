@@ -48,6 +48,8 @@ abstract class JobTest extends \PHPUnit_Framework_TestCase
         if ($payload['job'] == 'Indigo\\Queue\\Closure') {
             $this->assertArrayHasKey('closure', $payload);
         }
+
+        $this->assertEquals($payload, $this->job->getPayload());
     }
 
     public function jobProvider()

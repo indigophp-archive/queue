@@ -125,8 +125,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             return false;
         }
 
-        $this->resolveCallbacks($this->job, $this->execute, $this->failure);
-
         $this->config = $this->resolveConfig($this->job);
 
         return true;
@@ -162,35 +160,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         }
 
         return new $job($this, $data);
-    }
-
-    /**
-     * Resolve callbacks from the class
-     *
-     * @param object $job
-     * @param string $execute
-     * @param string $failure
-     */
-    protected function resolveCallbacks($job, & $execute, & $failure)
-    {
-        if ($this->isValidCallback($job->execute)) {
-            $execute = $job->execute;
-        }
-
-        if ($this->isValidCallback($job->failure)) {
-            $failure = $job->failure;
-        }
-    }
-
-    /**
-     * Is string a valid callback
-     *
-     * @param  string  $callback
-     * @return boolean
-     */
-    private function isValidCallback(& $callback)
-    {
-        return !empty($callback) and is_string($callback);
     }
 
     /**
