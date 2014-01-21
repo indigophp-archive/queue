@@ -4,11 +4,6 @@ namespace Indigo\Queue\Job;
 
 use Jeremeamia\SuperClosure\SerializableClosure;
 
-/**
- * Beanstalkd Job Test
- *
- * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
- */
 class BeanstalkdJobTest extends JobTest
 {
     public function setUp()

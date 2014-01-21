@@ -15,6 +15,7 @@ use Indigo\Queue\Connector\ConnectorInterface;
 use Jeremeamia\SuperClosure\SerializableClosure;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Queue class
@@ -48,6 +49,7 @@ class Queue implements LoggerAwareInterface
     {
         $this->queue = $queue;
         $this->connector = $connector;
+        $this->logger = new NullLogger;
     }
 
     /**
@@ -138,7 +140,17 @@ class Queue implements LoggerAwareInterface
     }
 
     /**
-     * Sets a logger instance on the object
+     * Get logger
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * Sets a logger
      *
      * @param LoggerInterface $logger
      */

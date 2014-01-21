@@ -2,25 +2,9 @@
 
 namespace Indigo\Queue\Job;
 
-/**
- * Abstract Job Test
- *
- * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
- */
 abstract class JobTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * Job
-     *
-     * @var JobInterface
-     */
     protected $job;
-
-    /**
-     * Connector
-     *
-     * @var ConnectorInterface
-     */
     protected $connector;
 
     public function setUp()

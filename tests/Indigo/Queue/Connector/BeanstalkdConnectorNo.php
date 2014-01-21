@@ -5,32 +5,11 @@ namespace Indigo\Queue\Connector;
 use Indigo\Queue\Queue;
 use Indigo\Queue\Worker;
 
-/**
- * BeanstalkdConnector Test
- *
- * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
- */
 class BeanstalkdConnectorTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * Connector
-     *
-     * @var ConnectorInterface
-     */
+
     protected $connector = null;
-
-    /**
-     * Queue
-     *
-     * @var Queue
-     */
     protected $queue;
-
-    /**
-     * Worker
-     *
-     * @var Worker
-     */
     protected $worker = null;
 
     public function setUp()
