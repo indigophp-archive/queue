@@ -44,7 +44,6 @@ class DirectConnector extends AbstractConnector
         if ($job = $this->pop(null)) {
             return $job->execute();
         }
-
     }
 
     /**
