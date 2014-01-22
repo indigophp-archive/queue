@@ -1,9 +1,15 @@
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
+    <php>
+        <var name="beanstalkd_host" value="localhost" />
+        <var name="beanstalkd_port" value="11300" />
+    </php>
+
     <testsuites>
         <testsuite name="Indigo Queue Test Suite">
             <directory>tests/Indigo/Queue</directory>
         </testsuite>
     </testsuites>
+
     <filter>
         <whitelist>
             <directory suffix=".php">src/Indigo/Queue</directory>

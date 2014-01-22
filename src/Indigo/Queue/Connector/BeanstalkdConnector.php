@@ -15,6 +15,7 @@ use Indigo\Queue\Job\BeanstalkdJob;
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
 use Pheanstalk_PheanstalkInterface as PheanstalkInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Beanstalkd connector

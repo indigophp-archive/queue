@@ -30,7 +30,7 @@ class DirectConnectorTest extends ConnectorTest
         $this->assertTrue($this->connector->push($payload));
     }
 
-    public function testDelay()
+    public function testDelayed()
     {
         $payload = array(
             'job' => 'Job',
