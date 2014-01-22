@@ -39,6 +39,7 @@ class Closure
     {
         $payload = $job->getPayload();
         $closure = unserialize($payload['closure']);
+        isset($data['config']) and $this->config = array_merge($this->config, $data['config']);
 
         return $closure($job, $data);
     }
