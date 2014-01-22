@@ -23,6 +23,39 @@ Via Composer
 ```
 
 
+## Usage
+
+First of all you have decide which MQ do you want to use. Currently there is only one supported ([Beanstalkd](http://kr.github.io/beanstalkd/)), but I plan to implement more (RabbitMQ, AWS, ZeroMQ, etc). There is also a special implementation, where to job is not sent to a queue, but executed immediately.
+
+### Connector
+
+Connector does the communication between the server and the Queue/Worker class.
+
+
+### Queue
+
+You use the Queue class to push jobs to a queue. You can also push a job with a delay.
+
+See [Queue example](examples/Queue.php).
+
+
+### Worker
+
+You usually set up a console application for your workers.
+
+See [Worker example](examples/Worker.php).
+
+
+### Job
+
+See [examples](examples);
+
+
+### Special connector: DirectConnector
+
+This connector does what you think: Executes the pushed job immediately. You can also push a delayed job, BUT BE CAREFUL: this means that your application will sleep for a certain time, so use it wisely.
+
+
 ## Testing
 
 ``` bash
