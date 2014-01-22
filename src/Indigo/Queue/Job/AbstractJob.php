@@ -219,7 +219,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function runFailure(\Exception $e, array $payload)
     {
-        if (!$failure = $this->getCallback($this->failure, false)) {
+        if (!$failure = $this->getCallback($this->failure)) {
             $this->log(
                 'debug',
                 "Failure callback '" . $this->failure .
@@ -248,14 +248,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * Get callback from string
      *
      * @param  string $callback
-     * @param  mixed  $default  Default value
      * @return mixed  Callable if callable, default otherwise
      */
-    protected function getCallback($callback, $default = null)
+    protected function getCallback($callback)
     {
         $callback = array($this->job, $callback);
 
-        return is_callable($callback) ? $callback : $default;
+        return is_callable($callback) ? $callback : false;
     }
 
     /**
