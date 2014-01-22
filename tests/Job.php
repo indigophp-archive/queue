@@ -12,6 +12,7 @@ class Job
 
     public function execute(JobInterface $job, array $data)
     {
+        $job->getLogger();
         return true;
     }
 
