@@ -5,6 +5,7 @@ use Indigo\Queue\Job\JobInterface;
 class Job
 {
     public $config = array(
+        'retry' => 2,
         'delete' => true,
         'bury' => true,
     );

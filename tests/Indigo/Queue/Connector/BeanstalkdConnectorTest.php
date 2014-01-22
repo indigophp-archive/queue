@@ -66,7 +66,7 @@ class BeanstalkdConnectorTest extends ConnectorTest
             'queue' => 'test'
         );
 
-        $payload = $this->connector->delayed(1, $payload);
+        $payload = $this->connector->delayed(100, $payload);
         $this->assertTrue(is_int($payload));
     }
 
@@ -80,5 +80,7 @@ class BeanstalkdConnectorTest extends ConnectorTest
         } else {
             $this->assertNull($job);
         }
+
+        $this->assertNull($this->connector->pop('null'));
     }
 }

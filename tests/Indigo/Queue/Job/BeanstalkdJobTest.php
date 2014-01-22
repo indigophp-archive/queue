@@ -32,10 +32,15 @@ class BeanstalkdJobTest extends JobTest
 
                             $mock->shouldReceive('delete')
                                 ->andReturn(true);
+
                             $mock->shouldReceive('bury')
                                 ->andReturn(true);
+
                             $mock->shouldReceive('statsJob')
                                 ->andReturn($stats);
+
+                            $mock->shouldReceive('release')
+                                ->andReturn(1);
                         }
                     ));
             }

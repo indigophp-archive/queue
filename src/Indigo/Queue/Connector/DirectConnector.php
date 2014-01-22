@@ -41,9 +41,9 @@ class DirectConnector extends AbstractConnector
     {
         $this->payload = $payload;
 
-        if ($job = $this->pop(null)) {
-            return $job->execute();
-        }
+        $job = $this->pop(null);
+
+        return $job->execute();
     }
 
     /**
