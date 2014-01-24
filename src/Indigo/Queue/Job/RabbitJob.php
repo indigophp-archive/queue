@@ -29,11 +29,24 @@ class RabbitJob extends AbstractJob
      */
     protected $message;
 
+    /**
+     * Channel
+     *
+     * @var AMQPChannel
+     */
+    protected $channel;
+
     public function __construct(AMQPMessage $msg, RabbitConnector $connector)
     {
         $this->message   = $msg;
         $this->connector = $connector;
-        $this->logger    = new NullLogger;
+        $this->channel   = $connector->regenerateChannel();
+        $this->setLogger(new NullLogger);
+    }
+
+    public function __destruct()
+    {
+        $this->channel->close();
     }
 
     /**
@@ -41,7 +54,9 @@ class RabbitJob extends AbstractJob
      */
     public function delete()
     {
-        $this->connector->getChannel()->basic_ack($this->message->delivery_info['delivery_tag']);
+        $this->channel->basic_ack($this->message->delivery_info['delivery_tag']);
+
+        return true;
     }
 
     /**
@@ -49,8 +64,11 @@ class RabbitJob extends AbstractJob
      */
     public function bury()
     {
-        $this->connector->getChannel()->queue_declare('buried', false, true, false, false);
-        $this->connector->getChannel()->basic_publish($this->message, '', 'buried');
+        $this->delete();
+        $this->channel->queue_declare('buried', false, true, false, false);
+        $this->channel->basic_publish($this->message, '', 'buried');
+
+        return true;
     }
 
     /**
@@ -58,7 +76,18 @@ class RabbitJob extends AbstractJob
      */
     public function release($delay = 0)
     {
-        $this->connector->getChannel()->basic_nack($this->message->delivery_info['delivery_tag']);
+        $payload = $this->getPayload();
+        $payload['attempts'] = isset($payload['attempts']) ? $payload['attempts'] + 1 : 2;
+
+        $this->delete();
+
+        if ($delay > 0) {
+            $this->connector->delayed($delay, $payload);
+        } else {
+            $this->connector->push($payload);
+        }
+
+        return true;
     }
 
     /**
@@ -66,7 +95,9 @@ class RabbitJob extends AbstractJob
      */
     public function attempts()
     {
-        return $this->message->delivery_info['redelivered'] ? 2 : 1;
+        $payload = $this->getPayload();
+
+        return isset($payload['attempts']) ? $payload['attempts'] : 1;
     }
 
     /**
