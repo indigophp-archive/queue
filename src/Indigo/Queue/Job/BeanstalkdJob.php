@@ -44,6 +44,8 @@ class BeanstalkdJob extends AbstractJob
     public function delete()
     {
         $this->connector->getPheanstalk()->delete($this->pheanstalkJob);
+
+        return true;
     }
 
     /**
@@ -52,14 +54,19 @@ class BeanstalkdJob extends AbstractJob
     public function bury()
     {
         $this->connector->getPheanstalk()->bury($this->pheanstalkJob);
+
+        return true;
     }
 
     /**
      * {@inheritdoc}
+     * @param int|null $priority
      */
     public function release($delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
     {
         $this->connector->getPheanstalk()->release($this->pheanstalkJob, $priority, $delay);
+
+        return true;
     }
 
     /**
