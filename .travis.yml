@@ -4,12 +4,18 @@ php:
   - 5.4
   - 5.3
 
+services:
+  - rabbitmq
+
 script: phpunit -v --coverage-clover=coverage.clover
 
 before_script:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq beanstalkd rabbitmq-server
+  - sudo apt-get install -qq beanstalkd
   - sudo beanstalkd -d -l 127.0.0.1 -p 11300
+  - sudo rabbitmqctl add_vhost queue_vhost
+  - sudo rabbitmqctl add_user queue_user queue_pass
+  - sudo rabbitmqctl set_permissions -p queue_vhost queue_user ".*" ".*" ".*"
   - wget https://scrutinizer-ci.com/ocular.phar
   - composer install --dev --prefer-source
 

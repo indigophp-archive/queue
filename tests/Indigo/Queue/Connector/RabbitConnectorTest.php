@@ -13,8 +13,9 @@ class RabbitConnectorTest extends ConnectorTest
         $port = isset($GLOBALS['rabbit_port']) ? $GLOBALS['rabbit_port'] : 5672;
         $user = isset($GLOBALS['rabbit_user']) ? $GLOBALS['rabbit_user'] : 'guest';
         $pass = isset($GLOBALS['rabbit_pass']) ? $GLOBALS['rabbit_pass'] : 'guest';
+        $vhost = isset($GLOBALS['rabbit_vhost']) ? $GLOBALS['rabbit_vhost'] : '/';
 
-        $amqp = new AMQPStreamConnection($host, $port, $user, $pass);
+        $amqp = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
 
         $this->connector = new RabbitConnector($amqp);
 

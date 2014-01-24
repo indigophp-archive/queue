@@ -5,8 +5,9 @@
 
         <var name="rabbit_host" value="localhost" />
         <var name="rabbit_port" value="5672" />
-        <var name="rabbit_user" value="guest" />
-        <var name="rabbit_pass" value="guest" />
+        <var name="rabbit_user" value="queue_user" />
+        <var name="rabbit_pass" value="queue_pass" />
+        <var name="rabbit_vhost" value="queue_vhost" />
     </php>
 
     <testsuites>
