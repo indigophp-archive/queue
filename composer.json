@@ -1,8 +1,9 @@
 {
     "name": "indigophp/queue",
-    "description": "Manage queues with PHP",
     "type": "library",
+    "description": "Manage work queues with PHP",
     "keywords": ["queue", "worker", "job"],
+    "homepage": "https://indigophp.com",
     "license": "MIT",
     "authors": [
         {
