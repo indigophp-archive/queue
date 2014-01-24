@@ -1,6 +1,6 @@
-TODO
-====
+# TODO
 
-* Logging
-* Unit tests
 * Documentation
+* Implement more MQs
+* Failure closure
+* Create pushClosure

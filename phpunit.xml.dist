@@ -1,0 +1,24 @@
+<phpunit bootstrap="tests/bootstrap.php" colors="true">
+    <php>
+        <var name="beanstalkd_host" value="localhost" />
+        <var name="beanstalkd_port" value="11300" />
+
+        <var name="rabbit_host" value="localhost" />
+        <var name="rabbit_port" value="5672" />
+        <var name="rabbit_user" value="queue_user" />
+        <var name="rabbit_pass" value="queue_pass" />
+        <var name="rabbit_vhost" value="queue_vhost" />
+    </php>
+
+    <testsuites>
+        <testsuite name="Indigo Queue Test Suite">
+            <directory>tests/Indigo/Queue</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src/Indigo/Queue</directory>
+        </whitelist>
+    </filter>
+</phpunit>
