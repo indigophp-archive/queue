@@ -60,6 +60,7 @@ class BeanstalkdJob extends AbstractJob
 
     /**
      * {@inheritdoc}
+     * @param int|null $priority
      */
     public function release($delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
     {

@@ -38,8 +38,7 @@ interface JobInterface
     /**
     * Release the job back into the queue.
     *
-    * @param  int      $delay
-    * @param  int|null $priority
+    * @param int $delay
     */
     public function release($delay = 0);
 
