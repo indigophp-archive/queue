@@ -47,7 +47,7 @@ class IronJobTest extends JobTest
         $job = $this->connector->pop('test');
 
         if ($job instanceof IronJob) {
-            $this->assertEquals(1, $job->attempts());
+            $this->assertTrue(is_int($job->attempts()));
             $this->assertInstanceOf(
                 'stdClass',
                 $job->getIronJob()
