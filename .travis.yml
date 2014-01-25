@@ -7,6 +7,10 @@ php:
 services:
   - rabbitmq
 
+env:
+  - secure: "IK8Ys/6krzMemuwPinClNeyVj7ATYYiqYPkqcMrEpmJgNqQmwumaDFIlEyZnIc2+AlhqZjxyksX5yilTT6uXLsKhjHzM3aeb+dy3yie+9Xu8nAuexRLQxbghc2oyS7BpOx26qySmHrFNlxD0BpCD+Qa95wdwNA+IeKUDFyUx/LU="
+  - secure: "JK+1029wPW6pg0Ry53leFQaz33dmCkEs48tniU8MQB1hhRezSKtfB4kQkP/XKYNzovPwGoFmwdtDz4GowDs5P0/woqi4XzO2IPZwzDqNRvNRwg68UQmgjahzkG3fAthTzrYx+JQpFlwfoVI77RVAjdP3j1+pupCDA91GIs2DtUs="
+
 script: phpunit -v --coverage-clover=coverage.clover
 
 before_script:

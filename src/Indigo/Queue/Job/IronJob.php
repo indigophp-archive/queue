@@ -19,46 +19,17 @@ use Psr\Log\NullLogger;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class BeanstalkdJob extends AbstractJob
+class IronJob extends AbstractJob
 {
     protected $ironJob;
 
-    public function __construct(\stdClass $job, IronConnector $connector)
+    public function __construct($queue, \stdClass $job, IronConnector $connector)
     {
         $this->ironJob   = $job;
         $this->connector = $connector;
+        $this->setPayload(json_decode($job->body, true));
+        $this->setQueue($queue);
         $this->setLogger(new NullLogger);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete()
-    {
-        $this->connector->getIron()->deleteMessage($this->pheanstalkJob);
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bury()
-    {
-        $this->connector->getPheanstalk()->bury($this->pheanstalkJob);
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     * @param int|null $priority
-     */
-    public function release($delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
-    {
-        $this->connector->getPheanstalk()->release($this->pheanstalkJob, $priority, $delay);
-
-        return true;
     }
 
     /**
@@ -66,33 +37,16 @@ class BeanstalkdJob extends AbstractJob
      */
     public function attempts()
     {
-        $stats = $this->connector->getPheanstalk()->statsJob($this->pheanstalkJob);
-
-        return (int) $stats->reserves;
+        return $this->ironJob->reserved_count;
     }
 
     /**
-     * Get Pheanstalk Job
+     * Get Iron Job
      *
-     * @return Pheanstalk_Job
+     * @return stdClass
      */
-    public function getPheanstalkJob()
+    public function getIronJob()
     {
-        return $this->pheanstalkJob;
-    }
-
-    /**
-     * {@inheritdoc}
-     * Get/Regenerate payload
-     *
-     * @param boolean $regenerate
-     */
-    public function getPayload($regenerate = false)
-    {
-        if ($regenerate === true or empty($this->payload)) {
-            return $this->payload = json_decode($this->ironJob->body, true);
-        }
-
-        return parent::getPayload();
+        return $this->ironJob;
     }
 }

@@ -11,6 +11,7 @@
 
 namespace Indigo\Queue\Connector;
 
+use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\IronJob;
 use IronMQ;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -30,16 +31,6 @@ class IronConnector extends AbstractConnector
      */
     protected $iron = null;
 
-    /**
-     * Job options
-     *
-     * @var array
-     */
-    protected $jobOptions = array(
-        'delay'   => 0,
-        'timeout' => 0,
-    );
-
     public function __construct(IronMQ $iron)
     {
         $this->iron = $iron;
@@ -58,12 +49,12 @@ class IronConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function push(array $payload, array $options = array())
+    public function push($queue, array $payload, array $options = array())
     {
-        $options = $this->resolveMessageOptions($options);
+        $options = $this->resolveJobOptions($options);
 
         return $this->iron->postMessage(
-            $payload['queue'],
+            $queue,
             json_encode($payload),
             $options
         );
@@ -72,24 +63,11 @@ class IronConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function delayed($delay, array $payload, array $options = array())
+    public function delayed($queue, $delay, array $payload, array $options = array())
     {
         $options['delay'] = $delay;
 
-        return $this->push($payload, $options);
-    }
-
-    protected function resolveMessageOptions(array $options)
-    {
-        static $resolver;
-
-        if (!$resolver instanceof OptionsResolver) {
-            $resolver = new OptionsResolver;
-            $resolver->setDefaults($this->jobOptions)
-                ->setAllowedTypes(array_fill_keys(array_keys($this->jobOptions), 'integer'));
-        }
-
-        return $resolver->resolve($options);
+        return $this->push($queue, $payload, $options);
     }
 
     /**
@@ -98,8 +76,28 @@ class IronConnector extends AbstractConnector
     public function pop($queue, $timeout = 0)
     {
         if ($job = $this->iron->getMessage($queue, $timeout)) {
-            return new IronJob($job, $this);
+            return new IronJob($queue, $job, $this);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(JobInterface $job)
+    {
+        $this->iron->deleteMessage($job->getQueue(), $job->getIronJob()->id);
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function release(JobInterface $job, $delay = 0)
+    {
+        $this->iron->releaseMessage($job->getQueue(), $job->getIronJob()->id, $delay);
+
+        return true;
     }
 
     /**
