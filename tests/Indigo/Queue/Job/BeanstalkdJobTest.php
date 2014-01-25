@@ -16,8 +16,6 @@ class BeanstalkdJobTest extends JobTest
 
         $this->connector = new BeanstalkdConnector($pheanstalk);
 
-        $this->queue = uniqid();
-
         if (!$this->connector->isConnected()) {
             $this->markTestSkipped(
               'Beanstald connection not available.'
@@ -30,9 +28,9 @@ class BeanstalkdJobTest extends JobTest
      */
     public function testJob($payload, $return)
     {
-        $this->connector->push($this->queue, $payload);
+        $this->connector->push('test', $payload);
 
-        $job = $this->connector->pop($this->queue);
+        $job = $this->connector->pop('test');
 
         if ($job instanceof BeanstalkdJob) {
             $this->assertEquals(1, $job->attempts());

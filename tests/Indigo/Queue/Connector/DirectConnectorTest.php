@@ -9,7 +9,6 @@ class DirectConnectorTest extends ConnectorTest
     public function setUp()
     {
         $this->connector = new DirectConnector;
-        $this->queue = uniqid();
     }
 
     /**
@@ -17,7 +16,7 @@ class DirectConnectorTest extends ConnectorTest
      */
     public function testPush($payload)
     {
-        $job = $this->connector->push($this->queue, $payload);
+        $job = $this->connector->push('test', $payload);
 
         $this->assertInstanceOf(
             'Indigo\\Queue\\Job\\DirectJob',
@@ -32,7 +31,7 @@ class DirectConnectorTest extends ConnectorTest
      */
     public function testDelayed($payload)
     {
-        $job = $this->connector->delayed($this->queue, 0.5, $payload);
+        $job = $this->connector->delayed('test', 0.5, $payload);
 
         $this->assertInstanceOf(
             'Indigo\\Queue\\Job\\DirectJob',
