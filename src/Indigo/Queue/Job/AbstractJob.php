@@ -10,6 +10,7 @@
 
 namespace Indigo\Queue\Job;
 
+use Indigo\Queue\Connector\ConnectorInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
@@ -33,6 +34,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * @var array
      */
     protected $payload = array();
+
+    /**
+     * Queue name
+     *
+     * @var string
+     */
+    protected $queue;
 
     /**
      * Logger instance
@@ -97,14 +105,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             // Make sure this class does not throw any
             return $this->runFailure($e, $payload);
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPayload()
-    {
-        return $this->payload;
     }
 
     /**
@@ -241,7 +241,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function failureCallback()
     {
-        return $this->tryRetry() or $this->tryBury() or $this->tryDelete();
+        return $this->tryRetry() or $this->tryDelete();
     }
 
     /**
@@ -264,17 +264,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function tryRetry()
     {
-        return $this->attempts() <= $this->config['retry'] and $this->release($this->config['delay']);
-    }
-
-    /**
-     * Try to bury the job
-     *
-     * @return boolean
-     */
-    protected function tryBury()
-    {
-        return $this->config['bury'] === true and $this->bury();
+        return $this->attempts() <= $this->config['retry'] and $this->getConnector()->release($this, $this->config['delay']);
     }
 
     /**
@@ -284,11 +274,70 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function tryDelete()
     {
-        return $this->config['delete'] === true and $this->delete();
+        return $this->config['delete'] === true and $this->getConnector()->delete($this);
+    }
+
+    /**
+     * Get connector
+     *
+     * @return ConnectorInterface
+     */
+    public function getConnector()
+    {
+        return $this->connector;
+    }
+
+    /**
+     * Set connector
+     *
+     * @param ConnectorInterface $connector
+     */
+    public function setConnector(ConnectorInterface $connector)
+    {
+        $this->connector = $connector;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPayload()
+    {
+        return $this->payload;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPayload(array $payload)
+    {
+        $this->payload = $payload;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getQueue()
+    {
+        return $this->queue;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setQueue($queue)
+    {
+        $this->queue = $queue;
+
+        return $this;
     }
 
     /**
      * Get logger
+     *
      * @return LoggerInterface
      */
     public function getLogger()

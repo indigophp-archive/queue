@@ -4,7 +4,7 @@ namespace Indigo\Queue\Connector;
 
 abstract class ConnectorTest extends \PHPUnit_Framework_TestCase
 {
-    protected $connector = null;
+    protected $connector;
 
     public function tearDown()
     {

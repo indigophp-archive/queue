@@ -16,9 +16,6 @@ class DirectJobTest extends JobTest
     {
         $job = new DirectJob(array());
 
-        $this->assertNull($job->delete());
-        $this->assertNull($job->bury());
-        $this->assertNull($job->release());
         $this->assertEquals(1, $job->attempts());
     }
 }

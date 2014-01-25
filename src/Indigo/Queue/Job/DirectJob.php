@@ -20,28 +20,7 @@ class DirectJob extends AbstractJob
 {
     public function __construct(array $payload)
     {
-        $this->payload = $payload;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete()
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bury()
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function release($delay = 0)
-    {
+        $this->setPayload($payload);
     }
 
     /**
