@@ -31,6 +31,11 @@ class RabbitConnectorTest extends ConnectorTest
         $this->assertTrue($this->connector->isConnected());
     }
 
+    public function testPersistent()
+    {
+        $this->assertTrue($this->connector->isPersistent());
+    }
+
     public function testAMQPInstance()
     {
         $amqp = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
@@ -89,6 +94,28 @@ class RabbitConnectorTest extends ConnectorTest
         }
 
         $this->assertNull($this->connector->pop('null', 0.25));
+    }
+
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testRelease($payload)
+    {
+        $this->connector->push('test_release', $payload);
+
+        if ($job = $this->connector->pop('test_release')) {
+            $this->assertInstanceOf(
+                'Indigo\\Queue\\Job\\RabbitJob',
+                $job
+            );
+
+            $this->assertTrue($this->connector->release($job));
+        } else {
+            $this->assertNull($job);
+        }
+
+        $job = $this->connector->pop('test_release');
+        $this->connector->delete($job);
     }
 
     public function testChannel()

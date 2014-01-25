@@ -76,6 +76,30 @@ class BeanstalkdConnectorTest extends ConnectorTest
         } else {
             $this->assertNull($job);
         }
+
+        $this->assertNull($this->connector->pop('null'));
+    }
+
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testRelease($payload)
+    {
+        $this->connector->push('test_release', $payload);
+
+        if ($job = $this->connector->pop('test_release')) {
+            $this->assertInstanceOf(
+                'Indigo\\Queue\\Job\\BeanstalkdJob',
+                $job
+            );
+
+            $this->assertTrue($this->connector->release($job));
+        } else {
+            $this->assertNull($job);
+        }
+
+        $job = $this->connector->pop('test_release');
+        $this->connector->delete($job);
     }
 
     public function tearDown()

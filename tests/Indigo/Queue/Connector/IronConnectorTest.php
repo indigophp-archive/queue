@@ -90,6 +90,8 @@ class IronConnectorTest extends ConnectorTest
         } else {
             $this->assertNull($job);
         }
+
+        $this->assertNull($this->connector->pop('null'));
     }
 
     /**
