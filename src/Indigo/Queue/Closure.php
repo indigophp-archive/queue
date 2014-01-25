@@ -29,6 +29,11 @@ class Closure
      */
     public $config = array('delete' => true);
 
+    public function __construct(JobInterface $job, array $data)
+    {
+        isset($data['config']) and $this->config = array_merge($this->config, $data['config']);
+    }
+
     /**
      * Execute the Closure job
      *
@@ -39,7 +44,6 @@ class Closure
     {
         $payload = $job->getPayload();
         $closure = unserialize($payload['closure']);
-        isset($data['config']) and $this->config = array_merge($this->config, $data['config']);
 
         return $closure($job, $data);
     }
