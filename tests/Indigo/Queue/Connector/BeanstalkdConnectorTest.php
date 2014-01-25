@@ -12,7 +12,9 @@ class BeanstalkdConnectorTest extends ConnectorTest
         $host = isset($GLOBALS['beanstalkd_host']) ? $GLOBALS['beanstalkd_host'] : 'localhost';
         $port = isset($GLOBALS['beanstalkd_port']) ? $GLOBALS['beanstalkd_port'] : 11300;
 
-        $this->connector = new BeanstalkdConnector($host, $port);
+        $pheanstalk = new Pheanstalk($host, $port);
+
+        $this->connector = new BeanstalkdConnector($pheanstalk);
 
         if (!$this->connector->isConnected()) {
             $this->markTestSkipped(
@@ -24,14 +26,6 @@ class BeanstalkdConnectorTest extends ConnectorTest
     public function testConnection()
     {
         $this->assertTrue($this->connector->isConnected());
-    }
-
-    public function testPheanstalkInstance()
-    {
-        $pheanstalk = new Pheanstalk('invalid:host');
-        $connector = new BeanstalkdConnector($pheanstalk);
-
-        $this->assertFalse($connector->isConnected());
     }
 
     public function testPheanstalk()
@@ -46,41 +40,48 @@ class BeanstalkdConnectorTest extends ConnectorTest
         );
     }
 
-    public function testPush()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testPush($payload)
     {
-        $payload = array(
-            'job' => 'Job',
-            'data' => array(),
-            'queue' => 'test'
-        );
+        $push = $this->connector->push('test', $payload);
+        $this->assertTrue(is_int($push));
+    }
 
-        $payload = $this->connector->push($payload);
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testDelayed($payload)
+    {
+        $payload = $this->connector->delayed('test', 1, $payload);
         $this->assertTrue(is_int($payload));
     }
 
-    public function testDelayed()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testPop($payload)
     {
-        $payload = array(
-            'job' => 'Job',
-            'data' => array(),
-            'queue' => 'test'
-        );
+        $this->connector->push('test', $payload);
 
-        $payload = $this->connector->delayed(100, $payload);
-        $this->assertTrue(is_int($payload));
-    }
-
-    public function testPop()
-    {
         if ($job = $this->connector->pop('test')) {
             $this->assertInstanceOf(
                 'Indigo\\Queue\\Job\\BeanstalkdJob',
                 $job
             );
+
+            $this->assertEquals($payload, $job->getPayload());
+            $this->assertTrue($this->connector->delete($job));
         } else {
             $this->assertNull($job);
         }
+    }
 
-        $this->assertNull($this->connector->pop('null'));
+    public function tearDown()
+    {
+        while (($job = $this->connector->pop('test')) instanceof BeanstalkdJob) {
+            $job->delete();
+        }
     }
 }

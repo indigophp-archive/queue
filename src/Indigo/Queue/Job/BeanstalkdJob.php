@@ -35,17 +35,8 @@ class BeanstalkdJob extends AbstractJob
     {
         $this->pheanstalkJob = $job;
         $this->connector     = $connector;
-        $this->logger        = new NullLogger;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete()
-    {
-        $this->connector->getPheanstalk()->delete($this->pheanstalkJob);
-
-        return true;
+        $this->setPayload(json_decode($job->getData(), true));
+        $this->setLogger(new NullLogger);
     }
 
     /**
@@ -53,20 +44,7 @@ class BeanstalkdJob extends AbstractJob
      */
     public function bury()
     {
-        $this->connector->getPheanstalk()->bury($this->pheanstalkJob);
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     * @param int|null $priority
-     */
-    public function release($delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
-    {
-        $this->connector->getPheanstalk()->release($this->pheanstalkJob, $priority, $delay);
-
-        return true;
+        return $this->getConnector()->bury($this);
     }
 
     /**
@@ -74,7 +52,7 @@ class BeanstalkdJob extends AbstractJob
      */
     public function attempts()
     {
-        $stats = $this->connector->getPheanstalk()->statsJob($this->pheanstalkJob);
+        $stats = $this->getConnector()->getPheanstalk()->statsJob($this->pheanstalkJob);
 
         return (int) $stats->reserves;
     }
@@ -87,20 +65,5 @@ class BeanstalkdJob extends AbstractJob
     public function getPheanstalkJob()
     {
         return $this->pheanstalkJob;
-    }
-
-    /**
-     * {@inheritdoc}
-     * Get/Regenerate payload
-     *
-     * @param boolean $regenerate
-     */
-    public function getPayload($regenerate = false)
-    {
-        if ($regenerate === true or empty($this->payload)) {
-            return $this->payload = json_decode($this->pheanstalkJob->getData(), true);
-        }
-
-        return parent::getPayload();
     }
 }
