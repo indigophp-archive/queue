@@ -91,7 +91,7 @@ class RabbitConnector extends AbstractConnector
     /**
      * Resolve AMQPMessage options
      *
-     * @param  array  $options
+     * @param  array $options
      * @return array Resolved options
      */
     protected function resolveMessageOptions(array $options)

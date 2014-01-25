@@ -11,7 +11,6 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Job\JobInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -44,7 +43,7 @@ abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInter
     /**
      * Resolve job options
      *
-     * @param  array  $options
+     * @param  array $options
      * @return array Resolved options
      */
     protected function resolveJobOptions(array $options)

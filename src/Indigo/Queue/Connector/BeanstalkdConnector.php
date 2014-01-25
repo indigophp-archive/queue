@@ -108,7 +108,7 @@ class BeanstalkdConnector extends AbstractConnector
      * Bury the job
      *
      * @param  JobInterface $job Job to bury
-     * @return boolean Always true
+     * @return boolean      Always true
      */
     public function bury(JobInterface $job)
     {

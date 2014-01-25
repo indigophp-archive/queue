@@ -61,7 +61,7 @@ interface ConnectorInterface
      * Delete job from queue
      *
      * @param  JobInterface $job Job to delete
-     * @return boolean Always true
+     * @return boolean      Always true
      */
     public function delete(JobInterface $job);
 
@@ -70,7 +70,7 @@ interface ConnectorInterface
      *
      * @param  JobInterface $job   Job to release
      * @param  integer      $delay Delay the job with x seconds, 0 means no delay
-     * @return boolean Always true
+     * @return boolean      Always true
      */
     public function release(JobInterface $job, $delay = 0);
 }
