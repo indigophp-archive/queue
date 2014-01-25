@@ -111,7 +111,7 @@ class IronConnector extends AbstractConnector
     }
 
     /**
-     * Set Pheanstalk object
+     * Set IronMQ object
      *
      * @param  IronMQ        $iron
      * @return IronConnector
