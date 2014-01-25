@@ -1,9 +1,11 @@
 <?php
 
 use Indigo\Queue\Connector\BeanstalkdConnector;
+use Pheanstalk_Pheanstalk as Pheanstalk;
 use Indigo\Queue\Queue;
 
-$connector = new BeanstalkdConnector('localhost');
+$pheanstalk = new Pheanstalk('localhost', 11300);
+$connector = new BeanstalkdConnector($pheanstalk);
 
 $queue = new Queue('test', $connector);
 
