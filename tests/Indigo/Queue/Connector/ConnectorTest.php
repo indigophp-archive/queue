@@ -2,13 +2,28 @@
 
 namespace Indigo\Queue\Connector;
 
+use Jeremeamia\SuperClosure\SerializableClosure;
+
 abstract class ConnectorTest extends \PHPUnit_Framework_TestCase
 {
-    protected $connector = null;
+    protected $connector;
+    protected $queue;
 
-    public function tearDown()
+    public function payloadProvider()
     {
-        \Mockery::close();
+        return array(
+            array(array(
+                'job' => 'Job@runThis',
+                'data' => array(),
+            )),
+            array(array(
+                'job' => 'Indigo\\Queue\\Closure',
+                'data' => array(),
+                'closure' => serialize(new SerializableClosure(function () {
+                    return true;
+                })),
+            )),
+        );
     }
 
     public function testConnection()

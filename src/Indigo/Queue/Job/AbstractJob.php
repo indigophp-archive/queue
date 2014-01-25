@@ -10,6 +10,7 @@
 
 namespace Indigo\Queue\Job;
 
+use Indigo\Queue\Connector\ConnectorInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
@@ -33,6 +34,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * @var array
      */
     protected $payload = array();
+
+    /**
+     * Queue name
+     *
+     * @var string
+     */
+    protected $queue;
 
     /**
      * Logger instance
@@ -70,7 +78,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected $config = array(
         'retry'  => 0,
         'delay'  => 0,
-        'bury'   => false,
         'delete' => false
     );
 
@@ -97,14 +104,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             // Make sure this class does not throw any
             return $this->runFailure($e, $payload);
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPayload()
-    {
-        return $this->payload;
     }
 
     /**
@@ -241,7 +240,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function failureCallback()
     {
-        return $this->tryRetry() or $this->tryBury() or $this->tryDelete();
+        return $this->tryRetry() or $this->tryDelete();
     }
 
     /**
@@ -258,23 +257,33 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     }
 
     /**
+     * Release a job
+     *
+     * @return boolean Always true
+     */
+    public function release()
+    {
+        return $this->getConnector()->release($this, $this->config['delay']);
+    }
+
+    /**
      * Try to retry the job
      *
      * @return boolean
      */
     protected function tryRetry()
     {
-        return $this->attempts() <= $this->config['retry'] and $this->release($this->config['delay']);
+        return $this->attempts() <= $this->config['retry'] and $this->release();
     }
 
     /**
-     * Try to bury the job
+     * Delete the job
      *
-     * @return boolean
+     * @return boolean Always true
      */
-    protected function tryBury()
+    public function delete()
     {
-        return $this->config['bury'] === true and $this->bury();
+        return $this->getConnector()->delete($this);
     }
 
     /**
@@ -288,7 +297,54 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     }
 
     /**
+     * Get connector
+     *
+     * @return ConnectorInterface
+     */
+    public function getConnector()
+    {
+        return $this->connector;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPayload()
+    {
+        return $this->payload;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPayload(array $payload)
+    {
+        $this->payload = $payload;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getQueue()
+    {
+        return $this->queue;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setQueue($queue)
+    {
+        $this->queue = $queue;
+
+        return $this;
+    }
+
+    /**
      * Get logger
+     *
      * @return LoggerInterface
      */
     public function getLogger()
@@ -308,6 +364,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
     /**
      * Always include payload as a context in logger
+     *
      * @param string $level   Log level
      * @param string $message
      */

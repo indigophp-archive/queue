@@ -15,12 +15,12 @@ class QueueTest extends \PHPUnit_Framework_TestCase
             function ($mock)
             {
                 $mock->shouldReceive('push')
-                    ->andReturnUsing(function (array $payload) {
+                    ->andReturnUsing(function ($queue, array $payload) {
                         return $payload;
                     });
 
                 $mock->shouldReceive('delayed')
-                    ->andReturnUsing(function ($delay) {
+                    ->andReturnUsing(function ($queue, $delay) {
                         return $delay;
                     });
             }
@@ -32,6 +32,22 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         \Mockery::close();
+    }
+
+    public function jobProvider()
+    {
+        return array(
+            array(
+                'Job@runThis',
+                array(),
+            ),
+            array(
+                function () {
+                    return true;
+                },
+                array(),
+            ),
+        );
     }
 
     public function testInstance()
@@ -73,41 +89,26 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testPush()
+    /**
+     * @dataProvider jobProvider
+     */
+    public function testPush($job, $data)
     {
-        $payload = array(
-            'job'  => 'test',
-            'data' => array(
-                'test'
-            ),
-            'queue' => 'test',
-        );
+        $payload = $this->queue->push($job, $data);
 
-        $this->assertEquals(
-            $payload,
-            $this->queue->push('test', array('test'))
-        );
-    }
+        if ($job instanceof \Closure) {
+            $this->assertEquals(serialize(new SerializableClosure($job)), $payload['closure']);
+            $this->assertEquals($data, $payload['data']);
+        } else {
+            $this->assertEquals(
+                array(
+                    'job'  => $job,
+                    'data' => $data,
+                ),
+                $payload
+            );
+        }
 
-    public function testClosure()
-    {
-        $closure = function () {
-            return true;
-        };
-
-        $payload = array(
-            'job'  => 'Indigo\\Queue\\Closure',
-            'data' => array(
-                'test'
-            ),
-            'closure' => serialize(new SerializableClosure($closure)),
-            'queue' => 'test',
-        );
-
-        $this->assertEquals(
-            $payload,
-            $this->queue->push($closure, array('test'))
-        );
     }
 
     public function testDelay()

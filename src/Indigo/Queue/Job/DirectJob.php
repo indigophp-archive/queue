@@ -11,6 +11,9 @@
 
 namespace Indigo\Queue\Job;
 
+use Indigo\Queue\Connector\DirectConnector;
+use Psr\Log\NullLogger;
+
 /**
  * Direct Job
  *
@@ -18,30 +21,11 @@ namespace Indigo\Queue\Job;
  */
 class DirectJob extends AbstractJob
 {
-    public function __construct(array $payload)
+    public function __construct(array $payload, DirectConnector $connector)
     {
-        $this->payload = $payload;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete()
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bury()
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function release($delay = 0)
-    {
+        $this->setPayload($payload);
+        $this->connector = $connector;
+        $this->setLogger(new NullLogger);
     }
 
     /**
