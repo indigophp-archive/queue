@@ -5,3 +5,4 @@
 * Failure closure
 * Create pushClosure
 * Closing channels in RabbitMQ
+* Clear how logging should work
