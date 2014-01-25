@@ -8,6 +8,9 @@
         <var name="rabbit_user" value="queue_user" />
         <var name="rabbit_pass" value="queue_pass" />
         <var name="rabbit_vhost" value="queue_vhost" />
+
+<!--         <var name="iron_token" value="YOUR_TOKEN_HERE" />
+        <var name="iron_project_id" value="YOUR_PROJECT_HERE" /> -->
     </php>
 
     <testsuites>
