@@ -40,11 +40,11 @@ class DirectConnector extends AbstractConnector
      */
     public function push($queue, array $payload = array(), array $options = array())
     {
-        $this->payload = $payload;
+        $job = $this->pop($queue, null, $payload);
 
-        $job = $this->pop($queue, null);
+        $job->execute();
 
-        return $job->execute();
+        return $job;
     }
 
     /**
@@ -60,11 +60,10 @@ class DirectConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function pop($queue, $timeout = 0)
+    public function pop($queue, $timeout = 0, array $payload = array())
     {
-        $job = new DirectJob($this->payload);
+        $job = new DirectJob($payload, $this);
         $job->setQueue($queue)
-            ->setConnector($this)
             ->setLogger($this->logger);
 
         return $job;

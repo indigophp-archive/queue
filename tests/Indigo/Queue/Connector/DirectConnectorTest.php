@@ -9,43 +9,36 @@ class DirectConnectorTest extends ConnectorTest
     public function setUp()
     {
         $this->connector = new DirectConnector;
-        $this->job = \Mockery::mock(
-            'Indigo\\Queue\\Job\\JobInterface',
-            function ($mock) {
-                $mock->shouldReceive('getPayload')
-                    ->andReturn(array(
-                        'job' => 'Job',
-                        'data' => array(),
-                    ));
-            }
-        );
+        $this->queue = uniqid();
     }
 
-    public function testInstance()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testPush($payload)
     {
+        $job = $this->connector->push($this->queue, $payload);
+
         $this->assertInstanceOf(
-            'Indigo\\Queue\\Connector\\DirectConnector',
-            new DirectConnector
+            'Indigo\\Queue\\Job\\DirectJob',
+            $job
         );
+
+        $this->assertTrue($this->connector->delete($job));
     }
 
-    public function testPush()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testDelayed($payload)
     {
-        $this->assertTrue($this->connector->push('test', $this->job->getPayload()));
-    }
+        $job = $this->connector->delayed($this->queue, 0.5, $payload);
 
-    public function testDelayed()
-    {
-        $this->assertTrue($this->connector->delayed('true', 0.5, $this->job->getPayload()));
-    }
+        $this->assertInstanceOf(
+            'Indigo\\Queue\\Job\\DirectJob',
+            $job
+        );
 
-    public function testDelete()
-    {
-        $this->assertTrue($this->connector->delete($this->job));
-    }
-
-    public function testRelease()
-    {
-        $this->assertTrue($this->connector->release($this->job));
+        $this->assertTrue($this->connector->release($job));
     }
 }

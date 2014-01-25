@@ -2,20 +2,36 @@
 
 namespace Indigo\Queue\Job;
 
+use Indigo\Queue\Connector\DirectConnector;
+
 class DirectJobTest extends JobTest
 {
     public function setUp()
     {
-        $this->job = new DirectJob(array(
-            'job' => 'Test',
-            'data' => array(),
-        ));
+        $this->connector = new DirectConnector;
+
+        $this->queue = uniqid();
     }
 
-    public function testJob()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testJob($payload, $return)
     {
-        $job = new DirectJob(array());
+        $this->connector->push($this->queue, $payload);
 
-        $this->assertEquals(1, $job->attempts());
+        $job = $this->connector->pop($this->queue);
+
+        if ($job instanceof DirectJob) {
+            $this->assertEquals(1, $job->attempts());
+
+            $payload = $job->getPayload();
+
+            $this->assertTrue($job->delete());
+        } else {
+            $this->assertNull($job);
+        }
+
+        return $job;
     }
 }
