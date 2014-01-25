@@ -14,10 +14,10 @@ class IronJobTest extends JobTest
                 'token'      => $GLOBALS['iron_token'],
                 'project_id' => $GLOBALS['iron_project_id'],
             );
-        } elseif (isset($_ENV['iron_token']) and isset($_ENV['iron_project_id'])) {
+        } elseif (isset($_ENV['IRON_TOKEN']) and isset($_ENV['IRON_PROJECT_ID'])) {
             $config = array(
-                'token'      => $_ENV['iron_token'],
-                'project_id' => $_ENV['iron_project_id'],
+                'token'      => $_ENV['IRON_TOKEN'],
+                'project_id' => $_ENV['IRON_PROJECT_ID'],
             );
         } else {
             $this->markTestSkipped(
