@@ -2,105 +2,54 @@
 
 namespace Indigo\Queue\Job;
 
-use Jeremeamia\SuperClosure\SerializableClosure;
+use Indigo\Queue\Connector\BeanstalkdConnector;
+use Pheanstalk_Pheanstalk as Pheanstalk;
 
 class BeanstalkdJobTest extends JobTest
 {
     public function setUp()
     {
-        $job = \Mockery::mock('Pheanstalk_Job');
-        $job->shouldReceive('getData')
-            ->andReturn(
-                json_encode(array(
-                    'job' => 'Job',
-                    'data' => array(
-                        'test',
-                        'test2'
-                    )
-                ))
+        $host = isset($GLOBALS['beanstalkd_host']) ? $GLOBALS['beanstalkd_host'] : 'localhost';
+        $port = isset($GLOBALS['beanstalkd_port']) ? $GLOBALS['beanstalkd_port'] : 11300;
+
+        $pheanstalk = new Pheanstalk($host, $port);
+
+        $this->connector = new BeanstalkdConnector($pheanstalk);
+
+        if (!$this->connector->isConnected()) {
+            $this->markTestSkipped(
+              'Beanstald connection not available.'
             );
-
-        $this->connector = \Mockery::mock(
-            'Indigo\\Queue\\Connector\\BeanstalkdConnector',
-            function ($mock) {
-                $mock->shouldReceive('getPheanstalk')
-                    ->andReturn(\Mockery::mock(
-                        'Pheanstalk_PheanstalkInterface',
-                        function ($mock) {
-                            $stats = new \stdClass;
-                            $stats->reserves = 2;
-
-                            $mock->shouldReceive('delete')
-                                ->andReturn(true);
-
-                            $mock->shouldReceive('bury')
-                                ->andReturn(true);
-
-                            $mock->shouldReceive('statsJob')
-                                ->andReturn($stats);
-
-                            $mock->shouldReceive('release')
-                                ->andReturn(1);
-                        }
-                    ));
-            }
-        );
-
-        $this->job = new BeanstalkdJob($job, $this->connector);
-    }
-
-    public function testJobProvider()
-    {
-        return array(
-            array(array(
-                'job' => 'Job@runThis',
-                'data' => array(),
-            ), true),
-            array(array(
-                'job' => 'Job@failThis',
-                'data' => array(),
-            ), null),
-            array(array(
-                'job' => 'Job@fake',
-                'data' => array(),
-            ), false),
-            array(array(
-                'job' => 'Fake',
-                'data' => array(),
-            ), false),
-            array(array(
-                'job' => 'Job@failThis:failedThis',
-                'data' => array(),
-            ), null),
-            array(array(
-                'job' => 'Indigo\\Queue\\Closure',
-                'data' => array(),
-                'closure' => serialize(new SerializableClosure(function () {
-                    return true;
-                })),
-            ), true),
-        );
+        }
     }
 
     /**
-     * @dataProvider testJobProvider
+     * @dataProvider payloadProvider
      */
     public function testJob($payload, $return)
     {
-        $job = \Mockery::mock('Pheanstalk_Job');
-        $job->shouldReceive('getData')
-            ->andReturn(json_encode($payload));
+        $this->connector->push('test', $payload);
 
-        $job = new BeanstalkdJob($job, $this->connector);
+        $job = $this->connector->pop('test');
 
-        $this->assertEquals($return, $job->execute());
-    }
+        if ($job instanceof BeanstalkdJob) {
+            $this->assertEquals(1, $job->attempts());
+            $this->assertInstanceOf(
+                'Pheanstalk_Job',
+                $job->getPheanstalkJob()
+            );
 
-    public function testPheanstalkJob()
-    {
-        $this->assertInstanceOf(
-            'Pheanstalk_Job',
-            $this->job->getPheanstalkJob()
-        );
+            $payload = $job->getPayload();
+
+            if ($payload['job'] == 'Fake') {
+                $this->assertTrue($job->bury());
+            } else {
+                $this->assertTrue($job->delete());
+            }
+        } else {
+            $this->assertNull($job);
+        }
+
+        return $job;
     }
 }

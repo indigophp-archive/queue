@@ -2,7 +2,7 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Job\BeanstalkdJob;
+use Indigo\Queue\Job\RabbitJob;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class RabbitConnectorTest extends ConnectorTest
@@ -21,7 +21,7 @@ class RabbitConnectorTest extends ConnectorTest
 
         if (!$this->connector->isConnected()) {
             $this->markTestSkipped(
-              'RabbitMQ connection not available.'
+                'RabbitMQ connection not available.'
             );
         }
     }
@@ -51,37 +51,39 @@ class RabbitConnectorTest extends ConnectorTest
         );
     }
 
-    public function testPush()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testPush($payload)
     {
-        $payload = array(
-            'job' => 'Job',
-            'data' => array(),
-            'queue' => 'test'
-        );
-
-        $payload = $this->connector->push($payload);
+        $payload = $this->connector->push('test', $payload);
         $this->assertNull($payload);
     }
 
-    public function testDelayed()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testDelayed($payload)
     {
-        $payload = array(
-            'job' => 'Job',
-            'data' => array(),
-            'queue' => 'test'
-        );
-
-        $payload = $this->connector->delayed(100, $payload);
+        $payload = $this->connector->delayed('test', 1, $payload);
         $this->assertNull($payload);
     }
 
-    public function testPop()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testPop($payload)
     {
-        if ($job = $this->connector->pop('test')) {
+        $this->connector->push('test_pop', $payload);
+
+        if ($job = $this->connector->pop('test_pop')) {
             $this->assertInstanceOf(
                 'Indigo\\Queue\\Job\\RabbitJob',
                 $job
             );
+
+            $this->assertEquals($payload, $job->getPayload());
+            $this->assertTrue($this->connector->delete($job));
         } else {
             $this->assertNull($job);
         }

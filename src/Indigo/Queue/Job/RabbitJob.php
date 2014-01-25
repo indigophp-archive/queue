@@ -36,58 +36,14 @@ class RabbitJob extends AbstractJob
      */
     protected $channel;
 
-    public function __construct(AMQPMessage $msg, RabbitConnector $connector)
+    public function __construct($queue, AMQPMessage $message, RabbitConnector $connector)
     {
-        $this->message   = $msg;
+        $this->message   = $message;
         $this->connector = $connector;
         $this->channel   = $connector->regenerateChannel();
+        $this->setQueue($queue);
+        $this->setPayload(json_decode($message->body, true));
         $this->setLogger(new NullLogger);
-    }
-
-    public function __destruct()
-    {
-        $this->channel->close();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete()
-    {
-        $this->channel->basic_ack($this->message->delivery_info['delivery_tag']);
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bury()
-    {
-        $this->delete();
-        $this->channel->queue_declare('buried', false, true, false, false);
-        $this->channel->basic_publish($this->message, '', 'buried');
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function release($delay = 0)
-    {
-        $payload = $this->getPayload();
-        $payload['attempts'] = isset($payload['attempts']) ? $payload['attempts'] + 1 : 2;
-
-        $this->delete();
-
-        if ($delay > 0) {
-            $this->connector->delayed($delay, $payload);
-        } else {
-            $this->connector->push($payload);
-        }
-
-        return true;
     }
 
     /**
@@ -111,17 +67,12 @@ class RabbitJob extends AbstractJob
     }
 
     /**
-     * {@inheritdoc}
-     * Get/Regenerate payload
+     * Get channel
      *
-     * @param boolean $regenerate
+     * @return AMQPChannel
      */
-    public function getPayload($regenerate = false)
+    public function getChannel()
     {
-        if ($regenerate === true or empty($this->payload)) {
-            return $this->payload = json_decode($this->message->body, true);
-        }
-
-        return parent::getPayload();
+        return $this->channel;
     }
 }

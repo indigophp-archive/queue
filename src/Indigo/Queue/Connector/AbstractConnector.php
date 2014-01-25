@@ -11,6 +11,8 @@
 
 namespace Indigo\Queue\Connector;
 
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
@@ -27,6 +29,45 @@ abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInter
      * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * Default job options
+     *
+     * @var array
+     */
+    protected $jobOptions = array(
+        'delay'   => 0,
+        'timeout' => 60,
+    );
+
+    /**
+     * Resolve job options
+     *
+     * @param  array $options
+     * @return array Resolved options
+     */
+    protected function resolveJobOptions(array $options)
+    {
+        static $resolver;
+
+        if (!$resolver instanceof OptionsResolver) {
+            $resolver = new OptionsResolver;
+            $this->setDefaultJobOptions($resolver);
+        }
+
+        return $resolver->resolve($options);
+    }
+
+    /**
+     * Set default job options
+     *
+     * @param OptionsResolverInterface $resolver
+     */
+    protected function setDefaultJobOptions(OptionsResolverInterface $resolver)
+    {
+        $resolver->setDefaults($this->jobOptions)
+            ->setAllowedTypes(array_fill_keys(array_keys($this->jobOptions), 'integer'));
+    }
 
     /**
      * Sets a logger instance on the object

@@ -11,6 +11,7 @@
 
 namespace Indigo\Queue\Connector;
 
+use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\DirectJob;
 use Psr\Log\NullLogger;
 
@@ -37,33 +38,49 @@ class DirectConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function push(array $payload = array(), array $options = array())
+    public function push($queue, array $payload = array(), array $options = array())
     {
-        $this->payload = $payload;
+        $job = $this->pop($queue, null, $payload);
 
-        $job = $this->pop(null);
+        $job->execute();
 
-        return $job->execute();
+        return $job;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delayed($delay, array $payload = array(), array $options = array())
+    public function delayed($queue, $delay, array $payload = array(), array $options = array())
     {
         sleep($delay);
 
-        return $this->push($payload, $options);
+        return $this->push($queue, $payload, $options);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function pop($queue, $timeout = 0)
+    public function pop($queue, $timeout = 0, array $payload = array())
     {
-        $job = new DirectJob($this->payload);
-        $job->setLogger($this->logger);
+        $job = new DirectJob($payload, $this);
+        $job->setQueue($queue);
 
         return $job;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(JobInterface $job)
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function release(JobInterface $job, $delay = 0)
+    {
+        return true;
     }
 }

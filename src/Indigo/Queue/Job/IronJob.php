@@ -11,20 +11,24 @@
 
 namespace Indigo\Queue\Job;
 
-use Indigo\Queue\Connector\DirectConnector;
+use Indigo\Queue\Connector\IronConnector;
 use Psr\Log\NullLogger;
 
 /**
- * Direct Job
+ * Iron Job
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class DirectJob extends AbstractJob
+class IronJob extends AbstractJob
 {
-    public function __construct(array $payload, DirectConnector $connector)
+    protected $ironJob;
+
+    public function __construct($queue, \stdClass $job, IronConnector $connector)
     {
-        $this->setPayload($payload);
+        $this->ironJob   = $job;
         $this->connector = $connector;
+        $this->setPayload(json_decode($job->body, true));
+        $this->setQueue($queue);
         $this->setLogger(new NullLogger);
     }
 
@@ -33,6 +37,16 @@ class DirectJob extends AbstractJob
      */
     public function attempts()
     {
-        return 1;
+        return $this->ironJob->reserved_count;
+    }
+
+    /**
+     * Get Iron Job
+     *
+     * @return stdClass
+     */
+    public function getIronJob()
+    {
+        return $this->ironJob;
     }
 }

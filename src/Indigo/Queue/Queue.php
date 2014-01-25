@@ -64,7 +64,6 @@ class Queue implements LoggerAwareInterface
         $payload = array(
             'job'   => $job,
             'data'  => $data,
-            'queue' => $this->queue
         );
 
         // Create special payload if it is a Closure
@@ -88,7 +87,7 @@ class Queue implements LoggerAwareInterface
     {
         $payload = $this->createPayload($job, $data);
 
-        return $this->connector->push($payload, $options);
+        return $this->connector->push($this->queue, $payload, $options);
     }
 
     /**
@@ -104,7 +103,7 @@ class Queue implements LoggerAwareInterface
     {
         $payload = $this->createPayload($job, $data);
 
-        return $this->connector->delayed($delay, $payload, $options);
+        return $this->connector->delayed($this->queue, $delay, $payload, $options);
     }
 
     /**

@@ -26,23 +26,6 @@ interface JobInterface
     public function execute();
 
     /**
-    * Delete the job from the queue.
-    */
-    public function delete();
-
-    /**
-    * Bury the job for further inspection.
-    */
-    public function bury();
-
-    /**
-    * Release the job back into the queue.
-    *
-    * @param int $delay
-    */
-    public function release($delay = 0);
-
-    /**
     * Get the number of times the job has been attempted to execute.
     *
     * @return integer
@@ -55,4 +38,27 @@ interface JobInterface
      * @return array Payload array
      */
     public function getPayload();
+
+    /**
+     * Set the payload
+     *
+     * @param  array        $payload Payload array
+     * @return JobInterface
+     */
+    public function setPayload(array $payload);
+
+    /**
+     * Get the queue name
+     *
+     * @return string
+     */
+    public function getQueue();
+
+    /**
+     * Set the queue name
+     *
+     * @param  string       $queue
+     * @return JobInterface
+     */
+    public function setQueue($queue);
 }

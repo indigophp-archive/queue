@@ -2,109 +2,51 @@
 
 namespace Indigo\Queue\Job;
 
-use Jeremeamia\SuperClosure\SerializableClosure;
+use Indigo\Queue\Connector\RabbitConnector;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class RabbitJobTest extends JobTest
 {
     public function setUp()
     {
-        $msg = \Mockery::mock('PhpAmqpLib\\Message\\AMQPMessage');
-        $msg->body = json_encode(array(
-                    'job' => 'Job',
-                    'data' => array(
-                        'test',
-                        'test2'
-                    )
-                ));
-        $msg->delivery_info = array('delivery_tag' => 1);
+        $host = isset($GLOBALS['rabbit_host']) ? $GLOBALS['rabbit_host'] : 'localhost';
+        $port = isset($GLOBALS['rabbit_port']) ? $GLOBALS['rabbit_port'] : 5672;
+        $user = isset($GLOBALS['rabbit_user']) ? $GLOBALS['rabbit_user'] : 'guest';
+        $pass = isset($GLOBALS['rabbit_pass']) ? $GLOBALS['rabbit_pass'] : 'guest';
+        $vhost = isset($GLOBALS['rabbit_vhost']) ? $GLOBALS['rabbit_vhost'] : '/';
 
-        $this->connector = \Mockery::mock(
-            'Indigo\\Queue\\Connector\\RabbitConnector',
-            function ($mock) {
-                $mock->shouldReceive('regenerateChannel')
-                    ->andReturn(\Mockery::mock(
-                        'PhpAmqpLib\\Channel\\AMQPChannel',
-                        function ($mock) {
-                            $mock->shouldReceive('queue_declare')
-                                ->andReturnUsing(function ($queue) {
-                                    return $queue;
-                                });
+        $amqp = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
 
-                           $mock->shouldReceive('exchange_declare')
-                                ->andReturnUsing(function ($exchange) {
-                                    return $exchange;
-                                });
+        $this->connector = new RabbitConnector($amqp);
 
-                            $mock->shouldReceive('basic_ack')
-                                ->shouldReceive('basic_publish')
-                                ->shouldReceive('close')
-                                ->andReturnNull();
-                        }
-                    ));
-
-                $mock->shouldReceive('push')
-                    ->andReturnNull();
-
-                $mock->shouldReceive('isConnected')
-                    ->andReturn(false);
-            }
-        );
-
-        $this->job = new RabbitJob($msg, $this->connector);
-    }
-
-    public function testJobProvider()
-    {
-        return array(
-            array(array(
-                'job' => 'Job@runThis',
-                'data' => array(),
-            ), true),
-            array(array(
-                'job' => 'Job@failThis',
-                'data' => array(),
-            ), null),
-            array(array(
-                'job' => 'Job@fake',
-                'data' => array(),
-            ), false),
-            array(array(
-                'job' => 'Fake',
-                'data' => array(),
-            ), false),
-            array(array(
-                'job' => 'Job@failThis:failedThis',
-                'data' => array(),
-            ), null),
-            array(array(
-                'job' => 'Indigo\\Queue\\Closure',
-                'data' => array(),
-                'closure' => serialize(new SerializableClosure(function () {
-                    return true;
-                })),
-            ), true),
-        );
+        if (!$this->connector->isConnected()) {
+            $this->markTestSkipped(
+              'RabbitMQ connection not available.'
+            );
+        }
     }
 
     /**
-     * @dataProvider testJobProvider
+     * @dataProvider payloadProvider
      */
     public function testJob($payload, $return)
     {
-        $msg = \Mockery::mock('PhpAmqpLib\\Message\\AMQPMessage');
-        $msg->body = json_encode($payload);
-        $msg->delivery_info = array('delivery_tag' => 1);
+        $this->connector->push('test', $payload);
 
-        $job = new RabbitJob($msg, $this->connector);
+        $job = $this->connector->pop('test');
 
-        $this->assertEquals($return, $job->execute());
-    }
+        if ($job instanceof RabbitJob) {
+            $this->assertEquals(1, $job->attempts());
+            $this->assertInstanceOf(
+                'PhpAmqpLib\\Message\\AMQPMessage',
+                $job->getMessage()
+            );
 
-    public function testMessage()
-    {
-        $this->assertInstanceOf(
-            'PhpAmqpLib\\Message\\AMQPMessage',
-            $this->job->getMessage()
-        );
+            $this->assertTrue($job->delete());
+        } else {
+            $this->assertNull($job);
+        }
+
+        return $job;
     }
 }

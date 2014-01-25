@@ -4,39 +4,40 @@ namespace Indigo\Queue\Connector;
 
 class DirectConnectorTest extends ConnectorTest
 {
-
-    protected $connector = null;
+    protected $job;
 
     public function setUp()
     {
         $this->connector = new DirectConnector;
     }
 
-    public function testInstance()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testPush($payload)
     {
+        $job = $this->connector->push('test', $payload);
+
         $this->assertInstanceOf(
-            'Indigo\\Queue\\Connector\\DirectConnector',
-            new DirectConnector
+            'Indigo\\Queue\\Job\\DirectJob',
+            $job
         );
+
+        $this->assertTrue($this->connector->delete($job));
     }
 
-    public function testPush()
+    /**
+     * @dataProvider payloadProvider
+     */
+    public function testDelayed($payload)
     {
-        $payload = array(
-            'job' => 'Job',
-            'data' => array(),
+        $job = $this->connector->delayed('test', 0.5, $payload);
+
+        $this->assertInstanceOf(
+            'Indigo\\Queue\\Job\\DirectJob',
+            $job
         );
 
-        $this->assertTrue($this->connector->push($payload));
-    }
-
-    public function testDelayed()
-    {
-        $payload = array(
-            'job' => 'Job',
-            'data' => array(),
-        );
-
-        $this->assertTrue($this->connector->delayed(0.5, $payload));
+        $this->assertTrue($this->connector->release($job));
     }
 }
