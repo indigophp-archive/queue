@@ -11,6 +11,7 @@
 
 namespace Indigo\Queue\Connector;
 
+use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\RabbitJob;
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -85,24 +86,38 @@ class RabbitConnector extends AbstractConnector
         $this->setLogger(new NullLogger);
 
         $this->persistent = $persistent;
-
-        $this->setMessageResolver(new OptionsResolver());
     }
 
     /**
-     * Set AMQPMessage defaults
+     * Resolve AMQPMessage options
+     *
+     * @param  array  $options
+     * @return array Resolved options
+     */
+    protected function resolveMessageOptions(array $options)
+    {
+        static $resolver;
+
+        if (!$resolver instanceof OptionsResolver) {
+            $resolver = new OptionsResolver;
+            $this->setDefaultMessageOptions($resolver);
+        }
+
+        return $resolver->resolve($options);
+    }
+
+    /**
+     * Set default message options
      *
      * @param OptionsResolverInterface $resolver
      */
-    protected function setMessageResolver(OptionsResolverInterface $resolver)
+    protected function setDefaultMessageOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setOptional(array_keys($this->messageOptions));
         $resolver->setAllowedTypes($this->messageOptions);
         $resolver->setDefaults(array(
             'delivery_mode' => 2,
         ));
-
-        return $this->messageResolver = $resolver;
     }
 
     /**
@@ -134,46 +149,42 @@ class RabbitConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function push(array $payload, array $options = array())
+    public function push($queue, array $payload, array $options = array())
     {
-        $msg = $this->prepareMessage($payload, $options);
-        $this->channel->basic_publish($msg, '', $payload['queue']);
+        $msg = $this->prepareMessage($queue, $payload, $options);
+        $this->channel->basic_publish($msg, '', $queue);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delayed($delay, array $payload, array $options = array())
+    public function delayed($queue, $delay, array $payload, array $options = array())
     {
         $this->exchangeDeclare('delay');
 
         $delay = $delay * 1000;
 
-        $queue = $this->queueDeclare(
+        $tmpQueue = $this->queueDeclare(
             '',
             array(
                 'x-expires'                 => array('I', $delay + 2000),
                 'x-message-ttl'             => array('I', $delay),
                 'x-dead-letter-exchange'    => array('S', 'delay'),
-                'x-dead-letter-routing-key' => array('S', $payload['queue']),
+                'x-dead-letter-routing-key' => array('S', $queue),
             )
         );
 
-        $this->channel->queue_bind($payload['queue'], 'delay', $payload['queue']);
+        $this->channel->queue_bind($queue, 'delay', $queue);
 
-        $msg = $this->prepareMessage($payload, $options);
-        $this->channel->basic_publish($msg, '', $queue);
+        $msg = $this->prepareMessage($queue, $payload, $options);
+        $this->channel->basic_publish($msg, '', $tmpQueue);
     }
 
-    private function prepareMessage(array $payload, array $options = array())
+    private function prepareMessage($queue, array $payload, array $options = array())
     {
-        if ($payload['queue'] == 'buried') {
-            throw new \InvalidArgumentException('Do not push jobs directly to buried queue');
-        }
+        $options = $this->resolveMessageOptions($options);
 
-        $options = $this->messageResolver->resolve($options);
-
-        $this->queueDeclare($payload['queue']);
+        $this->queueDeclare($queue);
 
         return new AMQPMessage(json_encode($payload), $options);
     }
@@ -211,19 +222,52 @@ class RabbitConnector extends AbstractConnector
     {
         $this->queueDeclare($queue);
 
-        $msg = $this->channel->basic_get($queue);
+        $job = $this->channel->basic_get($queue);
         if ($timeout > 0) {
             $start = microtime(true);
 
-            while (is_null($msg) and $timeout > microtime(true) - $start) {
+            while (is_null($job) and $timeout > microtime(true) - $start) {
                 sleep(1);
-                $msg = $this->channel->basic_get($queue);
+                $job = $this->channel->basic_get($queue);
             }
         }
 
-        if ($msg instanceof AMQPMessage) {
-            return new RabbitJob($msg, $this);
+        if ($job instanceof AMQPMessage) {
+            $job = new RabbitJob($job, $this);
+
+            $job->setQueue($queue);
+
+            return $job;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(JobInterface $job)
+    {
+        $job->getChannel()->basic_ack($job->getMessage()->delivery_info['delivery_tag']);
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function release(JobInterface $job, $delay = 0)
+    {
+        $payload = $job->getPayload();
+        $payload['attempts'] = isset($payload['attempts']) ? $payload['attempts'] + 1 : 2;
+
+        $this->delete($job);
+
+        if ($delay > 0) {
+            $this->delayed($job->getQueue(), $delay, $payload);
+        } else {
+            $this->push($job->getQueue(), $payload);
+        }
+
+        return true;
     }
 
     /**
@@ -259,6 +303,11 @@ class RabbitConnector extends AbstractConnector
         return $this->channel;
     }
 
+    /**
+     * Regenerate channel
+     *
+     * @return AMQPChannel Old channel
+     */
     public function regenerateChannel()
     {
         $channel = $this->channel;

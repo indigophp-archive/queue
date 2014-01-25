@@ -18,7 +18,7 @@ class BeanstalkdConnectorTest extends ConnectorTest
 
         if (!$this->connector->isConnected()) {
             $this->markTestSkipped(
-              'Beanstald connection not available.'
+                'Beanstald connection not available.'
             );
         }
     }
@@ -54,7 +54,7 @@ class BeanstalkdConnectorTest extends ConnectorTest
      */
     public function testDelayed($payload)
     {
-        $payload = $this->connector->delayed('test', 1, $payload);
+        $payload = $this->connector->delayed('test', 100, $payload);
         $this->assertTrue(is_int($payload));
     }
 
@@ -63,9 +63,9 @@ class BeanstalkdConnectorTest extends ConnectorTest
      */
     public function testPop($payload)
     {
-        $this->connector->push('test', $payload);
+        $this->connector->push('test_pop', $payload);
 
-        if ($job = $this->connector->pop('test')) {
+        if ($job = $this->connector->pop('test_pop')) {
             $this->assertInstanceOf(
                 'Indigo\\Queue\\Job\\BeanstalkdJob',
                 $job

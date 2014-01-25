@@ -88,8 +88,7 @@ class BeanstalkdConnector extends AbstractConnector
         if ($job instanceof Pheanstalk_Job) {
             $job = new BeanstalkdJob($job, $this);
 
-            $job->setQueue($queue)
-                ->setLogger($this->logger);
+            $job->setQueue($queue);
 
             return $job;
         }

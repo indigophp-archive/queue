@@ -63,8 +63,7 @@ class DirectConnector extends AbstractConnector
     public function pop($queue, $timeout = 0, array $payload = array())
     {
         $job = new DirectJob($payload, $this);
-        $job->setQueue($queue)
-            ->setLogger($this->logger);
+        $job->setQueue($queue);
 
         return $job;
     }

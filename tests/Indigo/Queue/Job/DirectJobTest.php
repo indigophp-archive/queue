@@ -9,8 +9,6 @@ class DirectJobTest extends JobTest
     public function setUp()
     {
         $this->connector = new DirectConnector;
-
-        $this->queue = uniqid();
     }
 
     /**
@@ -18,9 +16,9 @@ class DirectJobTest extends JobTest
      */
     public function testJob($payload, $return)
     {
-        $this->connector->push($this->queue, $payload);
+        $this->connector->push('test', $payload);
 
-        $job = $this->connector->pop($this->queue);
+        $job = $this->connector->pop('test');
 
         if ($job instanceof DirectJob) {
             $this->assertEquals(1, $job->attempts());

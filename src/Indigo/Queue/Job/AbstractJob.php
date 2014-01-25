@@ -78,7 +78,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected $config = array(
         'retry'  => 0,
         'delay'  => 0,
-        'bury'   => false,
         'delete' => false
     );
 
@@ -258,13 +257,33 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     }
 
     /**
+     * Release a job
+     *
+     * @return boolean Always true
+     */
+    public function release()
+    {
+        return $this->getConnector()->release($this, $this->config['delay']);
+    }
+
+    /**
      * Try to retry the job
      *
      * @return boolean
      */
     protected function tryRetry()
     {
-        return $this->attempts() <= $this->config['retry'] and $this->getConnector()->release($this, $this->config['delay']);
+        return $this->attempts() <= $this->config['retry'] and $this->release();
+    }
+
+    /**
+     * Delete the job
+     *
+     * @return boolean Always true
+     */
+    public function delete()
+    {
+        return $this->getConnector()->delete($this);
     }
 
     /**
@@ -274,7 +293,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function tryDelete()
     {
-        return $this->config['delete'] === true and $this->getConnector()->delete($this);
+        return $this->config['delete'] === true and $this->delete();
     }
 
     /**
@@ -285,18 +304,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     public function getConnector()
     {
         return $this->connector;
-    }
-
-    /**
-     * Set connector
-     *
-     * @param ConnectorInterface $connector
-     */
-    public function setConnector(ConnectorInterface $connector)
-    {
-        $this->connector = $connector;
-
-        return $this;
     }
 
     /**
@@ -357,6 +364,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
     /**
      * Always include payload as a context in logger
+     *
      * @param string $level   Log level
      * @param string $message
      */

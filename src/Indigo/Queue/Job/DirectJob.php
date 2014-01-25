@@ -12,6 +12,7 @@
 namespace Indigo\Queue\Job;
 
 use Indigo\Queue\Connector\DirectConnector;
+use Psr\Log\NullLogger;
 
 /**
  * Direct Job
@@ -24,6 +25,7 @@ class DirectJob extends AbstractJob
     {
         $this->setPayload($payload);
         $this->connector = $connector;
+        $this->setLogger(new NullLogger);
     }
 
     /**
