@@ -27,7 +27,12 @@ class IronConnectorTest extends ConnectorTest
             return;
         }
 
+        $config['protocol'] = 'http';
+        $config['port'] = 80;
+
         $iron = new IronMQ($config);
+
+        $iron->ssl_verifypeer = false;
 
         $this->connector = new IronConnector($iron);
     }
