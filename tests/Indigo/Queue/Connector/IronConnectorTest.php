@@ -14,10 +14,10 @@ class IronConnectorTest extends ConnectorTest
                 'token'      => $GLOBALS['iron_token'],
                 'project_id' => $GLOBALS['iron_project_id'],
             );
-        } elseif (isset($_ENV['IRON_TOKEN']) and isset($_ENV['IRON_PROJECT_ID'])) {
+        } elseif (getenv('IRON_TOKEN') and getenv('IRON_PROJECT_ID')) {
             $config = array(
-                'token'      => $_ENV['IRON_TOKEN'],
-                'project_id' => $_ENV['IRON_PROJECT_ID'],
+                'token'      => getenv('IRON_TOKEN'),
+                'project_id' => getenv('IRON_PROJECT_ID'),
             );
         } else {
             $this->markTestSkipped(
