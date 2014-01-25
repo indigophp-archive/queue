@@ -233,11 +233,7 @@ class RabbitConnector extends AbstractConnector
         }
 
         if ($job instanceof AMQPMessage) {
-            $job = new RabbitJob($job, $this);
-
-            $job->setQueue($queue);
-
-            return $job;
+            return new RabbitJob($queue, $job, $this);
         }
     }
 
