@@ -1,6 +1,8 @@
 <?php
 
-namespace Indigo\Queue;
+namespace Indigo\Queue\Test;
+
+use Indigo\Queue\Worker;
 
 class WorkerTest extends \PHPUnit_Framework_TestCase
 {

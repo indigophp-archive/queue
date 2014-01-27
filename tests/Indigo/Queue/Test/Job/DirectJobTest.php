@@ -1,7 +1,8 @@
 <?php
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Test\Job;
 
+use Indigo\Queue\Job\DirectJob;
 use Indigo\Queue\Connector\DirectConnector;
 
 class DirectJobTest extends JobTest

@@ -1,6 +1,6 @@
 <?php
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue\Test\Connector;
 
 use Jeremeamia\SuperClosure\SerializableClosure;
 

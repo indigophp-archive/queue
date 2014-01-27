@@ -1,7 +1,8 @@
 <?php
 
-namespace Indigo\Queue;
+namespace Indigo\Queue\Test;
 
+use Indigo\Queue\Queue;
 use Jeremeamia\SuperClosure\SerializableClosure;
 
 class QueueTest extends \PHPUnit_Framework_TestCase

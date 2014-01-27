@@ -1,7 +1,8 @@
 <?php
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Test\Job;
 
+use Indigo\Queue\Job\BeanstalkdJob;
 use Indigo\Queue\Connector\BeanstalkdConnector;
 use Pheanstalk_Pheanstalk as Pheanstalk;
 

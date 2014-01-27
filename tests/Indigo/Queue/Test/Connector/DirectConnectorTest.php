@@ -1,6 +1,8 @@
 <?php
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue\Test\Connector;
+
+use Indigo\Queue\Connector\DirectConnector;
 
 class DirectConnectorTest extends ConnectorTest
 {

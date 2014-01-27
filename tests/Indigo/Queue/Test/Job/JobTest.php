@@ -1,6 +1,6 @@
 <?php
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Test\Job;
 
 use Jeremeamia\SuperClosure\SerializableClosure;
 

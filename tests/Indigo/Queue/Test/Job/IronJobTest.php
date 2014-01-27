@@ -1,7 +1,8 @@
 <?php
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Test\Job;
 
+use Indigo\Queue\Job\IronJob;
 use Indigo\Queue\Connector\IronConnector;
 use IronMQ;
 

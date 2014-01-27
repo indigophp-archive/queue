@@ -1,7 +1,8 @@
 <?php
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue\Test\Connector;
 
+use Indigo\Queue\Connector\RabbitConnector;
 use Indigo\Queue\Job\RabbitJob;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
