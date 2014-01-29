@@ -16,6 +16,7 @@ use Jeremeamia\SuperClosure\SerializableClosure;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Closure;
 
 /**
  * Queue class
@@ -67,7 +68,7 @@ class Queue implements LoggerAwareInterface
         );
 
         // Create special payload if it is a Closure
-        if ($job instanceof \Closure) {
+        if ($job instanceof Closure) {
             $payload['closure'] = serialize(new SerializableClosure($job));
             $payload['job'] = 'Indigo\\Queue\\Closure';
         }

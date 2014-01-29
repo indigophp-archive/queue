@@ -17,6 +17,7 @@ use Indigo\Queue\Connector\DirectConnector;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use InvalidArgumentException;
 
 /**
  * Worker class
@@ -49,7 +50,7 @@ class Worker implements LoggerAwareInterface
     public function __construct($queue, ConnectorInterface $connector)
     {
         if ($connector instanceof DirectConnector) {
-            throw new \InvalidArgumentException('DirectConnector should not be used in a Worker');
+            throw new InvalidArgumentException('DirectConnector should not be used in a Worker');
         }
 
         $this->queue     = $queue;
