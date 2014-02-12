@@ -19,7 +19,7 @@ class BeanstalkdConnectorTest extends ConnectorTest
 
         if (!$this->connector->isConnected()) {
             $this->markTestSkipped(
-                'Beanstald connection not available.'
+                'Beanstalkd connection not available.'
             );
         }
     }
