@@ -25,7 +25,13 @@ Via Composer
 
 ## Usage
 
-First of all you have decide which MQ do you want to use. Currently there is only one supported ([Beanstalkd](http://kr.github.io/beanstalkd/)), but I plan to implement more (RabbitMQ, AWS, ZeroMQ, etc). There is also a special implementation, where to job is not sent to a queue, but executed immediately.
+First of all you have decide which MQ do you want to use. Currently supported MQs:
+
+* [Beanstalkd](http://kr.github.io/beanstalkd/)
+* [RabbitMQ](http://www.rabbitmq.com/)
+* [IronMQ](http://www.iron.io/)
+
+There is also a special implementation, where to job is not sent to a queue, but executed immediately.
 
 ### Connector
 
