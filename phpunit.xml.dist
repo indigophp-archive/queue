@@ -16,13 +16,13 @@
 
     <testsuites>
         <testsuite name="Indigo Queue Test Suite">
-            <directory>tests/Indigo/Queue</directory>
+            <directory>tests/</directory>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist>
-            <directory suffix=".php">src/Indigo/Queue</directory>
+            <directory suffix=".php">src/</directory>
         </whitelist>
     </filter>
 </phpunit>

@@ -29,6 +29,6 @@
         "iron-io/iron_mq": "Client binding for IronMQ (hosted message queue)"
     },
     "autoload": {
-        "psr-0": {"Indigo\\Queue": ["src/", "tests/"]}
+        "psr-4": {"Indigo\\Queue\\": ["src/", "tests/"]}
     }
 }
