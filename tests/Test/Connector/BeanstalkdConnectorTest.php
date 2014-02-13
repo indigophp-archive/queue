@@ -106,7 +106,7 @@ class BeanstalkdConnectorTest extends ConnectorTest
     public function tearDown()
     {
         while (($job = $this->connector->pop('test')) instanceof BeanstalkdJob) {
-            $job->delete();
+            $this->connector->delete($job);
         }
     }
 }

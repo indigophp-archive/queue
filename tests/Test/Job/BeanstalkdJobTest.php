@@ -41,12 +41,6 @@ class BeanstalkdJobTest extends JobTest
             );
 
             $payload = $job->getPayload();
-
-            if ($payload['job'] == 'Fake') {
-                $this->assertTrue($job->bury());
-            } else {
-                $this->assertTrue($job->delete());
-            }
         } else {
             $this->assertNull($job);
         }

@@ -28,7 +28,7 @@ class Job
 
     public function failedThis(JobInterface $job, \Exception $e, $data)
     {
-        $job->delete();
+        $job->getConnector()->delete($job);
         return true;
     }
 }

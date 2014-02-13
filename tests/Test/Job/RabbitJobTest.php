@@ -42,8 +42,6 @@ class RabbitJobTest extends JobTest
                 'PhpAmqpLib\\Message\\AMQPMessage',
                 $job->getMessage()
             );
-
-            $this->assertTrue($job->delete());
         } else {
             $this->assertNull($job);
         }

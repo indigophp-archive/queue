@@ -94,15 +94,15 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         try {
             $this->resolve($payload);
         } catch (Exception $e) {
-            $this->delete();
+            $this->connector->delete($this);
 
             return false;
         }
 
         try {
-            return $this->doExecute($payload);
+            return $this->callExecute($payload);
         } catch (Exception $e) {
-            return $this->doFailure($e, $payload);
+            return $this->callFailure($e, $payload);
         }
     }
 
@@ -124,9 +124,14 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         $this->job = new $job($this, $payload['data']);
         $this->execute = $this->getCallback($execute);
+
+        if (!$this->execute) {
+            $this->logException('error', 'Execute method ' . $execute . ' is not found in job ' . $job . '.');
+        }
+
         $this->failure = $this->getCallback($failure);
 
-        if (property_exists($job, 'config')) {
+        if (isset($job->config)) {
             $this->config = array_merge($this->config, $job->config);
         }
     }
@@ -151,39 +156,28 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * @param  array $payload Job payload
      * @return mixed
      */
-    protected function doExecute(array $payload)
+    protected function callExecute(array $payload)
     {
-        // Check whether we have a valid callback
-        if (!$this->execute) {
-            $this->log(
-                'error',
-                'Execute callback ' . $this->execute .
-                ' is not found in job ' . get_class($this->job) . '.'
-            );
-
-            return false;
-        }
-
         // Here comes the funny part: execute the job
         $execute = call_user_func($this->execute, $this, $payload['data']);
 
         $this->log('debug', 'Job ' . $payload['job'] . ' finished');
 
-        // Try to delete the job if enabled
-        $this->tryDelete();
+        // Try to delete the job if auto delete is enabled
+        $this->autoDelete();
 
         return $execute;
     }
 
     /**
      * Run failure callback
-     * This should only be run if doExecute throws an exception
+     * This should only be run if callExecute throws an exception
      *
      * @param  Exception $e
      * @param  array     $payload Job payload
      * @return mixed
      */
-    protected function doFailure(\Exception $e, array $payload)
+    protected function callFailure(Exception $e, array $payload)
     {
         if (!$this->failure) {
             $this->log(
@@ -191,6 +185,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
                 'Failure callback ' . $this->failure .
                 ' is not found in job ' . get_class($this->job) . '.'
             );
+
+            $failure = false;
         } else {
             $failure = call_user_func($this->failure, $this, $e, $payload['data']);
         }
@@ -207,7 +203,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function failureCallback()
     {
-        return $this->tryRetry() or $this->tryDelete();
+        return $this->autoRetry() or $this->autoDelete();
     }
 
     /**
@@ -224,33 +220,15 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     }
 
     /**
-     * Release a job
-     *
-     * @return boolean Always true
-     */
-    public function release()
-    {
-        return $this->connector->release($this, $this->config['delay']);
-    }
-
-    /**
      * Try to retry the job
      *
      * @return boolean
      */
-    protected function tryRetry()
+    protected function autoRetry()
     {
-        return $this->attempts() <= $this->config['retry'] and $this->release();
-    }
-
-    /**
-     * Delete the job
-     *
-     * @return boolean Always true
-     */
-    public function delete()
-    {
-        return $this->connector->delete($this);
+        if ($this->attempts() <= $this->config['retry']) {
+            return $this->connector->release($this, $this->config['delay']);
+        }
     }
 
     /**
@@ -258,9 +236,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      *
      * @return boolean
      */
-    protected function tryDelete()
+    protected function autoDelete()
     {
-        return $this->config['delete'] === true and $this->delete();
+        return $this->config['delete'] === true and $this->connector->delete($this);
     }
 
     /**

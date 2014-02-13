@@ -114,6 +114,6 @@ class IronConnectorTest extends ConnectorTest
         }
 
         $job = $this->connector->pop('test_release');
-        $this->connector->delete($job);
+        $job and $this->connector->delete($job);
     }
 }

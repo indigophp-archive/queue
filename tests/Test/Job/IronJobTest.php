@@ -53,8 +53,6 @@ class IronJobTest extends JobTest
                 'stdClass',
                 $job->getIronJob()
             );
-
-            $this->assertTrue($job->delete());
         } else {
             $this->assertNull($job);
         }

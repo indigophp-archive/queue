@@ -25,8 +25,6 @@ class DirectJobTest extends JobTest
             $this->assertEquals(1, $job->attempts());
 
             $payload = $job->getPayload();
-
-            $this->assertTrue($job->delete());
         } else {
             $this->assertNull($job);
         }
