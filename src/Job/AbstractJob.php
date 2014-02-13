@@ -188,8 +188,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         if (!$execute = $this->getCallback($this->execute)) {
             $this->log(
                 'error',
-                "Execute callback '" . $this->execute .
-                "' is not found in job " . get_class($this->job) . "."
+                'Execute callback ' . $this->execute .
+                ' is not found in job ' . get_class($this->job) . '.'
             );
 
             return false;
@@ -219,8 +219,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         if (!$failure = $this->getCallback($this->failure)) {
             $this->log(
                 'debug',
-                "Failure callback '" . $this->failure .
-                "' is not found in job " . get_class($this->job) . "."
+                'Failure callback ' . $this->failure .
+                ' is not found in job ' . get_class($this->job) . '.'
             );
         } else {
             $failure = call_user_func($failure, $this, $e, $payload['data']);
