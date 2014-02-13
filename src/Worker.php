@@ -104,11 +104,9 @@ class Worker implements LoggerAwareInterface
 
         if ($job instanceof JobInterface) {
             $job->setLogger($this->logger);
-        } else {
-            $job = null;
-        }
 
-        return $job;
+            return $job;
+        }
     }
 
     /**
