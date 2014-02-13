@@ -118,15 +118,16 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         list($job, $this->execute, $this->failure) = $job;
 
-        $this->job = $this->resolveJob($job, $payload['data']);
+        if (class_exists($job)) {
+            $this->job = new $job($this, $payload['data']);
+            $this->config = $this->resolveConfig($this->job);
 
-        if (!is_object($this->job)) {
-            return false;
+            return true;
         }
 
-        $this->config = $this->resolveConfig($this->job);
+        $this->log('error', 'Job ' . $job . ' is not found.');
 
-        return true;
+        return false;
     }
 
     /**
@@ -141,22 +142,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         // Make sure we have default values
         return $job + array(null, 'execute', 'failure');
-    }
-
-    /**
-     * Resolve job
-     *
-     * @param  string      $job
-     * @param  array       $data Payload data
-     * @return object|null
-     */
-    protected function resolveJob($job, array $data)
-    {
-        if (class_exists($job)) {
-            return new $job($this, $data);
-        }
-
-        $this->log('error', 'Job ' . $job . ' is not found.');
     }
 
     /**
