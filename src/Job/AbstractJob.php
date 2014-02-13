@@ -321,8 +321,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     /**
      * Log a message and throw Exception
      *
-     * @param string $level   Log level
-     * @param string $message
+     * @param  string    $level   Log level
+     * @param  string    $message
      * @throws Exception
      */
     protected function logException($level, $message)
