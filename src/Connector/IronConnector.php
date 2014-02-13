@@ -14,7 +14,6 @@ namespace Indigo\Queue\Connector;
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\IronJob;
 use IronMQ;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Psr\Log\NullLogger;
 
 /**
