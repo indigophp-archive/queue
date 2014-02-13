@@ -13,6 +13,7 @@ namespace Indigo\Queue\Job;
 use Indigo\Queue\Connector\ConnectorInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Exception;
 
 /**
  * Abstract Job class
@@ -90,18 +91,17 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         $payload = $this->getPayload();
 
         // Resolve job and delete on error
-        if (!$this->resolve($payload)) {
+        try {
+            $this->resolve($payload);
+        } catch (Exception $e) {
             $this->delete();
 
             return false;
         }
 
         try {
-            // Run execute callback
             return $this->doExecute($payload);
-        } catch (\Exception $e) {
-            // Catch any Exceptions
-            // Make sure this class does not throw any
+        } catch (Exception $e) {
             return $this->doFailure($e, $payload);
         }
     }
@@ -116,18 +116,19 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     {
         $job = $this->parseJob($payload['job']);
 
-        list($job, $this->execute, $this->failure) = $job;
+        list($job, $execute, $failure) = $job;
 
-        if (class_exists($job)) {
-            $this->job = new $job($this, $payload['data']);
-            $this->config = $this->resolveConfig($this->job);
-
-            return true;
+        if (!class_exists($job)) {
+            $this->logException('error', 'Job ' . $job . ' is not found.');
         }
 
-        $this->log('error', 'Job ' . $job . ' is not found.');
+        $this->job = new $job($this, $payload['data']);
+        $this->execute = $this->getCallback($execute);
+        $this->failure = $this->getCallback($failure);
 
-        return false;
+        if (property_exists($job, 'config')) {
+            $this->config = array_merge($this->config, $job->config);
+        }
     }
 
     /**
@@ -141,24 +142,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         $job = preg_split('/[:@]/', $job);
 
         // Make sure we have default values
-        return $job + array(null, 'execute', 'failure');
-    }
-
-    /**
-     * Get config from job
-     *
-     * @param  object $job
-     * @return array  Resolved config
-     */
-    protected function resolveConfig($job)
-    {
-        $config = $this->config;
-
-        if (isset($job->config) and is_array($job->config)) {
-            $config = array_merge($config, $job->config);
-        }
-
-        return $config;
+        return $job + array($this->job, $this->execute, $this->failure);
     }
 
     /**
@@ -170,7 +154,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected function doExecute(array $payload)
     {
         // Check whether we have a valid callback
-        if (!$execute = $this->getCallback($this->execute)) {
+        if (!$this->execute) {
             $this->log(
                 'error',
                 'Execute callback ' . $this->execute .
@@ -181,7 +165,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         }
 
         // Here comes the funny part: execute the job
-        $execute = call_user_func($execute, $this, $payload['data']);
+        $execute = call_user_func($this->execute, $this, $payload['data']);
 
         $this->log('debug', 'Job ' . $payload['job'] . ' finished');
 
@@ -201,14 +185,14 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function doFailure(\Exception $e, array $payload)
     {
-        if (!$failure = $this->getCallback($this->failure)) {
+        if (!$this->failure) {
             $this->log(
                 'debug',
                 'Failure callback ' . $this->failure .
                 ' is not found in job ' . get_class($this->job) . '.'
             );
         } else {
-            $failure = call_user_func($failure, $this, $e, $payload['data']);
+            $failure = call_user_func($this->failure, $this, $e, $payload['data']);
         }
 
         if ($failure === false) {
@@ -230,7 +214,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * Get callback from string
      *
      * @param  string $callback
-     * @return mixed  Callable if callable, default otherwise
+     * @return mixed  Callable if callable, false otherwise
      */
     protected function getCallback($callback)
     {
@@ -246,7 +230,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     public function release()
     {
-        return $this->getConnector()->release($this, $this->config['delay']);
+        return $this->connector->release($this, $this->config['delay']);
     }
 
     /**
@@ -266,7 +250,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     public function delete()
     {
-        return $this->getConnector()->delete($this);
+        return $this->connector->delete($this);
     }
 
     /**
@@ -354,5 +338,18 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected function log($level, $message)
     {
         return $this->logger->log($level, $message, $this->getPayload());
+    }
+
+    /**
+     * Log a message and throw Exception
+     *
+     * @param string $level   Log level
+     * @param string $message
+     * @throws Exception
+     */
+    protected function logException($level, $message)
+    {
+        $this->log($level, $message);
+        throw new Exception($message);
     }
 }
