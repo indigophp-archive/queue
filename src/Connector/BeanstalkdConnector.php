@@ -86,7 +86,10 @@ class BeanstalkdConnector extends AbstractConnector
         $job = $this->pheanstalk->reserveFromTube($queue, $timeout);
 
         if ($job instanceof Pheanstalk_Job) {
-            return new BeanstalkdJob($queue, $job, $this);
+            $job = new BeanstalkdJob($job, $this);
+            $job->setQueue($queue);
+
+            return $job;
         }
     }
 

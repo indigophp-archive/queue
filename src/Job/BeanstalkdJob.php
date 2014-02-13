@@ -30,12 +30,11 @@ class BeanstalkdJob extends AbstractJob
      */
     protected $pheanstalkJob;
 
-    public function __construct($queue, Pheanstalk_Job $job, BeanstalkdConnector $connector)
+    public function __construct(Pheanstalk_Job $job, BeanstalkdConnector $connector)
     {
         $this->pheanstalkJob = $job;
-        $this->connector     = $connector;
+        $this->connector = $connector;
         $this->setPayload(json_decode($job->getData(), true));
-        $this->setQueue($queue);
         $this->setLogger(new NullLogger);
     }
 
@@ -44,7 +43,7 @@ class BeanstalkdJob extends AbstractJob
      */
     public function bury()
     {
-        return $this->getConnector()->bury($this);
+        return $this->connector->bury($this);
     }
 
     /**
@@ -52,7 +51,7 @@ class BeanstalkdJob extends AbstractJob
      */
     public function attempts()
     {
-        $stats = $this->getConnector()->getPheanstalk()->statsJob($this->pheanstalkJob);
+        $stats = $this->connector->getPheanstalk()->statsJob($this->pheanstalkJob);
 
         return (int) $stats->reserves;
     }
