@@ -36,12 +36,11 @@ class RabbitJob extends AbstractJob
      */
     protected $channel;
 
-    public function __construct($queue, AMQPMessage $message, RabbitConnector $connector)
+    public function __construct(AMQPMessage $message, RabbitConnector $connector)
     {
         $this->message   = $message;
         $this->connector = $connector;
         $this->channel   = $connector->regenerateChannel();
-        $this->setQueue($queue);
         $this->setPayload(json_decode($message->body, true));
         $this->setLogger(new NullLogger);
     }
