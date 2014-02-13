@@ -152,13 +152,11 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      */
     protected function resolveJob($job, array $data)
     {
-        if (!class_exists($job)) {
-            $this->log('error', 'Job ' . $job . ' is not found.');
-
-            return;
+        if (class_exists($job)) {
+            return new $job($this, $data);
         }
 
-        return new $job($this, $data);
+        $this->log('error', 'Job ' . $job . ' is not found.');
     }
 
     /**
