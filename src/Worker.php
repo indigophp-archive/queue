@@ -17,6 +17,7 @@ use Indigo\Queue\Connector\DirectConnector;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Exception;
 use InvalidArgumentException;
 
 /**
@@ -46,6 +47,17 @@ class Worker implements LoggerAwareInterface
      * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * Config values
+     *
+     * @var array
+     */
+    protected static $config = array(
+        'retry'  => 0,
+        'delay'  => 0,
+        'delete' => false
+    );
 
     public function __construct($queue, ConnectorInterface $connector)
     {
@@ -132,5 +144,71 @@ class Worker implements LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+
+    public static function execute(JobInterface $job)
+    {
+        $payload = $job->getPayload();
+
+        $raw = static::parseJob($payload['job']);
+
+        list($class, $execute, $failure) = $raw;
+
+        try {
+            $class = static::resolveClass($class);
+        } catch (Exception $e) {
+            $this->connector->delete($job);
+
+            return false;
+        }
+    }
+
+    /**
+     * Parse job string
+     *
+     * @param  string $job Job@execute:failure
+     * @return array
+     */
+    protected static function parseJob($job)
+    {
+        $job = preg_split('/[:@]/', $job);
+
+        // Make sure we have default values
+        return $job + array(null, 'execute', 'failure');
+    }
+
+    protected static function resolveClass($class, array $data, JobInterface $job)
+    {
+        if (!class_exists($class)) {
+            $this->logger->log('error', 'Job ' . $class . ' is not found.', $job->getPayload());
+
+        }
+
+        return new $class($job, $data);
+    }
+
+    /**
+     * Resolve the job
+     *
+     * @param  array   $payload Job payload
+     * @return boolean
+     */
+    protected static function resolve(array $payload)
+    {
+        $job = $this->parseJob($payload['job']);
+
+        list($job, $execute, $failure) = $job;
+
+        if (!class_exists($job)) {
+            $this->logger->log('error', 'Job ' . $job . ' is not found.');
+        }
+
+        $this->job = new $job($this, $payload['data']);
+        $this->execute = $this->getCallback($execute);
+        $this->failure = $this->getCallback($failure);
+
+        if (property_exists($job, 'config')) {
+            $this->config = array_merge($this->config, $job->config);
+        }
     }
 }
