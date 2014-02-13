@@ -98,11 +98,11 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         try {
             // Run execute callback
-            return $this->runExecute($payload);
+            return $this->doExecute($payload);
         } catch (\Exception $e) {
             // Catch any Exceptions
             // Make sure this class does not throw any
-            return $this->runFailure($e, $payload);
+            return $this->doFailure($e, $payload);
         }
     }
 
@@ -182,7 +182,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * @param  array $payload Job payload
      * @return mixed
      */
-    protected function runExecute(array $payload)
+    protected function doExecute(array $payload)
     {
         // Check whether we have a valid callback
         if (!$execute = $this->getCallback($this->execute)) {
@@ -208,13 +208,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
     /**
      * Run failure callback
-     * This should only be run if runExecute throws an exception
+     * This should only be run if doExecute throws an exception
      *
      * @param  Exception $e
      * @param  array     $payload Job payload
      * @return mixed
      */
-    protected function runFailure(\Exception $e, array $payload)
+    protected function doFailure(\Exception $e, array $payload)
     {
         if (!$failure = $this->getCallback($this->failure)) {
             $this->log(
