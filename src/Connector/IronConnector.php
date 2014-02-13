@@ -74,8 +74,13 @@ class IronConnector extends AbstractConnector
      */
     public function pop($queue, $timeout = 0)
     {
-        if ($job = $this->iron->getMessage($queue, $timeout)) {
-            return new IronJob($queue, $job, $this);
+        $job = $this->iron->getMessage($queue, $timeout);
+
+        if ($job instanceof stdClass) {
+            $job = new IronJob($job, $this);
+            $job->setQueue($queue);
+
+            return $job;
         }
     }
 

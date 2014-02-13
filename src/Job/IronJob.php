@@ -13,6 +13,7 @@ namespace Indigo\Queue\Job;
 
 use Indigo\Queue\Connector\IronConnector;
 use Psr\Log\NullLogger;
+use stdClass;
 
 /**
  * Iron Job
@@ -23,12 +24,11 @@ class IronJob extends AbstractJob
 {
     protected $ironJob;
 
-    public function __construct($queue, \stdClass $job, IronConnector $connector)
+    public function __construct(stdClass $job, IronConnector $connector)
     {
-        $this->ironJob   = $job;
+        $this->ironJob = $job;
         $this->connector = $connector;
         $this->setPayload(json_decode($job->body, true));
-        $this->setQueue($queue);
         $this->setLogger(new NullLogger);
     }
 
