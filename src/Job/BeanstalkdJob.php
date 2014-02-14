@@ -41,14 +41,6 @@ class BeanstalkdJob extends AbstractJob
     /**
      * {@inheritdoc}
      */
-    public function bury()
-    {
-        return $this->connector->bury($this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function attempts()
     {
         $stats = $this->connector->getPheanstalk()->statsJob($this->pheanstalkJob);

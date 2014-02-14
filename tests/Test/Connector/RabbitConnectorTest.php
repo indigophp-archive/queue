@@ -110,7 +110,11 @@ class RabbitConnectorTest extends ConnectorTest
                 $job
             );
 
-            $this->assertTrue($this->connector->release($job));
+            if ($payload['job'] == 'Job@runThis') {
+                $this->assertTrue($this->connector->release($job));
+            } else {
+                $this->assertTrue($this->connector->release($job, 1));
+            }
         } else {
             $this->assertNull($job);
         }

@@ -15,6 +15,7 @@ use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\IronJob;
 use IronMQ;
 use Psr\Log\NullLogger;
+use stdClass;
 
 /**
  * Iron connector

@@ -73,7 +73,12 @@ class BeanstalkdConnectorTest extends ConnectorTest
             );
 
             $this->assertEquals($payload, $job->getPayload());
-            $this->assertTrue($this->connector->delete($job));
+
+            if ($payload['job'] == 'Job@runThis') {
+                $this->assertTrue($this->connector->delete($job));
+            } else {
+                $this->assertTrue($this->connector->bury($job));
+            }
         } else {
             $this->assertNull($job);
         }
