@@ -118,18 +118,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         list($job, $execute, $failure) = $job;
 
-        if (!class_exists($job)) {
-            $this->logException('error', 'Job ' . $job . ' is not found.');
-        }
-
-        $this->job = new $job($this, $payload['data']);
-        $this->execute = $this->getCallback($execute);
-
-        if (!$this->execute) {
-            $this->logException('error', 'Execute method ' . $execute . ' is not found in job ' . $job . '.');
-        }
-
-        $this->failure = $this->getCallback($failure);
+        $this->job = $this->resolveClass($job, $payload['data']);
+        $this->execute = $this->resolveCallback($execute, true);
+        $this->failure = $this->resolveCallback($failure);
 
         if (isset($job->config)) {
             $this->config = array_merge($this->config, $job->config);
@@ -148,6 +139,47 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 
         // Make sure we have default values
         return $job + array($this->job, $this->execute, $this->failure);
+    }
+
+    /**
+     * Resolve class
+     *
+     * @param  string $class Class name
+     * @param  array  $data  Data
+     * @return object
+     */
+    protected function resolveClass($class, $data)
+    {
+        if (!class_exists($class)) {
+            $this->logException('error', 'Job ' . $class . ' is not found.');
+        }
+
+        return new $class($this, $sata);
+    }
+
+    /**
+     * Resolve callback from string
+     *
+     * @param  string  $callback
+     * @param  boolean $exception
+     * @return mixed   Callable if callable, false otherwise
+     */
+    protected function resolveCallback($callback, $exception = false)
+    {
+        $callback = array($this->job, $callback);
+
+        if (is_callable($callback)) {
+            return $callback;
+        }
+
+        if ($exception) {
+            $this->logException(
+                'error',
+                'Method ' . $callback[1] . ' is not found in job ' . get_class($callback[0]) . '.'
+            );
+        }
+
+        return false;
     }
 
     /**
@@ -204,19 +236,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
     protected function failureCallback()
     {
         return $this->autoRetry() or $this->autoDelete();
-    }
-
-    /**
-     * Get callback from string
-     *
-     * @param  string $callback
-     * @return mixed  Callable if callable, false otherwise
-     */
-    protected function getCallback($callback)
-    {
-        $callback = array($this->job, $callback);
-
-        return is_callable($callback) ? $callback : false;
     }
 
     /**
