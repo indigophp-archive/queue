@@ -122,8 +122,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
         $this->execute = $this->resolveCallback($execute, true);
         $this->failure = $this->resolveCallback($failure);
 
-        if (isset($job->config)) {
-            $this->config = array_merge($this->config, $job->config);
+        if (isset($this->job->config)) {
+            $this->config = array_merge($this->config, $this->job->config);
         }
     }
 
