@@ -80,9 +80,10 @@ class RabbitConnectorTest extends ConnectorTest
      */
     public function testPop($payload)
     {
-        $this->connector->push('test_pop', $payload);
+        $queue = 'test_pop_' . uniqid();
+        $this->connector->push($queue, $payload);
 
-        if ($job = $this->connector->pop('test_pop')) {
+        if ($job = $this->connector->pop($queue)) {
             $this->assertInstanceOf(
                 'Indigo\\Queue\\Job\\RabbitJob',
                 $job
@@ -102,9 +103,10 @@ class RabbitConnectorTest extends ConnectorTest
      */
     public function testRelease($payload)
     {
-        $this->connector->push('test_release', $payload);
+        $queue = 'test_release_' . uniqid();
+        $this->connector->push($queue, $payload);
 
-        if ($job = $this->connector->pop('test_release')) {
+        if ($job = $this->connector->pop($queue)) {
             $this->assertInstanceOf(
                 'Indigo\\Queue\\Job\\RabbitJob',
                 $job
@@ -118,9 +120,6 @@ class RabbitConnectorTest extends ConnectorTest
         } else {
             $this->assertNull($job);
         }
-
-        $job = $this->connector->pop('test_release');
-        $this->connector->delete($job);
     }
 
     public function testChannel()

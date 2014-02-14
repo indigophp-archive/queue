@@ -114,8 +114,5 @@ class IronConnectorTest extends ConnectorTest
         } else {
             $this->assertNull($job);
         }
-
-        $job = $this->connector->pop($queue);
-        $job and $this->connector->delete($job);
     }
 }

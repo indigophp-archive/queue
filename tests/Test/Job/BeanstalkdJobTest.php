@@ -29,9 +29,10 @@ class BeanstalkdJobTest extends JobTest
      */
     public function testJob($payload, $return)
     {
-        $this->connector->push('test', $payload);
+        $queue = 'test_' . uniqid();
+        $this->connector->push($queue, $payload);
 
-        $job = $this->connector->pop('test');
+        $job = $this->connector->pop($queue);
 
         if ($job instanceof BeanstalkdJob) {
             $this->assertEquals(1, $job->attempts());
