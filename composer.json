@@ -1,13 +1,12 @@
 {
     "name": "indigophp/queue",
-    "type": "library",
     "description": "Manage work queues with PHP",
+    "license": "MIT",
     "keywords": ["queue", "worker", "job"],
     "homepage": "https://indigophp.com",
-    "license": "MIT",
     "authors": [
         {
-            "name": "Sági-Kazár Márk",
+            "name": "Márk Sági-Kazár",
             "email": "mark.sagikazar@gmail.com"
         }
     ],
