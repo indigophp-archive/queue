@@ -14,12 +14,12 @@
         "php": ">=5.3.3",
         "psr/log": "~1.0",
         "jeremeamia/SuperClosure": "1.0.1",
-        "symfony/options-resolver": "v2.4.0"
+        "symfony/options-resolver": "v2.4.2"
     },
     "require-dev": {
         "pda/pheanstalk": "2.1.0",
-        "videlalvaro/php-amqplib": "2.2.*",
-        "iron-io/iron_mq": "1.4.8",
+        "videlalvaro/php-amqplib": "2.2.6",
+        "iron-io/iron_mq": "1.5.0",
         "mockery/mockery": "dev-master@dev"
     },
     "suggest": {
