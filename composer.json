@@ -13,13 +13,13 @@
     "require": {
         "php": ">=5.3.3",
         "psr/log": "~1.0",
-        "jeremeamia/SuperClosure": "1.0.*",
-        "symfony/options-resolver": "2.4.*"
+        "jeremeamia/SuperClosure": "~1.0.0",
+        "symfony/options-resolver": "~2.4.0"
     },
     "require-dev": {
-        "pda/pheanstalk": "2.1.*",
-        "videlalvaro/php-amqplib": "2.2.*",
-        "iron-io/iron_mq": "1.5.*",
+        "pda/pheanstalk": "~2.1.0",
+        "videlalvaro/php-amqplib": "~2.2.0",
+        "iron-io/iron_mq": "~1.5.0",
         "mockery/mockery": "dev-master@dev"
     },
     "suggest": {
