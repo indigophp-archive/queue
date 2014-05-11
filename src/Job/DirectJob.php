@@ -21,11 +21,15 @@ use Psr\Log\NullLogger;
  */
 class DirectJob extends AbstractJob
 {
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct(array $payload, DirectConnector $connector)
     {
-        $this->setPayload($payload);
         $this->connector = $connector;
-        $this->setLogger(new NullLogger);
+        $this->logger    = new NullLogger;
+
+        $this->setPayload($payload);
     }
 
     /**

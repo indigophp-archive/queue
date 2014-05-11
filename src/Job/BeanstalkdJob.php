@@ -30,12 +30,16 @@ class BeanstalkdJob extends AbstractJob
      */
     protected $pheanstalkJob;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct(Pheanstalk_Job $job, BeanstalkdConnector $connector)
     {
         $this->pheanstalkJob = $job;
-        $this->connector = $connector;
+        $this->connector     = $connector;
+        $this->logger        = new NullLogger;
+
         $this->setPayload(json_decode($job->getData(), true));
-        $this->setLogger(new NullLogger);
     }
 
     /**

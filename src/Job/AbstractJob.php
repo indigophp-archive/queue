@@ -310,6 +310,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * Get logger
      *
      * @return LoggerInterface
+     *
+     * @codeCoverageIgnore
      */
     public function getLogger()
     {
@@ -320,6 +322,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
      * Sets a logger instance on the object
      *
      * @param LoggerInterface $logger
+     *
+     * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger)
     {

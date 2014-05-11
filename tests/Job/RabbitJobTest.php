@@ -44,6 +44,7 @@ class RabbitJobTest extends JobTest
     /**
      * @covers       ::attempts
      * @covers       ::getMessage
+     * @covers       ::getChannel
      * @dataProvider payloadProvider
      * @group        Queue
      */
@@ -59,6 +60,10 @@ class RabbitJobTest extends JobTest
             $this->assertInstanceOf(
                 'PhpAmqpLib\\Message\\AMQPMessage',
                 $job->getMessage()
+            );
+            $this->assertInstanceOf(
+                'PhpAmqpLib\\Message\\AMQPChannel',
+                $job->getChannel()
             );
         } else {
             $this->assertNull($job);

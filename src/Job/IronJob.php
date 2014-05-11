@@ -24,12 +24,16 @@ class IronJob extends AbstractJob
 {
     protected $ironJob;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct(stdClass $job, IronConnector $connector)
     {
-        $this->ironJob = $job;
+        $this->ironJob   = $job;
         $this->connector = $connector;
+        $this->logger    = new NullLogger;
+
         $this->setPayload(json_decode($job->body, true));
-        $this->setLogger(new NullLogger);
     }
 
     /**

@@ -34,6 +34,7 @@ class BeanstalkdJobTest extends JobTest
     /**
      * @covers       ::attempts
      * @covers       ::getPayload
+     * @covers       ::getPheanstalkJob
      * @dataProvider payloadProvider
      * @group        Queue
      */
