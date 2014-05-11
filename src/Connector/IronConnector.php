@@ -31,11 +31,13 @@ class IronConnector extends AbstractConnector
      */
     protected $iron = null;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct(IronMQ $iron)
     {
-        $this->iron = $iron;
-
-        $this->setLogger(new NullLogger);
+        $this->iron   = $iron;
+        $this->logger = new NullLogger;
     }
 
     /**
