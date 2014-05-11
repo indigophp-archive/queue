@@ -45,6 +45,8 @@ abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInter
      *
      * @param  array $options
      * @return array Resolved options
+     *
+     * @codeCoverageIgnore
      */
     protected function resolveJobOptions(array $options)
     {
@@ -62,6 +64,8 @@ abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInter
      * Set default job options
      *
      * @param OptionsResolverInterface $resolver
+     *
+     * @codeCoverageIgnore
      */
     protected function setDefaultJobOptions(OptionsResolverInterface $resolver)
     {
@@ -73,6 +77,8 @@ abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInter
      * Sets a logger instance on the object
      *
      * @param LoggerInterface $logger
+     *
+     * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger)
     {

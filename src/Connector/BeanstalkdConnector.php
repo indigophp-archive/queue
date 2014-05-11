@@ -32,10 +32,13 @@ class BeanstalkdConnector extends AbstractConnector
      */
     protected $pheanstalk = null;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct(PheanstalkInterface $pheanstalk)
     {
         $this->pheanstalk = $pheanstalk;
-        $this->setLogger(new NullLogger);
+        $this->logger     = new NullLogger;
 
         $this->jobOptions = array(
             'delay'    => PheanstalkInterface::DEFAULT_DELAY,
