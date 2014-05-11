@@ -59,17 +59,6 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::__construct
-     * @covers ::__toString
-     * @group  Queue
-     */
-    public function testConstruct()
-    {
-        $queue = new Queue('test', $this->queue->getConnector());
-        $this->assertEquals('test', (string) $queue);
-    }
-
-    /**
      * @covers ::getQueue
      * @covers ::__toString
      * @group  Queue

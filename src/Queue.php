@@ -45,11 +45,14 @@ class Queue implements LoggerAwareInterface
      */
     protected $logger;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct($queue, ConnectorInterface $connector)
     {
-        $this->queue = $queue;
+        $this->queue     = $queue;
         $this->connector = $connector;
-        $this->setLogger(new NullLogger);
+        $this->logger    = new NullLogger;
     }
 
     /**
