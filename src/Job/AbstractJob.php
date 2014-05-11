@@ -19,6 +19,8 @@ use Exception;
  * Abstract Job class
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @codeCoverageIgnore
  */
 abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 {
