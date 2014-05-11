@@ -22,6 +22,7 @@ class DirectConnectorTest extends ConnectorTest
 
     /**
      * @covers       ::push
+     * @covers       ::pop
      * @covers       ::delete
      * @dataProvider payloadProvider
      * @group        Queue
@@ -40,6 +41,7 @@ class DirectConnectorTest extends ConnectorTest
 
     /**
      * @covers       ::push
+     * @covers       ::pop
      * @covers       ::delayed
      * @covers       ::release
      * @dataProvider payloadProvider

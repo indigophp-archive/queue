@@ -22,9 +22,12 @@ use Psr\Log\NullLogger;
  */
 class DirectConnector extends AbstractConnector
 {
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct()
     {
-        $this->setLogger(new NullLogger);
+        $this->logger = new NullLogger;
     }
 
     /**
