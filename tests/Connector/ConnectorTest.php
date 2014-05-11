@@ -4,6 +4,8 @@ namespace Indigo\Queue\Test\Connector;
 
 use Jeremeamia\SuperClosure\SerializableClosure;
 
+require __DIR__.'/../../resources/Job.php';
+
 abstract class ConnectorTest extends \PHPUnit_Framework_TestCase
 {
     protected $connector;
@@ -26,6 +28,10 @@ abstract class ConnectorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers ::isConnected
+     * @group  Queue
+     */
     public function testConnection()
     {
         $this->assertTrue($this->connector->isConnected());

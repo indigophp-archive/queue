@@ -6,6 +6,13 @@ use Indigo\Queue\Connector\BeanstalkdConnector;
 use Indigo\Queue\Job\BeanstalkdJob;
 use Pheanstalk_Pheanstalk as Pheanstalk;
 
+/**
+ * Tests for Beanstalkd Connector
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Connector\BeanstalkdConnector
+ */
 class BeanstalkdConnectorTest extends ConnectorTest
 {
     public function setUp()
@@ -24,25 +31,27 @@ class BeanstalkdConnectorTest extends ConnectorTest
         }
     }
 
-    public function testConnection()
-    {
-        $this->assertTrue($this->connector->isConnected());
-    }
-
+    /**
+     * @covers ::getPheanstalk
+     * @covers ::setPheanstalk
+     * @group  Queue
+     */
     public function testPheanstalk()
     {
         $pheanstalk = $this->connector->getPheanstalk();
 
         $this->assertInstanceOf('Pheanstalk_Pheanstalk', $pheanstalk);
 
-        $this->assertInstanceOf(
-            'Indigo\\Queue\\Connector\\BeanstalkdConnector',
+        $this->assertEquals(
+            $this->connector,
             $this->connector->setPheanstalk($pheanstalk)
         );
     }
 
     /**
+     * @covers       ::push
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testPush($payload)
     {
@@ -51,7 +60,10 @@ class BeanstalkdConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::delayed
+     * @covers       ::push
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testDelayed($payload)
     {
@@ -60,7 +72,11 @@ class BeanstalkdConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::pop
+     * @covers       ::delete
+     * @covers       ::bury
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testPop($payload)
     {
@@ -88,7 +104,10 @@ class BeanstalkdConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::pop
+     * @covers       ::release
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testRelease($payload)
     {

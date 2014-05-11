@@ -5,6 +5,13 @@ namespace Indigo\Queue\Test;
 use Indigo\Queue\Queue;
 use Jeremeamia\SuperClosure\SerializableClosure;
 
+/**
+ * Tests for Queue
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Queue
+ */
 class QueueTest extends \PHPUnit_Framework_TestCase
 {
     protected $queue;
@@ -51,30 +58,33 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testInstance()
+    /**
+     * @covers ::__construct
+     * @covers ::__toString
+     * @group  Queue
+     */
+    public function testConstruct()
     {
         $queue = new Queue('test', $this->queue->getConnector());
-        $this->assertEquals('test', (string)$queue);
+        $this->assertEquals('test', (string) $queue);
     }
 
+    /**
+     * @covers ::getQueue
+     * @covers ::__toString
+     * @group  Queue
+     */
     public function testQueue()
     {
         $this->assertEquals('test', $this->queue->getQueue());
-        $this->assertEquals('test', (string)$this->queue);
+        $this->assertEquals('test', (string) $this->queue);
     }
 
-    public function testLogger()
-    {
-        $logger = $this->queue->getLogger();
-
-        $this->assertInstanceOf(
-            'Psr\\Log\\LoggerInterface',
-            $logger
-        );
-
-        $this->assertNull($this->queue->setLogger($logger));
-    }
-
+    /**
+     * @covers ::getConnector
+     * @covers ::setConnector
+     * @group  Queue
+     */
     public function testConnector()
     {
         $connector = $this->queue->getConnector();
@@ -84,14 +94,17 @@ class QueueTest extends \PHPUnit_Framework_TestCase
             $connector
         );
 
-        $this->assertInstanceOf(
-            'Indigo\\Queue\\Queue',
+        $this->assertEquals(
+            $this->queue,
             $this->queue->setConnector($connector)
         );
     }
 
     /**
+     * @covers       ::push
+     * @covers       ::createPayload
      * @dataProvider jobProvider
+     * @group        Queue
      */
     public function testPush($job, $data)
     {
@@ -112,6 +125,10 @@ class QueueTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    /**
+     * @covers ::delayed
+     * @group  Queue
+     */
     public function testDelay()
     {
         $this->assertEquals(

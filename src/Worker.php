@@ -55,7 +55,7 @@ class Worker implements LoggerAwareInterface
 
         $this->queue     = $queue;
         $this->connector = $connector;
-        $this->setLogger(new NullLogger);
+        $this->logger    = new NullLogger;
     }
 
     /**
@@ -63,6 +63,8 @@ class Worker implements LoggerAwareInterface
      *
      * @param float   $interval Sleep for certain time if no job is available
      * @param integer $timeout  Wait timeout for pop
+     *
+     * @codeCoverageIgnore
      */
     public function listen($interval = 5, $timeout = 0)
     {
@@ -94,25 +96,27 @@ class Worker implements LoggerAwareInterface
     /**
      * Get JobInterface
      *
-     * @param  integer           $timeout Wait timeout for pop
-     * @return JobInterface|null Return null if $job is not a valid JobIterface
+     * @param  integer      $timeout Wait timeout for pop
+     * @return JobInterface Returns null if $job is not a valid JobIterface
      */
     protected function getJob($timeout = 0)
     {
         // Pop job from the queue
         $job = $this->connector->pop($this->queue, $timeout);
 
-        if ($job instanceof JobInterface) {
+        if ($job instanceof LoggerAwareInterface) {
             $job->setLogger($this->logger);
-
-            return $job;
         }
+
+        return $job;
     }
 
     /**
      * Sleep for a certain time
      *
      * @param float $interval
+     *
+     * @codeCoverageIgnore
      */
     protected function sleep($interval)
     {
@@ -128,6 +132,8 @@ class Worker implements LoggerAwareInterface
      * Sets a logger
      *
      * @param LoggerInterface $logger
+     *
+     * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger)
     {

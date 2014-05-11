@@ -6,6 +6,13 @@ use Indigo\Queue\Connector\IronConnector;
 use Indigo\Queue\Job\IronJob;
 use IronMQ;
 
+/**
+ * Tests for Iron Connector
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Connector\IronConnector
+ */
 class IronConnectorTest extends ConnectorTest
 {
     public function setUp()
@@ -38,25 +45,27 @@ class IronConnectorTest extends ConnectorTest
         $this->connector = new IronConnector($iron);
     }
 
-    public function testConnection()
-    {
-        $this->assertTrue($this->connector->isConnected());
-    }
-
+    /**
+     * @covers ::getIron
+     * @covers ::setIron
+     * @group  Queue
+     */
     public function testIron()
     {
         $iron = $this->connector->getIron();
 
         $this->assertInstanceOf('IronMQ', $iron);
 
-        $this->assertInstanceOf(
-            'Indigo\\Queue\\Connector\\IronConnector',
+        $this->assertEquals(
+            $this->connector,
             $this->connector->setIron($iron)
         );
     }
 
     /**
+     * @covers       ::push
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testPush($payload)
     {
@@ -65,7 +74,9 @@ class IronConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::delayed
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testDelayed($payload)
     {
@@ -74,7 +85,10 @@ class IronConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::pop
+     * @covers       ::delete
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testPop($payload)
     {
@@ -97,7 +111,10 @@ class IronConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::pop
+     * @covers       ::release
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testRelease($payload)
     {

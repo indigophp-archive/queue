@@ -5,7 +5,15 @@ namespace Indigo\Queue\Test\Job;
 use Indigo\Queue\Job\RabbitJob;
 use Indigo\Queue\Connector\RabbitConnector;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Exception\AMQPRuntimeException;
 
+/**
+ * Tests for Rabbit Job
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Job\RabbitJob
+ */
 class RabbitJobTest extends JobTest
 {
     public function setUp()
@@ -16,19 +24,28 @@ class RabbitJobTest extends JobTest
         $pass = isset($GLOBALS['rabbit_pass']) ? $GLOBALS['rabbit_pass'] : 'guest';
         $vhost = isset($GLOBALS['rabbit_vhost']) ? $GLOBALS['rabbit_vhost'] : '/';
 
-        $amqp = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
+        try {
+            $amqp = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
+        } catch (AMQPRuntimeException $e) {
+            $this->markTestSkipped(
+                'RabbitMQ connection not available.'
+            );
+        }
 
         $this->connector = new RabbitConnector($amqp);
 
         if (!$this->connector->isConnected()) {
             $this->markTestSkipped(
-              'RabbitMQ connection not available.'
+                'RabbitMQ connection not available.'
             );
         }
     }
 
     /**
+     * @covers       ::attempts
+     * @covers       ::getMessage
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testJob($payload, $return)
     {

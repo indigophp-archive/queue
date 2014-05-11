@@ -5,7 +5,15 @@ namespace Indigo\Queue\Test\Connector;
 use Indigo\Queue\Connector\RabbitConnector;
 use Indigo\Queue\Job\RabbitJob;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Exception\AMQPRuntimeException;
 
+/**
+ * Tests for Rabbit Connector
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Connector\RabbitConnector
+ */
 class RabbitConnectorTest extends ConnectorTest
 {
     public function setUp()
@@ -16,7 +24,13 @@ class RabbitConnectorTest extends ConnectorTest
         $pass = isset($GLOBALS['rabbit_pass']) ? $GLOBALS['rabbit_pass'] : 'guest';
         $vhost = isset($GLOBALS['rabbit_vhost']) ? $GLOBALS['rabbit_vhost'] : '/';
 
-        $amqp = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
+        try {
+            $amqp = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
+        } catch (AMQPRuntimeException $e) {
+            $this->markTestSkipped(
+                'RabbitMQ connection not available.'
+            );
+        }
 
         $this->connector = new RabbitConnector($amqp);
 
@@ -27,16 +41,19 @@ class RabbitConnectorTest extends ConnectorTest
         }
     }
 
-    public function testConnection()
-    {
-        $this->assertTrue($this->connector->isConnected());
-    }
-
+    /**
+     * @covers ::isPersistent
+     * @group  Queue
+     */
     public function testPersistent()
     {
         $this->assertTrue($this->connector->isPersistent());
     }
 
+    /**
+     * @covers ::isConnected
+     * @group  Queue
+     */
     public function testAMQPInstance()
     {
         $amqp = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
@@ -45,20 +62,27 @@ class RabbitConnectorTest extends ConnectorTest
         $this->assertTrue($connector->isConnected());
     }
 
+    /**
+     * @covers ::getAMQP
+     * @covers ::setAMQP
+     * @group  Queue
+     */
     public function testAMQP()
     {
         $amqp = $this->connector->getAMQP();
 
         $this->assertInstanceOf('PhpAmqpLib\\Connection\\AbstractConnection', $amqp);
 
-        $this->assertInstanceOf(
-            'Indigo\\Queue\\Connector\\RabbitConnector',
+        $this->assertEquals(
+            $this->connector,
             $this->connector->setAMQP($amqp)
         );
     }
 
     /**
+     * @covers       ::push
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testPush($payload)
     {
@@ -67,7 +91,9 @@ class RabbitConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::delayed
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testDelayed($payload)
     {
@@ -76,7 +102,10 @@ class RabbitConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::pop
+     * @covers       ::delete
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testPop($payload)
     {
@@ -99,7 +128,10 @@ class RabbitConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::pop
+     * @covers       ::release
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testRelease($payload)
     {
@@ -122,6 +154,11 @@ class RabbitConnectorTest extends ConnectorTest
         }
     }
 
+    /**
+     * @covers ::getChannel
+     * @covers ::regenerateChannel
+     * @group  Queue
+     */
     public function testChannel()
     {
         $channel1 = $this->connector->getChannel();

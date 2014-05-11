@@ -29,7 +29,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Indigo\\Queue\\": ["src/", "tests/"]
+            "Indigo\\Queue\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Indigo\\Queue\\Test\\": "tests/"
         }
     }
 }

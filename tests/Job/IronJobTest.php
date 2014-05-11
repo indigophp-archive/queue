@@ -6,6 +6,13 @@ use Indigo\Queue\Job\IronJob;
 use Indigo\Queue\Connector\IronConnector;
 use IronMQ;
 
+/**
+ * Tests for Iron Job
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Job\IronJob
+ */
 class IronJobTest extends JobTest
 {
     public function setUp()
@@ -39,7 +46,10 @@ class IronJobTest extends JobTest
     }
 
     /**
+     * @covers       ::attempts
+     * @covers       ::getIronJob
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testJob($payload, $return)
     {

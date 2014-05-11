@@ -142,6 +142,8 @@ class Queue implements LoggerAwareInterface
      * Get logger
      *
      * @return LoggerInterface
+     *
+     * @codeCoverageIgnore
      */
     public function getLogger()
     {
@@ -152,6 +154,8 @@ class Queue implements LoggerAwareInterface
      * Sets a logger
      *
      * @param LoggerInterface $logger
+     *
+     * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger)
     {

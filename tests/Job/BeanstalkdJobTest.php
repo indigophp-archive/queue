@@ -6,6 +6,13 @@ use Indigo\Queue\Job\BeanstalkdJob;
 use Indigo\Queue\Connector\BeanstalkdConnector;
 use Pheanstalk_Pheanstalk as Pheanstalk;
 
+/**
+ * Tests for Beanstalkd Job
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Job\BeanstalkdJob
+ */
 class BeanstalkdJobTest extends JobTest
 {
     public function setUp()
@@ -25,7 +32,10 @@ class BeanstalkdJobTest extends JobTest
     }
 
     /**
+     * @covers       ::attempts
+     * @covers       ::getPayload
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testJob($payload, $return)
     {

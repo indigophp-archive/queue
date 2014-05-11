@@ -4,6 +4,13 @@ namespace Indigo\Queue\Test\Connector;
 
 use Indigo\Queue\Connector\DirectConnector;
 
+/**
+ * Tests for Direct Connector
+ *
+ * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass  Indigo\Queue\Connector\DirectConnector
+ */
 class DirectConnectorTest extends ConnectorTest
 {
     protected $job;
@@ -14,7 +21,10 @@ class DirectConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::push
+     * @covers       ::delete
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testPush($payload)
     {
@@ -29,7 +39,11 @@ class DirectConnectorTest extends ConnectorTest
     }
 
     /**
+     * @covers       ::push
+     * @covers       ::delayed
+     * @covers       ::release
      * @dataProvider payloadProvider
+     * @group        Queue
      */
     public function testDelayed($payload)
     {
