@@ -77,15 +77,16 @@ class RabbitConnector extends AbstractConnector
      */
     protected $messageResolver;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct(AbstractConnection $amqp, $persistent = true)
     {
-        $this->amqp = $amqp;
+        $this->amqp       = $amqp;
+        $this->logger     = new NullLogger;
+        $this->persistent = $persistent;
 
         $this->regenerateChannel();
-
-        $this->setLogger(new NullLogger);
-
-        $this->persistent = $persistent;
     }
 
     /**
@@ -93,6 +94,8 @@ class RabbitConnector extends AbstractConnector
      *
      * @param  array $options
      * @return array Resolved options
+     *
+     * @codeCoverageIgnore
      */
     protected function resolveMessageOptions(array $options)
     {
@@ -110,6 +113,8 @@ class RabbitConnector extends AbstractConnector
      * Set default message options
      *
      * @param OptionsResolverInterface $resolver
+     *
+     * @codeCoverageIgnore
      */
     protected function setDefaultMessageOptions(OptionsResolverInterface $resolver)
     {
@@ -130,6 +135,9 @@ class RabbitConnector extends AbstractConnector
         return $this->persistent;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __destruct()
     {
         if ($this->isConnected()) {
@@ -180,6 +188,9 @@ class RabbitConnector extends AbstractConnector
         $this->channel->basic_publish($msg, '', $tmpQueue);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     private function prepareMessage($queue, array $payload, array $options = array())
     {
         $options = $this->resolveMessageOptions($options);
@@ -189,6 +200,9 @@ class RabbitConnector extends AbstractConnector
         return new AMQPMessage(json_encode($payload), $options);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function queueDeclare($queue = '', array $arguments = array())
     {
         $queue = $this->channel->queue_declare(
@@ -204,6 +218,9 @@ class RabbitConnector extends AbstractConnector
         return reset($queue);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     protected function exchangeDeclare($exchange, $type = 'direct')
     {
         $this->channel->exchange_declare(
