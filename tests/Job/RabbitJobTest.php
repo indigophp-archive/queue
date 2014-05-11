@@ -62,7 +62,7 @@ class RabbitJobTest extends JobTest
                 $job->getMessage()
             );
             $this->assertInstanceOf(
-                'PhpAmqpLib\\Message\\AMQPChannel',
+                'PhpAmqpLib\\Channel\\AMQPChannel',
                 $job->getChannel()
             );
         } else {
