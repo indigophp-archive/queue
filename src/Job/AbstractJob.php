@@ -157,7 +157,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
             $this->logException('error', 'Job ' . $class . ' is not found.');
         }
 
-        return new $class($this, $sata);
+        return new $class($this, $data);
     }
 
     /**
