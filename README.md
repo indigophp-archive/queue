@@ -6,7 +6,7 @@
 [![Total Downloads](https://poser.pugx.org/indigophp/queue/downloads.png)](https://packagist.org/packages/indigophp/queue)
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=83208d2af7fe392c2942a17fd1f2641fb0f9032d)](https://scrutinizer-ci.com/g/indigophp/queue/)
 [![License](https://poser.pugx.org/indigophp/queue/license.png)](https://packagist.org/packages/indigophp/queue)
-[![Dependency Status](https://www.versioneye.com/user/projects/5303acbaec1375b94f000019/badge.png)](https://www.versioneye.com/user/projects/5303acbaec1375b94f000019)
+[![Dependency Status](http://www.versioneye.com/user/projects/53cd7ce82254268535000153/badge.svg?style=flat)](http://www.versioneye.com/user/projects/53cd7ce82254268535000153)
 
 **Indigo Queue manages your queues and processes the jobs you put onto them.**
 
@@ -22,8 +22,6 @@ Via Composer
     }
 }
 ```
-
-**Note**: Package now uses PSR-4 autoloader, make sure you have a fresh version of Composer.
 
 
 ## Usage
@@ -68,7 +66,7 @@ This connector does what you think: Executes the pushed job immediately. You can
 ## Testing
 
 ``` bash
-$ phpunit
+$ codecept run
 ```
 
 
