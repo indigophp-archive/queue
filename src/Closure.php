@@ -25,20 +25,30 @@ class Closure
     /**
      * Config
      *
-     * @var array
+     * @var []
      */
-    public $config = array('delete' => true);
+    public $config = ['delete' => true];
 
+    /**
+     * Creates a new Closure
+     *
+     * @param JobInterface $job
+     * @param []           $data
+     */
     public function __construct(JobInterface $job, array $data)
     {
-        isset($data['config']) and $this->config = array_merge($this->config, $data['config']);
+        if (isset($data['config'])) {
+            $this->config = array_merge($this->config, $data['config']);
+        }
     }
 
     /**
-     * Execute the Closure job
+     * Executes the Closure job
      *
      * @param JobInterface $job
      * @param array        $data
+     *
+     * @return mixed
      */
     public function execute(JobInterface $job, array $data)
     {

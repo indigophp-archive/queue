@@ -1,45 +1,32 @@
 <?php
 
-namespace Indigo\Queue\Test;
+namespace Indigo\Queue;
 
-use Indigo\Queue\Queue;
 use Jeremeamia\SuperClosure\SerializableClosure;
+use Codeception\TestCase\Test;
 
 /**
  * Tests for Queue
  *
- * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass  Indigo\Queue\Queue
+ * @coversDefaultClass Indigo\Queue\Queue
  */
-class QueueTest extends \PHPUnit_Framework_TestCase
+class QueueTest extends Test
 {
     protected $queue;
 
-    public function setUp()
+    public function _before()
     {
-        $connector = \Mockery::mock(
-            'Indigo\\Queue\\Connector\\ConnectorInterface',
-            function ($mock)
-            {
-                $mock->shouldReceive('push')
-                    ->andReturnUsing(function ($queue, array $payload) {
-                        return $payload;
-                    });
+        $connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
 
-                $mock->shouldReceive('delayed')
-                    ->andReturnUsing(function ($queue, $delay) {
-                        return $delay;
-                    });
-            }
-        );
+        $connector->shouldReceive('push')
+            ->andReturn(null);
+
+        $connector->shouldReceive('delayed')
+            ->andReturn(null);
 
         $this->queue = new Queue('test', $connector);
-    }
-
-    public function tearDown()
-    {
-        \Mockery::close();
     }
 
     public function jobProvider()
@@ -78,15 +65,9 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     {
         $connector = $this->queue->getConnector();
 
-        $this->assertInstanceOf(
-            'Indigo\\Queue\\Connector\\ConnectorInterface',
-            $connector
-        );
+        $this->assertSame($this->queue, $this->queue->setConnector($connector));
 
-        $this->assertEquals(
-            $this->queue,
-            $this->queue->setConnector($connector)
-        );
+        $this->assertSame($connector, $this->queue->getConnector());
     }
 
     /**

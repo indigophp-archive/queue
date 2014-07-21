@@ -20,7 +20,8 @@
         "pda/pheanstalk": "~2.1.0",
         "videlalvaro/php-amqplib": "~2.2.0",
         "iron-io/iron_mq": "~1.5.0",
-        "mockery/mockery": "dev-master@dev"
+        "codeception/codeception": "~2.0.0",
+        "codeception/mockery-module": "dev-master"
     },
     "suggest": {
         "pda/pheanstalk": "PHP client for beanstalkd queue",
@@ -32,9 +33,6 @@
             "Indigo\\Queue\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Indigo\\Queue\\Test\\": "tests/"
-        }
-    }
+    "prefer-stable": true,
+    "minimum-stability": "dev"
 }
