@@ -14,12 +14,29 @@ use Codeception\TestCase\Test;
  */
 class QueueTest extends Test
 {
+    /**
+     * Connector mock
+     *
+     * @var ConnectorInterface
+     */
     protected $connector;
+
+    /**
+     * Queue object
+     *
+     * @var Queue
+     */
     protected $queue;
 
     public function _before()
     {
         $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
+
+        $this->connecotr->shouldReceive('push')
+            ->andReturn(null);
+
+        $this->connecotr->shouldReceive('delayed')
+            ->andReturn(null);
 
         $this->queue = new Queue('test', $this->connector);
     }
@@ -56,5 +73,27 @@ class QueueTest extends Test
     {
         $this->assertSame($this->queue, $this->queue->setConnector($this->connector));
         $this->assertSame($this->connector, $this->queue->getConnector());
+    }
+
+    /**
+     * @covers ::push
+     * @group  Queue
+     */
+    public function testPush()
+    {
+        $job = \Mockery::mock('Indigo\\Queue\\Job');
+
+        $this->assertNull($this->queue->push($job));
+    }
+
+    /**
+     * @covers ::delayed
+     * @group  Queue
+     */
+    public function testDelayed()
+    {
+        $job = \Mockery::mock('Indigo\\Queue\\Job');
+
+        $this->assertNull($this->queue->delayed(0, $job));
     }
 }

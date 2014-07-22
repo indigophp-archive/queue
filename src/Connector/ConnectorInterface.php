@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Job\JobInterface;
+use Indigo\Queue\Manager\ManagerInterface;
 
 /**
  * Connector Inteface
@@ -30,25 +30,23 @@ interface ConnectorInterface
     /**
     * Pushes a new job onto the queue
     *
-    * @param string $queue   Name of the queue
-    * @param []     $payload Array of payload
-    * @param []     $options Array of connector specific options
+    * @param string $queue
+    * @param Job    $job
     *
     * @return mixed
     */
-    public function push($queue, array $payload, array $options = []);
+    public function push($queue, Job $job);
 
     /**
     * Pushes a new job onto the queue after a delay
     *
-    * @param string  $queue   Name of the queue
-    * @param integer $delay   Delay of job in seconds
-    * @param []      $payload Array of payload
-    * @param []      $options Array of connector specific options
+    * @param string  $queue
+    * @param integer $delay
+    * @param Job     $job
     *
     * @return mixed
     */
-    public function delayed($queue, $delay, array $payload, array $options = []);
+    public function delayed($queue, $delay, Job $job);
 
     /**
     * Pops the next job off of the queue
@@ -56,7 +54,7 @@ interface ConnectorInterface
     * @param string  $queue   Name of the queue
     * @param integer $timeout Wait timeout
     *
-    * @return JobInterface
+    * @return ManagerInterface
     *
     * @throws NoJobFoundException If no job can be returned
     */
@@ -72,11 +70,11 @@ interface ConnectorInterface
     /**
      * Deletes job from queue
      *
-     * @param JobInterface $job Job to delete
+     * @param ManagerInterface $job Job to delete
      *
      * @return boolean Always true
      */
-    public function delete(JobInterface $job);
+    public function delete(ManagerInterface $job);
 
     /**
      * Clears the queue
@@ -90,10 +88,10 @@ interface ConnectorInterface
     /**
      * Releases a job back to the queue
      *
-     * @param JobInterface $job   Job to release
-     * @param integer      $delay Delay the job with x seconds, 0 means no delay
+     * @param ManagerInterface $job   Job to release
+     * @param integer          $delay Delay the job with x seconds, 0 means no delay
      *
      * @return boolean Always true
      */
-    public function release(JobInterface $job, $delay = 0);
+    public function release(ManagerInterface $job, $delay = 0);
 }

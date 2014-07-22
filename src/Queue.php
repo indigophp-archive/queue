@@ -87,64 +87,28 @@ class Queue
     }
 
     /**
-    * Creates a serialized payload
-    *
-    * @param string $job
-    * @param []     $data
-    *
-    * @return []
-    */
-    public function createPayload($job, array $data = [])
-    {
-        $payload = [
-            'job'   => $job,
-            'data'  => $data,
-        ];
-
-        // Create special payload if it is a Closure
-        if ($job instanceof \Closure) {
-            $payload['closure'] = serialize(new SerializableClosure($job));
-            $payload['job'] = 'Indigo\\Queue\\Closure';
-        }
-
-        return $payload;
-    }
-
-    /**
     * Pushes a new job onto the queue
     *
-    * @param string $job
-    * @param []     $data
-    * @param []     $options
+    * @param Job $job
     *
     * @return mixed
-    *
-    * @codeCoverageIgnore
     */
-    public function push($job, array $data = [], array $options = [])
+    public function push(Job $job)
     {
-        $payload = $this->createPayload($job, $data);
-
-        return $this->connector->push($this->queue, $payload, $options);
+        return $this->connector->push($this->queue, $job);
     }
 
     /**
     * Pushes a new job onto the queue after a delay
     *
     * @param integer $delay
-    * @param string  $job
-    * @param []      $data
-    * @param []      $options
+    * @param Job     $job
     *
     * @return mixed
-    *
-    * @codeCoverageIgnore
     */
-    public function delayed($delay, $job, array $data = [], array $options = [])
+    public function delayed($delay, Job $job)
     {
-        $payload = $this->createPayload($job, $data);
-
-        return $this->connector->delayed($this->queue, $delay, $payload, $options);
+        return $this->connector->delayed($this->queue, $delay, $job);
     }
 
     /**
