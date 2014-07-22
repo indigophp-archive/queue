@@ -14,35 +14,26 @@ use Codeception\TestCase\Test;
  */
 class QueueTest extends Test
 {
+    protected $connector;
     protected $queue;
 
     public function _before()
     {
-        $connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
+        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
 
-        $connector->shouldReceive('push')
-            ->andReturn(null);
-
-        $connector->shouldReceive('delayed')
-            ->andReturn(null);
-
-        $this->queue = new Queue('test', $connector);
+        $this->queue = new Queue('test', $this->connector);
     }
 
-    public function jobProvider()
+    /**
+     * @covers ::__construct
+     * @group  Queue
+     */
+    public function testConstruct()
     {
-        return array(
-            array(
-                'Job@runThis',
-                array(),
-            ),
-            array(
-                function () {
-                    return true;
-                },
-                array(),
-            ),
-        );
+        $queue = new Queue('test', $this->connector);
+
+        $this->assertSame($this->connector, $queue->getConnector());
+        $this->assertEquals('test', $queue->getQueue());
     }
 
     /**
@@ -63,47 +54,7 @@ class QueueTest extends Test
      */
     public function testConnector()
     {
-        $connector = $this->queue->getConnector();
-
-        $this->assertSame($this->queue, $this->queue->setConnector($connector));
-
-        $this->assertSame($connector, $this->queue->getConnector());
-    }
-
-    /**
-     * @covers       ::push
-     * @covers       ::createPayload
-     * @dataProvider jobProvider
-     * @group        Queue
-     */
-    public function testPush($job, $data)
-    {
-        $payload = $this->queue->push($job, $data);
-
-        if ($job instanceof \Closure) {
-            $this->assertEquals(serialize(new SerializableClosure($job)), $payload['closure']);
-            $this->assertEquals($data, $payload['data']);
-        } else {
-            $this->assertEquals(
-                array(
-                    'job'  => $job,
-                    'data' => $data,
-                ),
-                $payload
-            );
-        }
-
-    }
-
-    /**
-     * @covers ::delayed
-     * @group  Queue
-     */
-    public function testDelay()
-    {
-        $this->assertEquals(
-            10,
-            $this->queue->delayed(10, 'test', array('test'))
-        );
+        $this->assertSame($this->queue, $this->queue->setConnector($this->connector));
+        $this->assertSame($this->connector, $this->queue->getConnector());
     }
 }

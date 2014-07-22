@@ -13,8 +13,6 @@ namespace Indigo\Queue;
 
 use Indigo\Queue\Connector\ConnectorInterface;
 use Jeremeamia\SuperClosure\SerializableClosure;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -22,8 +20,10 @@ use Psr\Log\NullLogger;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class Queue implements LoggerAwareInterface
+class Queue
 {
+    use \Psr\Log\LoggerAwareTrait;
+
     /**
      * Connector object
      *
@@ -39,78 +39,31 @@ class Queue implements LoggerAwareInterface
     protected $queue;
 
     /**
-     * Logger instance
+     * Creates a new Queue
      *
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @codeCoverageIgnore
+     * @param string             $queue
+     * @param ConnectorInterface $connector
      */
     public function __construct($queue, ConnectorInterface $connector)
     {
-        $this->queue     = $queue;
+        $this->queue = $queue;
         $this->connector = $connector;
-        $this->logger    = new NullLogger;
+
+        $this->setLogger(new NullLogger);
     }
 
     /**
-    * Create serialized payload
-    *
-    * @param  string $job
-    * @param  mixed  $data
-    * @return array
-    */
-    protected function createPayload($job, array $data = array())
+     * Returns the queue name
+     *
+     * @return string
+     */
+    public function getQueue()
     {
-        $payload = array(
-            'job'   => $job,
-            'data'  => $data,
-        );
-
-        // Create special payload if it is a Closure
-        if ($job instanceof \Closure) {
-            $payload['closure'] = serialize(new SerializableClosure($job));
-            $payload['job'] = 'Indigo\\Queue\\Closure';
-        }
-
-        return $payload;
+        return $this->queue;
     }
 
     /**
-    * Push a new job onto the queue
-    *
-    * @param  string $job
-    * @param  array  $data
-    * @param  array  $options
-    * @return mixed
-    */
-    public function push($job, array $data = array(), array $options = array())
-    {
-        $payload = $this->createPayload($job, $data);
-
-        return $this->connector->push($this->queue, $payload, $options);
-    }
-
-    /**
-    * Push a new job onto the queue after a delay
-    *
-    * @param  int    $delay
-    * @param  string $job
-    * @param  array  $data
-    * @param  array  $options
-    * @return mixed
-    */
-    public function delayed($delay, $job, array $data = array(), array $options = array())
-    {
-        $payload = $this->createPayload($job, $data);
-
-        return $this->connector->delayed($this->queue, $delay, $payload, $options);
-    }
-
-    /**
-     * Gets the connector
+     * Returns the connector
      *
      * @return ConnectorInterface
      */
@@ -123,6 +76,8 @@ class Queue implements LoggerAwareInterface
      * Sets the connector
      *
      * @param ConnectorInterface $connector
+     *
+     * @return this
      */
     public function setConnector(ConnectorInterface $connector)
     {
@@ -132,41 +87,71 @@ class Queue implements LoggerAwareInterface
     }
 
     /**
-     * Gets the queue name
-     *
-     * @return string
-     */
-    public function getQueue()
+    * Creates a serialized payload
+    *
+    * @param string $job
+    * @param []     $data
+    *
+    * @return []
+    */
+    public function createPayload($job, array $data = [])
     {
-        return $this->queue;
+        $payload = [
+            'job'   => $job,
+            'data'  => $data,
+        ];
+
+        // Create special payload if it is a Closure
+        if ($job instanceof \Closure) {
+            $payload['closure'] = serialize(new SerializableClosure($job));
+            $payload['job'] = 'Indigo\\Queue\\Closure';
+        }
+
+        return $payload;
     }
 
     /**
-     * Get logger
-     *
-     * @return LoggerInterface
-     *
-     * @codeCoverageIgnore
-     */
-    public function getLogger()
+    * Pushes a new job onto the queue
+    *
+    * @param string $job
+    * @param []     $data
+    * @param []     $options
+    *
+    * @return mixed
+    *
+    * @codeCoverageIgnore
+    */
+    public function push($job, array $data = [], array $options = [])
     {
-        return $this->logger;
+        $payload = $this->createPayload($job, $data);
+
+        return $this->connector->push($this->queue, $payload, $options);
     }
 
     /**
-     * Sets a logger
-     *
-     * @param LoggerInterface $logger
-     *
-     * @codeCoverageIgnore
-     */
-    public function setLogger(LoggerInterface $logger)
+    * Pushes a new job onto the queue after a delay
+    *
+    * @param integer $delay
+    * @param string  $job
+    * @param []      $data
+    * @param []      $options
+    *
+    * @return mixed
+    *
+    * @codeCoverageIgnore
+    */
+    public function delayed($delay, $job, array $data = [], array $options = [])
     {
-        $this->logger = $logger;
+        $payload = $this->createPayload($job, $data);
+
+        return $this->connector->delayed($this->queue, $delay, $payload, $options);
     }
 
-    public function __tostring()
+    /**
+     * Alias to getQueue()
+     */
+    public function __toString()
     {
-        return $this->queue;
+        return $this->getQueue();
     }
 }
