@@ -12,10 +12,10 @@
 namespace Indigo\Queue\Connector;
 
 use Indigo\Queue\Job\JobInterface;
-use Indigo\Queue\Job\BeanstalkdJob;
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
 use Pheanstalk_PheanstalkInterface as PheanstalkInterface;
+use Pheanstalk_Exception_ServerException as ServerException;
 use Psr\Log\NullLogger;
 
 /**
@@ -26,6 +26,20 @@ use Psr\Log\NullLogger;
 class BeanstalkdConnector extends AbstractConnector
 {
     /**
+     * {@inheritdoc}
+     */
+    protected $options = [
+        'delay'    => PheanstalkInterface::DEFAULT_DELAY,
+        'timeout'  => PheanstalkInterface::DEFAULT_TTR,
+        'priority' => PheanstalkInterface::DEFAULT_PRIORITY
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $jobClass = 'Indigo\\Queue\\Job\\BeanstalkdJob';
+
+    /**
      * Pheanstalk object
      *
      * @var Pheanstalk
@@ -33,18 +47,39 @@ class BeanstalkdConnector extends AbstractConnector
     protected $pheanstalk = null;
 
     /**
-     * @codeCoverageIgnore
+     * Creates a new BeanstalkdConnector
+     *
+     * @param PheanstalkInterface $pheanstalk
      */
     public function __construct(PheanstalkInterface $pheanstalk)
     {
         $this->pheanstalk = $pheanstalk;
-        $this->logger     = new NullLogger;
 
-        $this->jobOptions = array(
-            'delay'    => PheanstalkInterface::DEFAULT_DELAY,
-            'timeout'  => PheanstalkInterface::DEFAULT_TTR,
-            'priority' => PheanstalkInterface::DEFAULT_PRIORITY
-        );
+        parent::__construct();
+    }
+
+    /**
+     * Returns a Pheanstalk object
+     *
+     * @return Pheanstalk
+     */
+    public function getPheanstalk()
+    {
+        return $this->pheanstalk;
+    }
+
+    /**
+     * Sets a Pheanstalk object
+     *
+     * @param PheanstalkInterface $pheanstalk
+     *
+     * @return BeanstalkdConnector
+     */
+    public function setPheanstalk(PheanstalkInterface $pheanstalk)
+    {
+        $this->pheanstalk = $pheanstalk;
+
+        return $this;
     }
 
     /**
@@ -58,9 +93,9 @@ class BeanstalkdConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function push($queue, array $payload, array $options = array())
+    public function push($queue, array $payload, array $options = [])
     {
-        $options = $this->resolveJobOptions($options);
+        $options = $this->options + $options;
 
         return $this->pheanstalk->putInTube(
             $queue,
@@ -74,7 +109,7 @@ class BeanstalkdConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function delayed($queue, $delay, array $payload, array $options = array())
+    public function delayed($queue, $delay, array $payload, array $options = [])
     {
         $options['delay'] = $delay;
 
@@ -87,13 +122,24 @@ class BeanstalkdConnector extends AbstractConnector
     public function pop($queue, $timeout = 0)
     {
         $job = $this->pheanstalk->reserveFromTube($queue, $timeout);
+        $class = $this->jobClass;
 
         if ($job instanceof Pheanstalk_Job) {
-            $job = new BeanstalkdJob($job, $this);
+            $job = new $class($job, $this);
             $job->setQueue($queue);
 
             return $job;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count($queue)
+    {
+        $stats = $this->pheanstalk->statsTube($queue);
+
+        return $stats['current-jobs-ready'];
     }
 
     /**
@@ -107,10 +153,40 @@ class BeanstalkdConnector extends AbstractConnector
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function clear($queue)
+    {
+        $this->doClear('ready');
+        $this->doClear('buried');
+        $this->doClear('delayed');
+    }
+
+    /**
+     * Clears a specific state
+     *
+     * @param string $state
+     *
+     * @return boolean
+     */
+    protected function doClear($state)
+    {
+        try {
+            while ($item = $this->pheanstalk->{'peek'.$state}($queue)) {
+                $this->pheanstalk->delete($item);
+            }
+        } catch (ServerException $e) {
+        }
+
+        return true;
+    }
+
+    /**
      * Bury the job
      *
-     * @param  JobInterface $job Job to bury
-     * @return boolean      Always true
+     * @param JobInterface $job Job to bury
+     *
+     * @return boolean Always true
      */
     public function bury(JobInterface $job)
     {
@@ -121,35 +197,13 @@ class BeanstalkdConnector extends AbstractConnector
 
     /**
      * {@inheritdoc}
-     * @param int|null $priority
+     *
+     * @param integer|null $priority
      */
     public function release(JobInterface $job, $delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
     {
         $this->pheanstalk->release($job->getPheanstalkJob(), $priority, $delay);
 
         return true;
-    }
-
-    /**
-     * Return Pheanstalk object
-     *
-     * @return Pheanstalk
-     */
-    public function getPheanstalk()
-    {
-        return $this->pheanstalk;
-    }
-
-    /**
-     * Set Pheanstalk object
-     *
-     * @param  PheanstalkInterface $pheanstalk
-     * @return BeanstalkdConnector
-     */
-    public function setPheanstalk(PheanstalkInterface $pheanstalk)
-    {
-        $this->pheanstalk = $pheanstalk;
-
-        return $this;
     }
 }

@@ -28,49 +28,72 @@ interface ConnectorInterface
     public function isConnected();
 
     /**
-    * Push a new job onto the queue
+    * Pushes a new job onto the queue
     *
-    * @param  string $queue   Name of the queue
-    * @param  array  $payload Array of payload
-    * @param  array  $options Array of specific options
+    * @param string $queue   Name of the queue
+    * @param []     $payload Array of payload
+    * @param []     $options Array of connector specific options
+    *
     * @return mixed
     */
-    public function push($queue, array $payload, array $options = array());
+    public function push($queue, array $payload, array $options = []);
 
     /**
-    * Push a new job onto the queue after a delay
+    * Pushes a new job onto the queue after a delay
     *
-    * @param  string $queue   Name of the queue
-    * @param  int    $delay   Delay of job in seconds
-    * @param  array  $payload Array of payload
-    * @param  array  $options Array of specific options
+    * @param string  $queue   Name of the queue
+    * @param integer $delay   Delay of job in seconds
+    * @param []      $payload Array of payload
+    * @param []      $options Array of connector specific options
+    *
     * @return mixed
     */
-    public function delayed($queue, $delay, array $payload, array $options = array());
+    public function delayed($queue, $delay, array $payload, array $options = []);
 
     /**
-    * Pop the next job off of the queue
+    * Pops the next job off of the queue
     *
-    * @param  string       $queue   Name of the queue
-    * @param  integer      $timeout Wait timeout
+    * @param string  $queue   Name of the queue
+    * @param integer $timeout Wait timeout
+    *
     * @return JobInterface
+    *
+    * @throws NoJobFoundException If no job can be returned
     */
     public function pop($queue, $timeout = 0);
 
     /**
-     * Delete job from queue
+     * Returns the count of jobs
      *
-     * @param  JobInterface $job Job to delete
-     * @return boolean      Always true
+     * @return integer
+     */
+    public function count();
+
+    /**
+     * Deletes job from queue
+     *
+     * @param JobInterface $job Job to delete
+     *
+     * @return boolean Always true
      */
     public function delete(JobInterface $job);
 
     /**
-     * Release a job back to the queue
+     * Clears the queue
      *
-     * @param  JobInterface $job   Job to release
-     * @param  integer      $delay Delay the job with x seconds, 0 means no delay
-     * @return boolean      Always true
+     * @param string $queue
+     *
+     * @return boolean Always true
+     */
+    public function clear($queue);
+
+    /**
+     * Releases a job back to the queue
+     *
+     * @param JobInterface $job   Job to release
+     * @param integer      $delay Delay the job with x seconds, 0 means no delay
+     *
+     * @return boolean Always true
      */
     public function release(JobInterface $job, $delay = 0);
 }

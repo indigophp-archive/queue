@@ -13,75 +13,39 @@ namespace Indigo\Queue\Connector;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Abstract Connector class
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInterface
+abstract class AbstractConnector implements ConnectorInterface
 {
-    /**
-     * Logger instance
-     *
-     * @var LoggerInterface
-     */
-    protected $logger;
+    use \Psr\Log\LoggerAwareTrait;
 
     /**
      * Default job options
      *
-     * @var array
+     * @var []
      */
-    protected $jobOptions = array(
+    protected $options = [
         'delay'   => 0,
         'timeout' => 60,
-    );
+    ];
 
     /**
-     * Resolve job options
+     * Job class to be instantiated
      *
-     * @param  array $options
-     * @return array Resolved options
-     *
-     * @codeCoverageIgnore
+     * @var string
      */
-    protected function resolveJobOptions(array $options)
-    {
-        static $resolver;
-
-        if (!$resolver instanceof OptionsResolver) {
-            $resolver = new OptionsResolver;
-            $this->setDefaultJobOptions($resolver);
-        }
-
-        return $resolver->resolve($options);
-    }
+    protected $jobClass;
 
     /**
-     * Set default job options
-     *
-     * @param OptionsResolverInterface $resolver
-     *
-     * @codeCoverageIgnore
+     * Creates a new Connector
      */
-    protected function setDefaultJobOptions(OptionsResolverInterface $resolver)
+    public function __construct()
     {
-        $resolver->setDefaults($this->jobOptions)
-            ->setAllowedTypes(array_fill_keys(array_keys($this->jobOptions), 'integer'));
-    }
-
-    /**
-     * Sets a logger instance on the object
-     *
-     * @param LoggerInterface $logger
-     *
-     * @codeCoverageIgnore
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
+        $this->setLogger(new NullLogger);
     }
 }

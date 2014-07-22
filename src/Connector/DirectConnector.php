@@ -23,14 +23,6 @@ use Psr\Log\NullLogger;
 class DirectConnector extends AbstractConnector
 {
     /**
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        $this->logger = new NullLogger;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function isConnected()
@@ -74,7 +66,23 @@ class DirectConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
+    public function count($queue)
+    {
+        return 1;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function delete(JobInterface $job)
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clear($queue)
     {
         return true;
     }
