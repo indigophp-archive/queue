@@ -48,6 +48,8 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
                 'RabbitMQ connection not available.'
             );
         }
+
+        $this->connector->clear('test');
     }
 
     /**
