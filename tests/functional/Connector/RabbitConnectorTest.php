@@ -47,7 +47,7 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
     public function clear()
     {
         if ($this->connector->count('test') > 0) {
-            $this->connector->clear('test')
+            $this->connector->clear('test');
         }
     }
 
