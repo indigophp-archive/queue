@@ -3,10 +3,11 @@
 
 ## 2.0.0 (released )
 
-* Added RabbitMQ
-* Added IronMQ
+* Added RabbitMQ Connector
+* Added IronMQ Connector
 * Added Job class and JobInterface
-* Added codeception
+* Added Codeception
+* Added exceptions
 * Renamed connector specific jobs to managers
 * Improved tests by separating unit and functional tests
 * Improved code
