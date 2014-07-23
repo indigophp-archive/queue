@@ -33,22 +33,4 @@ abstract class AbstractConnectorTest extends Test
             })],
         ];
     }
-
-    /**
-     * Pushes all jobs in the provider to the queue at once
-     *
-     * @return Job[]
-     */
-    public function pushJobs()
-    {
-        $jobs = $this->jobProvider();
-
-        foreach ($jobs as $job) {
-            $job = reset($job);
-
-            $this->connector->push('test', $job);
-        }
-
-        return $jobs;
-    }
 }

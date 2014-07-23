@@ -17,13 +17,21 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
     }
 
     /**
-     * Makes sure the queue is empty
+     * Pushes all jobs in the provider to the queue at once
+     *
+     * @return Job[]
      */
-    public function clear()
+    public function pushJobs($queue = 'test')
     {
-        if ($this->connector->count('test') > 0) {
-            $this->connector->clear('test');
+        $jobs = $this->jobProvider();
+
+        foreach ($jobs as $job) {
+            $job = reset($job);
+
+            $this->connector->push($queue, $job);
         }
+
+        return $jobs;
     }
 
     /**
@@ -50,11 +58,13 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testCount()
     {
-        $this->connector->clear('test');
+        $this->connector->clear('test_count');
 
-        $jobs = $this->pushJobs();
+        $jobs = $this->pushJobs('test_count');
 
-        $this->assertEquals(count($jobs), $this->connector->count('test'));
+        $this->assertEquals(count($jobs), $this->connector->count('test_count'));
+
+        $this->connector->clear('test_count');
     }
 
     /**
@@ -62,8 +72,8 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testClear()
     {
-        $this->assertTrue($this->connector->clear('test'));
-        $this->assertEquals(0, $this->connector->count('test'));
+        $this->assertTrue($this->connector->clear('test_clear'));
+        $this->assertEquals(0, $this->connector->count('test_clear'));
     }
 
     /**
