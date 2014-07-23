@@ -68,9 +68,9 @@ class Worker implements LoggerAwareInterface
         }
 
         $this->queue = $queue;
+        $this->conector = $conector;
 
-        $this->setConnector($connector)
-            ->setLogger(new NullLogger);
+        $this->setLogger(new NullLogger);
     }
 
     /**
