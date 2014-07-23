@@ -12,12 +12,12 @@
 namespace Indigo\Queue\Exception;
 
 /**
- * Job Not Found Exception
+ * Invalid Job Exception
  *
  * Connectors should throw this exception if no job can be popped
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class JobNotFoundException extends \LogicException
+class InvalidJobException extends \InvalidArgumentException
 {
 }
