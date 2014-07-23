@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Indigo Queue package.
+ *
+ * (c) Indigo Development Team
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Indigo\Queue;
 
 use Jeremeamia\SuperClosure\SerializableClosure;
@@ -19,7 +28,7 @@ class QueueTest extends Test
     /**
      * Connector mock
      *
-     * @var ConnectorInterface
+     * @var Indigo\Queue\Connector\ConnectorInterface
      */
     protected $connector;
 

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Indigo Queue package.
+ *
+ * (c) Indigo Development Team
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Test\Unit;
 
 use Indigo\Queue\Job\ClosureJob;
@@ -20,7 +29,7 @@ class ClosureJobTest extends Test
     /**
      * Manager mock
      *
-     * @var ManagerInterface
+     * @var Indigo\Queue\Manager\ManagerInterface
      */
     protected $manager;
 
