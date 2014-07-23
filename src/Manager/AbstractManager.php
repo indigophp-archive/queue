@@ -102,10 +102,9 @@ abstract class AbstractManager implements ManagerInterface
      */
     public function execute()
     {
-        // Get payload here, so we can work with the same data
         $payload = $this->getPayload();
 
-        // Resolve job and delete on error
+        // Resolve job
         $job = $this->resolve($payload['job']);
 
         try {
@@ -113,8 +112,6 @@ abstract class AbstractManager implements ManagerInterface
             $execute = $job->execute($this);
 
             $this->log('debug', 'Job ' . $payload['job'] . ' finished');
-
-            // Try to delete the job if auto delete is enabled
             $this->autoDelete();
 
             return $execute;
