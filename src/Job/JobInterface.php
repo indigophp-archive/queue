@@ -22,13 +22,13 @@ use Indigo\Queue\Manager\ManagerInterface;
  */
 interface JobInterface
 {
-	/**
-	 * This is the execute callback
-	 *
-	 * @param ManagerInterface $manager
-	 *
-	 * @return mixed
-	 */
+    /**
+     * This is the execute callback
+     *
+     * @param ManagerInterface $manager
+     *
+     * @return mixed
+     */
     public function execute(ManagerInterface $manager);
 
     /**
