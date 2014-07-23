@@ -19,13 +19,13 @@ class BeanstalkdManagerTest extends AbstractManagerTest
     /**
      * Pheanstalk Job
      *
-     * @var Pheanstalk_Job
+     * @var Pheanstalk\Job
      */
     protected $pheanstalkJob;
 
     public function _before()
     {
-        $this->pheanstalkJob = \Mockery::mock('Pheanstalk_Job');
+        $this->pheanstalkJob = \Mockery::mock('Pheanstalk\\Job');
 
         $this->pheanstalkJob->shouldReceive('getData')
             ->andReturn(json_encode([]));

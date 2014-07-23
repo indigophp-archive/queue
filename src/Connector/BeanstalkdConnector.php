@@ -14,9 +14,9 @@ namespace Indigo\Queue\Connector;
 use Indigo\Queue\Manager\ManagerInterface;
 use Indigo\Queue\Job;
 use Indigo\Queue\Exception\QueueEmptyException;
-use Pheanstalk_Job;
-use Pheanstalk_PheanstalkInterface as PheanstalkInterface;
-use Pheanstalk_Exception_ServerException as ServerException;
+use Pheanstalk\Job as PheanstalkJob;
+use Pheanstalk\PheanstalkInterface;
+use Pheanstalk\Exception\ServerException;
 
 /**
  * Beanstalkd Connector
@@ -122,7 +122,7 @@ class BeanstalkdConnector extends AbstractConnector
     {
         $job = $this->pheanstalk->reserveFromTube($queue, $timeout);
 
-        if ($job instanceof Pheanstalk_Job) {
+        if ($job instanceof PheanstalkJob) {
             return new $this->managerClass($queue, $job, $this);
         }
 

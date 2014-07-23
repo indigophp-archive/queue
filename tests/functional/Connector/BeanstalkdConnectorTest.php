@@ -4,7 +4,7 @@ namespace Test\Functional;
 
 use Indigo\Queue\Connector\BeanstalkdConnector;
 use Indigo\Queue\Job;
-use Pheanstalk_Pheanstalk as Pheanstalk;
+use Pheanstalk\Pheanstalk;
 
 /**
  * Tests for BeanstalkdConnector

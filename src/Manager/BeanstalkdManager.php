@@ -12,8 +12,8 @@
 namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Connector\BeanstalkdConnector;
-use Pheanstalk_Job;
-use Pheanstalk_Pheanstalk as Pheanstalk;
+use Pheanstalk\Job as PheanstalkJob;
+use Pheanstalk\Pheanstalk;
 
 /**
  * Beanstalkd Manager
@@ -25,7 +25,7 @@ class BeanstalkdManager extends AbstractManager
     /**
      * Pheanstalk Job
      *
-     * @var Pheanstalk_Job
+     * @var PheanstalkJob
      */
     protected $pheanstalkJob;
 
@@ -33,10 +33,10 @@ class BeanstalkdManager extends AbstractManager
      * Creates a new BeanstalkdManager
      *
      * @param string              $queue
-     * @param Pheanstalk_Job      $job
+     * @param PheanstalkJob      $job
      * @param BeanstalkdConnector $connector
      */
-    public function __construct($queue, Pheanstalk_Job $job, BeanstalkdConnector $connector)
+    public function __construct($queue, PheanstalkJob $job, BeanstalkdConnector $connector)
     {
         $this->pheanstalkJob = $job;
         $this->payload = json_decode($job->getData(), true);
@@ -57,7 +57,7 @@ class BeanstalkdManager extends AbstractManager
     /**
      * Returns the Pheanstalk Job
      *
-     * @return Pheanstalk_Job
+     * @return PheanstalkJob
      */
     public function getPheanstalkJob()
     {

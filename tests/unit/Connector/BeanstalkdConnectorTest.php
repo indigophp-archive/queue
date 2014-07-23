@@ -18,7 +18,7 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
 {
     public function _before()
     {
-        $pheanstalk = \Mockery::mock('Pheanstalk_Pheanstalk');
+        $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
 
         $this->connector = new BeanstalkdConnector($pheanstalk);
     }
@@ -28,7 +28,7 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
      */
     public function testConstruct()
     {
-        $pheanstalk = \Mockery::mock('Pheanstalk_Pheanstalk');
+        $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
 
         $connector = new BeanstalkdConnector($pheanstalk);
 
@@ -54,7 +54,7 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
      */
     public function testPheanstalk()
     {
-        $pheanstalk = \Mockery::mock('Pheanstalk_Pheanstalk');
+        $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
 
         $this->assertSame($this->connector, $this->connector->setPheanstalk($pheanstalk));
 
