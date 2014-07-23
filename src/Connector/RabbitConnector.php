@@ -256,7 +256,7 @@ class RabbitConnector extends AbstractConnector
     {
         $queue = $this->queueDeclare($queue);
 
-        return $queue[1];
+        return (int) $queue[1];
     }
 
     /**
