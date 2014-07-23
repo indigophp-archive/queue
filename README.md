@@ -6,6 +6,7 @@
 [![Total Downloads](https://poser.pugx.org/indigophp/queue/downloads.png)](https://packagist.org/packages/indigophp/queue)
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=83208d2af7fe392c2942a17fd1f2641fb0f9032d)](https://scrutinizer-ci.com/g/indigophp/queue/)
 [![License](https://poser.pugx.org/indigophp/queue/license.png)](https://packagist.org/packages/indigophp/queue)
+[![Dependency Status](http://www.versioneye.com/user/projects/53cd7ce82254268535000153/badge.svg?style=flat)](http://www.versioneye.com/user/projects/53cd7ce82254268535000153)
 
 **Indigo Queue manages your queues and processes the jobs you put onto them.**
 
@@ -25,7 +26,13 @@ Via Composer
 
 ## Usage
 
-First of all you have decide which MQ do you want to use. Currently there is only one supported ([Beanstalkd](http://kr.github.io/beanstalkd/)), but I plan to implement more (RabbitMQ, AWS, ZeroMQ, etc). There is also a special implementation, where to job is not sent to a queue, but executed immediately.
+First of all you have decide which MQ do you want to use. Currently supported MQs:
+
+* [Beanstalkd](http://kr.github.io/beanstalkd/)
+* [RabbitMQ](http://www.rabbitmq.com/)
+* [IronMQ](http://www.iron.io/)
+
+There is also a special implementation, where to job is not sent to a queue, but executed immediately.
 
 ### Connector
 
@@ -59,7 +66,7 @@ This connector does what you think: Executes the pushed job immediately. You can
 ## Testing
 
 ``` bash
-$ phpunit
+$ codecept run
 ```
 
 

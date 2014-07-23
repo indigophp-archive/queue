@@ -1,7 +1,7 @@
 <?php
 
 use Indigo\Queue\Connector\BeanstalkdConnector;
-use Pheanstalk_Pheanstalk as Pheanstalk;
+use Pheanstalk\Pheanstalk;
 use Indigo\Queue\Worker;
 
 $pheanstalk = new Pheanstalk('localhost', 11300);

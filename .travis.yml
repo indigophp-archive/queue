@@ -1,8 +1,7 @@
 language: php
 php:
-  - 5.5
   - 5.4
-  - 5.3
+  - 5.5
 
 services:
   - rabbitmq
@@ -12,7 +11,7 @@ env:
   - secure: TBB0a5aZ3Avc0hKKQejo1zWAacQzEUL4c6Mf8EZqlJWrnEsQCCFXakJCnd3aHZfY8nwZD3WiMvpYkUgA+cfH2dtxsEgt50OMxHErqEZMd3yXhfX9IUcvHAGTImKxOsKKK7YqdKlsagTNxm1SEBe2x9dUxFCPkpzwFASV/Y+W6OA=
   - secure: G1LKnhmpUc/6QltI+90kcrmqvxW1Teb082qykvonsRqu8pjNBrK2qZRiCpSUD9c74JMNZDx3Vc8UnFK5A3A8ikJj5O5yoQRlZoMtqVWizpMYwulUxG4Bp/7HxWF/X8YaN9c1cF04F1G1Y4SKgy/VWf4PQFTBIQPH82RXJmYfL8M=
 
-script: phpunit -v --coverage-clover=coverage.clover
+script: vendor/bin/codecept run --coverage-xml
 
 before_script:
   - sudo apt-get update -qq
@@ -22,11 +21,7 @@ before_script:
   - sudo rabbitmqctl add_user queue_user queue_pass
   - sudo rabbitmqctl set_permissions -p queue_vhost queue_user ".*" ".*" ".*"
   - wget https://scrutinizer-ci.com/ocular.phar
-  - composer install --dev --prefer-source
+  - composer install --prefer-source
 
 after_script:
-  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
-
-notifications:
-    webhooks:
-        secure: "WAiPtlSj+7PU4w26TvOstBJyHrAJ30B/bZxvW/LD0e3iaEzdS6GJNReH/o+zZrUJgnHB4bu+Kn/rEMlCFUPAGPLDK7uU1HCHe7LDPzPJdWwo8gFZoy0wu1ZPuKzApZddb7Z4Nhzgsax3YwtRK5pkqX5FOl1WOPw3hFSslZrr0mc="
+  - php ocular.phar code-coverage:upload --format=php-clover tests/_output/coverage.xml

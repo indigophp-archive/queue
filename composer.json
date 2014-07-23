@@ -1,27 +1,26 @@
 {
     "name": "indigophp/queue",
-    "type": "library",
     "description": "Manage work queues with PHP",
+    "license": "MIT",
     "keywords": ["queue", "worker", "job"],
     "homepage": "https://indigophp.com",
-    "license": "MIT",
     "authors": [
         {
-            "name": "Sági-Kazár Márk",
+            "name": "Márk Sági-Kazár",
             "email": "mark.sagikazar@gmail.com"
         }
     ],
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.4.0",
         "psr/log": "~1.0",
-        "jeremeamia/SuperClosure": "1.0.1",
-        "symfony/options-resolver": "v2.4.0"
+        "jeremeamia/SuperClosure": "~1.0.0"
     },
     "require-dev": {
-        "pda/pheanstalk": "2.1.0",
-        "videlalvaro/php-amqplib": "2.2.*",
-        "iron-io/iron_mq": "1.4.8",
-        "mockery/mockery": "dev-master@dev"
+        "pda/pheanstalk": "~3.0.0",
+        "videlalvaro/php-amqplib": "~2.4.0",
+        "iron-io/iron_mq": "~1.5.0",
+        "codeception/codeception": "~2.0.0",
+        "codeception/mockery-module": "dev-master"
     },
     "suggest": {
         "pda/pheanstalk": "PHP client for beanstalkd queue",
@@ -29,6 +28,10 @@
         "iron-io/iron_mq": "Client binding for IronMQ (hosted message queue)"
     },
     "autoload": {
-        "psr-0": {"Indigo\\Queue": "src/"}
-    }
+        "psr-4": {
+            "Indigo\\Queue\\": "src/"
+        }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
 }
