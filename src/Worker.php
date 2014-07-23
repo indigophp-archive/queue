@@ -14,11 +14,10 @@ namespace Indigo\Queue;
 use Indigo\Queue\Connector\ConnectorInterface;
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Connector\DirectConnector;
+use Indigo\Queue\Exception\JobNotFoundException;
+use Indigo\Queue\Exception\QueueEmptyException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
-use Indigo\Queue\Exception\QueueEmptyException;
-use Exception;
-use InvalidArgumentException;
 
 /**
  * Worker class
@@ -27,7 +26,7 @@ use InvalidArgumentException;
  *
  * @codeCoverageIgnore
  */
-class Worker
+class Worker implements LoggerAwareInterface
 {
     use \Psr\Log\LoggerAwareTrait;
 
@@ -65,7 +64,7 @@ class Worker
     public function __construct($queue, ConnectorInterface $connector)
     {
         if ($connector instanceof DirectConnector) {
-            throw new InvalidArgumentException('DirectConnector should not be used in a Worker');
+            throw new \InvalidArgumentException('DirectConnector should not be used in a Worker');
         }
 
         $this->queue = $queue;
@@ -85,8 +84,8 @@ class Worker
         while (true) {
             // Process the current job if available
             // or sleep for a certain time
-            if ($job = $this->getJob($timeout)) {
-                $job->execute();
+            if ($manager = $this->getManager($timeout)) {
+                $manager->execute();
             } elseif ($interval > 0) {
                 $this->sleep($interval);
             }
@@ -103,8 +102,8 @@ class Worker
     public function work($timeout = 0)
     {
         // Only run when valid job object returned
-        if ($job = $this->getJob($timeout)) {
-            return $job->execute();
+        if ($manager = $this->getManager($timeout)) {
+            return $manager->execute();
         }
     }
 
@@ -113,21 +112,25 @@ class Worker
      *
      * @param integer $timeout Wait timeout for pop
      *
-     * @return ManagerInterface Returns null if $job is not a valid JobIterface
+     * @return ManagerInterface Returns null if $manager is not a valid ManagerIterface
      */
-    protected function getJob($timeout = 0)
+    protected function getManager($timeout = 0)
     {
         try {
-            $job = $this->connector->pop($this->queue, $timeout);
+            $manager = $this->connector->pop($this->queue, $timeout);
+        } catch (JobNotFoundException $e) {
+            $this->connector->delete($manager);
+
+            return false;
         } catch (QueueEmptyException $e) {
             return false;
         }
 
-        if ($job instanceof LoggerAwareInterface) {
-            $job->setLogger($this->logger);
+        if ($manager instanceof LoggerAwareInterface) {
+            $manager->setLogger($this->logger);
         }
 
-        return $job;
+        return $manager;
     }
 
     /**

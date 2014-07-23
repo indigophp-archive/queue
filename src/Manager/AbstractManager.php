@@ -106,13 +106,7 @@ abstract class AbstractManager implements ManagerInterface
         $payload = $this->getPayload();
 
         // Resolve job and delete on error
-        try {
-            $job = $this->resolve($payload['job']);
-        } catch (JobNotFoundException $e) {
-            $this->connector->delete($this);
-
-            return false;
-        }
+        $job = $this->resolve($payload['job']);
 
         try {
             // Here comes the funny part: execute the job
@@ -127,9 +121,7 @@ abstract class AbstractManager implements ManagerInterface
         } catch (\Exception $e) {
             $failure = $job->fail($this, $e);
 
-            if ($failure === false) {
-                $this->failureCallback();
-            }
+            $this->failureCallback($failure);
         }
     }
 
@@ -147,8 +139,11 @@ abstract class AbstractManager implements ManagerInterface
         if (class_exists($class) === false) {
             $message = 'Job ' . $class . ' is not found.';
 
-            throw new JobNotFoundException($message);
             $this->log('error', $message);
+
+            throw new JobNotFoundException($message);
+        } elseif (is_subclass_of($class, 'Indigo\\Queue\\Job\\JobInterface') === false) {
+            throw new InvalidJobException($class . 'is not a subclass of Indigo\\Queue\\Job\\JobInterface');
         }
 
         $job = new $class;
@@ -163,13 +158,15 @@ abstract class AbstractManager implements ManagerInterface
     /**
      * Failure callback is not present or returned false
      *
+     * @param boolean $failure Failure function return value
+     *
      * @return boolean
      *
      * @codeCoverageIgnore
      */
-    protected function failureCallback()
+    protected function failureCallback($failure)
     {
-        return $this->autoRetry() or $this->autoDelete();
+        return $failure === false and $this->autoRetry() or $this->autoDelete();
     }
 
     /**
