@@ -39,8 +39,16 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
                 'RabbitMQ connection not available.'
             );
         }
+    }
 
-        $this->connector->clear('test');
+    /**
+     * Makes sure the queue is empty
+     */
+    public function clear()
+    {
+        if ($this->connector->count('test') > 0) {
+            $this->connector->clear('test')
+        }
     }
 
     /**
@@ -78,6 +86,32 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
     public function testEmptyPop()
     {
         $this->connector->pop('test');
+    }
+
+    /**
+     * @covers ::count
+     */
+    public function testCount()
+    {
+        $this->clear();
+
+        $jobs = $this->pushJobs();
+
+        $this->assertEquals(count($jobs), $this->connector->count('test'));
+    }
+
+    /**
+     * @covers ::clear
+     */
+    public function testClear()
+    {
+        $this->clear();
+
+        $jobs = $this->pushJobs();
+
+        $this->assertEquals(count($jobs), $this->connector->count('test'));
+        $this->assertTrue($this->connector->clear('test'));
+        $this->assertEquals(0, $this->connector->count('test'));
     }
 
     /**
