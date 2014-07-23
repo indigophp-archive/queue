@@ -1,8 +1,9 @@
 <?php
 
 use Indigo\Queue\Job\JobInterface;
+use Indigo\Queue\Manager\ManagerInterface;
 
-class AdvancedJob
+class AdvancedJob implements JobInterface
 {
     protected $data;
 
@@ -21,23 +22,9 @@ class AdvancedJob
          * Autodelete job if success or failed and retry is disabled or reached max attempts.
          */
         'delete' => false,
-
-        /**
-         * Autobury job if failed and retry is disabled or reached max attempts.
-         * Bury is higher than delete, so after failing worker will first bury it, if can.
-         */
-        'bury' => true,
     );
 
-    // This is optional, but if your job has a constructor,
-    // it must follow this implementation
-    public function __construct(JobInterface $job, array $data)
-    {
-        $this->data = $data;
-    }
-
-    // See Queue example for name usage
-    public function exec(JobInterface $job, array $data)
+    public function execute(ManagerInterface $manager)
     {
         // Do something
         throw new \Exception('Testing exceptions');
@@ -47,8 +34,7 @@ class AdvancedJob
         $job->delete();
     }
 
-    // See Queue example for name usage
-    public function fail(JobInterface $job, \Exception $e, array $data)
+    public function fail(ManagerInterface $manager, \Exception $e)
     {
         $job->delete();
         // DON'T DO THIS

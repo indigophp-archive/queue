@@ -1,19 +1,11 @@
 <?php
 
 use Indigo\Queue\Job\JobInterface;
+use Indigo\Queue\Manager\ManagerInterface;
 
-class SimpleJob
+class SimpleJob implements JobInterface
 {
-    protected $data;
-
-    // This is optional, but if your job has a constructor,
-    // it must follow this implementation
-    public function __construct(JobInterface $job, array $data)
-    {
-        $this->data = $data;
-    }
-
-    public function execute(JobInterface $job, array $data)
+    public function execute(ManagerInterface $manager)
     {
         // Do something
 
@@ -22,7 +14,7 @@ class SimpleJob
         return true;
     }
 
-    public function failure(JobInterface $job, \Exception $e, array $data)
+    public function fail(ManagerInterface $manager, \Exception $e)
     {
         // Return has a special meaning
         // In case of false, worker will try to autorelease/bury/delete your job
