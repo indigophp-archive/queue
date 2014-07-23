@@ -19,11 +19,6 @@ abstract class AbstractConnectorTest extends Test
      */
     protected $connector;
 
-    public function _after()
-    {
-        $this->connector->clear('test');
-    }
-
     /**
      * Provides jobs
      *

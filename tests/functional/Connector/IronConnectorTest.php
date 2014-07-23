@@ -46,6 +46,8 @@ class IronConnectorTest extends AbstractMQConnectorTest
         $iron->ssl_verifypeer = false;
 
         $this->connector = new IronConnector($iron);
+
+        $this->connector->clear('test');
     }
 
     /**

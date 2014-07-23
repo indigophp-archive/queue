@@ -11,6 +11,21 @@ use Indigo\Queue\Job;
  */
 abstract class AbstractMQConnectorTest extends AbstractConnectorTest
 {
+    public function _after()
+    {
+        $this->connector->clear('test');
+    }
+
+    /**
+     * Makes sure the queue is empty
+     */
+    public function clear()
+    {
+        if ($this->connector->count('test') > 0) {
+            $this->connector->clear('test');
+        }
+    }
+
     /**
      * @covers       ::pop
      * @covers       ::delete
@@ -35,6 +50,8 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testCount()
     {
+        $this->clear();
+
         $jobs = $this->pushJobs();
 
         $this->assertEquals(count($jobs), $this->connector->count('test'));
@@ -45,6 +62,8 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testClear()
     {
+        $this->clear();
+
         $jobs = $this->pushJobs();
 
         $this->assertEquals(count($jobs), $this->connector->count('test'));

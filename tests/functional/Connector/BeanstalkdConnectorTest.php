@@ -32,7 +32,11 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
             $this->markTestSkipped(
                 'Beanstalkd connection not available.'
             );
+
+            return;
         }
+
+        $this->connector->clear('test');
     }
 
     /**
