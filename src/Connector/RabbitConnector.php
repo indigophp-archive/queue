@@ -274,6 +274,8 @@ class RabbitConnector extends AbstractConnector
      */
     public function clear($queue)
     {
+        $this->queueDeclare($queue);
+
         $this->channel->queue_purge($queue);
 
         return true;
