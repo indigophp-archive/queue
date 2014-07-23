@@ -11,6 +11,8 @@ use Codeception\TestCase\Test;
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
  * @coversDefaultClass Indigo\Queue\Queue
+ * @group              Queue
+ * @group              Main
  */
 class QueueTest extends Test
 {
@@ -32,18 +34,13 @@ class QueueTest extends Test
     {
         $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
 
-        $this->connecotr->shouldReceive('push')
-            ->andReturn(null);
-
-        $this->connecotr->shouldReceive('delayed')
-            ->andReturn(null);
-
         $this->queue = new Queue('test', $this->connector);
     }
 
     /**
      * @covers ::__construct
      * @group  Queue
+     * @group  Main
      */
     public function testConstruct()
     {
@@ -57,6 +54,7 @@ class QueueTest extends Test
      * @covers ::getQueue
      * @covers ::__toString
      * @group  Queue
+     * @group  Main
      */
     public function testQueue()
     {
@@ -68,6 +66,7 @@ class QueueTest extends Test
      * @covers ::getConnector
      * @covers ::setConnector
      * @group  Queue
+     * @group  Main
      */
     public function testConnector()
     {
@@ -78,9 +77,13 @@ class QueueTest extends Test
     /**
      * @covers ::push
      * @group  Queue
+     * @group  Main
      */
     public function testPush()
     {
+        $this->connector->shouldReceive('push')
+            ->andReturn(null);
+
         $job = \Mockery::mock('Indigo\\Queue\\Job');
 
         $this->assertNull($this->queue->push($job));
@@ -89,9 +92,13 @@ class QueueTest extends Test
     /**
      * @covers ::delayed
      * @group  Queue
+     * @group  Main
      */
     public function testDelayed()
     {
+        $this->connector->shouldReceive('delayed')
+            ->andReturn(null);
+
         $job = \Mockery::mock('Indigo\\Queue\\Job');
 
         $this->assertNull($this->queue->delayed(0, $job));

@@ -11,54 +11,33 @@
 
 namespace Indigo\Queue\Job;
 
+use Indigo\Queue\Manager\ManagerInterface;
+
 /**
- * Job Inteface
+ * Job interface
+ *
+ * Generic interface for jobs
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
 interface JobInterface
 {
-    /**
-    * Execute the job.
-    *
-    * @return mixed Job return value
-    */
-    public function execute();
+	/**
+	 * This is the execute callback
+	 *
+	 * @param ManagerInterface $manager
+	 *
+	 * @return mixed
+	 */
+    public function execute(ManagerInterface $manager);
 
     /**
-    * Get the number of times the job has been attempted to execute.
-    *
-    * @return integer
-    */
-    public function attempts();
-
-    /**
-     * Return the payload
+     * This is the failure callback
      *
-     * @return array Payload array
-     */
-    public function getPayload();
-
-    /**
-     * Set the payload
+     * @param ManagerInterface $manager
+     * @param Exception        $e Any exceptions thrown during execution
      *
-     * @param  array        $payload Payload array
-     * @return JobInterface
+     * @return mixed
      */
-    public function setPayload(array $payload);
-
-    /**
-     * Get the queue name
-     *
-     * @return string
-     */
-    public function getQueue();
-
-    /**
-     * Set the queue name
-     *
-     * @param  string       $queue
-     * @return JobInterface
-     */
-    public function setQueue($queue);
+    public function fail(ManagerInterface $manager, \Exception $e = null);
 }

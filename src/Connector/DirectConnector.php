@@ -11,17 +11,24 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Job\JobInterface;
-use Indigo\Queue\Job\DirectJob;
-use Psr\Log\NullLogger;
+use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Job;
+use Indigo\Queue\Exception\QueueEmptyException;
 
 /**
- * Direct driver for running jobs immediately
+ * Direct Connector for running jobs immediately
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
 class DirectConnector extends AbstractConnector
 {
+    /**
+     * Last added job
+     *
+     * @var Job
+     */
+    protected $job;
+
     /**
      * {@inheritdoc}
      */
@@ -33,34 +40,38 @@ class DirectConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function push($queue, array $payload = array(), array $options = array())
+    public function push($queue, Job $job)
     {
-        $job = $this->pop($queue, null, $payload);
+        $this->job = $job;
 
-        $job->execute();
+        $manager = $this->pop($queue);
 
-        return $job;
+        return $manager->execute();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delayed($queue, $delay, array $payload = array(), array $options = array())
+    public function delayed($queue, $delay, Job $job)
     {
         sleep($delay);
 
-        return $this->push($queue, $payload, $options);
+        return $this->push($queue, $job);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function pop($queue, $timeout = 0, array $payload = array())
+    public function pop($queue, $timeout = 0)
     {
-        $job = new DirectJob($payload, $this);
-        $job->setQueue($queue);
+        if ($this->job === null) {
+            throw new QueueEmptyException($queue);
+        }
 
-        return $job;
+        $payload = $this->job->createPayload();
+        $this->job = null;
+
+        return new $this->managerClass($queue, $payload, $this);
     }
 
     /**
@@ -74,7 +85,7 @@ class DirectConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function delete(JobInterface $job)
+    public function delete(ManagerInterface $manager)
     {
         return true;
     }
@@ -90,7 +101,7 @@ class DirectConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function release(JobInterface $job, $delay = 0)
+    public function release(ManagerInterface $manager, $delay = 0)
     {
         return true;
     }

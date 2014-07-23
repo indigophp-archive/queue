@@ -35,17 +35,33 @@ abstract class AbstractConnector implements ConnectorInterface
     ];
 
     /**
-     * Job class to be instantiated
+     * Manager class to be instantiated
      *
      * @var string
      */
-    protected $jobClass;
+    protected $managerClass;
 
     /**
      * Creates a new Connector
+     *
+     * @codeCoverageIgnore
      */
     public function __construct()
     {
         $this->setLogger(new NullLogger);
+
+        if (empty($this->managerClass)) {
+            $this->managerClass = str_replace('Connector', 'Manager', get_called_class());
+        }
+    }
+
+    /**
+     * Returns the manager class for connector
+     *
+     * @return string
+     */
+    public function getManagerClass()
+    {
+        return $this->managerClass;
     }
 }

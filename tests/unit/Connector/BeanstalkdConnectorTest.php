@@ -1,128 +1,92 @@
 <?php
 
-namespace Indigo\Queue\Test\Connector;
+namespace Test\Unit;
 
 use Indigo\Queue\Connector\BeanstalkdConnector;
-use Indigo\Queue\Job\BeanstalkdJob;
-use Pheanstalk_Pheanstalk as Pheanstalk;
 
 /**
- * Tests for Beanstalkd Connector
+ * Tests for BeanstalkdConnector
  *
- * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass  Indigo\Queue\Connector\BeanstalkdConnector
+ * @coversDefaultClass Indigo\Queue\Connector\BeanstalkdConnector
+ * @group              Queue
+ * @group              Connector
+ * @group              Beanstalkd
  */
-class BeanstalkdConnectorTest extends ConnectorTest
+class BeanstalkdConnectorTest extends AbstractConnectorTest
 {
-    public function setUp()
+    public function _before()
     {
-        $host = isset($GLOBALS['beanstalkd_host']) ? $GLOBALS['beanstalkd_host'] : 'localhost';
-        $port = isset($GLOBALS['beanstalkd_port']) ? $GLOBALS['beanstalkd_port'] : 11300;
-
-        $pheanstalk = new Pheanstalk($host, $port);
+        $pheanstalk = \Mockery::mock('Pheanstalk_Pheanstalk');
 
         $this->connector = new BeanstalkdConnector($pheanstalk);
+    }
 
-        if (!$this->connector->isConnected()) {
-            $this->markTestSkipped(
-                'Beanstalkd connection not available.'
-            );
-        }
+    /**
+     * @covers ::__construct
+     */
+    public function testConstruct()
+    {
+        $pheanstalk = \Mockery::mock('Pheanstalk_Pheanstalk');
+
+        $connector = new BeanstalkdConnector($pheanstalk);
+
+        $this->assertSame($pheanstalk, $connector->getPheanstalk());
+    }
+
+    /**
+     * @covers ::isConnected
+     */
+    public function testConnection()
+    {
+        $pheanstalk = $this->connector->getPheanstalk();
+
+        $pheanstalk->shouldReceive('getConnection->isServiceListening')
+            ->andReturn(true);
+
+        $this->assertTrue($this->connector->isConnected());
     }
 
     /**
      * @covers ::getPheanstalk
      * @covers ::setPheanstalk
-     * @group  Queue
      */
     public function testPheanstalk()
     {
+        $pheanstalk = \Mockery::mock('Pheanstalk_Pheanstalk');
+
+        $this->assertSame($this->connector, $this->connector->setPheanstalk($pheanstalk));
+
+        $this->assertSame($pheanstalk, $this->connector->getPheanstalk());
+    }
+
+    /**
+     * @covers                   ::pop
+     * @covers                   Indigo\Queue\Exception\QueueEmptyException
+     * @expectedException        Indigo\Queue\Exception\QueueEmptyException
+     * @expectedExceptionMessage Queue test is empty.
+     */
+    public function testEmptyPop()
+    {
         $pheanstalk = $this->connector->getPheanstalk();
 
-        $this->assertInstanceOf('Pheanstalk_Pheanstalk', $pheanstalk);
+        $pheanstalk->shouldReceive('reserveFromTube')
+            ->andReturn(null);
 
-        $this->assertEquals(
-            $this->connector,
-            $this->connector->setPheanstalk($pheanstalk)
-        );
+        $this->connector->pop('test');
     }
 
     /**
-     * @covers       ::push
-     * @dataProvider payloadProvider
-     * @group        Queue
+     * @covers ::count
      */
-    public function testPush($payload)
+    public function testCount()
     {
-        $push = $this->connector->push('test', $payload);
-        $this->assertTrue(is_int($push));
-    }
+        $pheanstalk = $this->connector->getPheanstalk();
 
-    /**
-     * @covers       ::delayed
-     * @covers       ::push
-     * @dataProvider payloadProvider
-     * @group        Queue
-     */
-    public function testDelayed($payload)
-    {
-        $payload = $this->connector->delayed('test', 100, $payload);
-        $this->assertTrue(is_int($payload));
-    }
+        $pheanstalk->shouldReceive('statsTube')
+            ->andReturn(['current-jobs-ready' => 1]);
 
-    /**
-     * @covers       ::pop
-     * @covers       ::delete
-     * @covers       ::bury
-     * @dataProvider payloadProvider
-     * @group        Queue
-     */
-    public function testPop($payload)
-    {
-        $queue = 'test_pop_' . uniqid();
-        $this->connector->push($queue, $payload);
-
-        if ($job = $this->connector->pop($queue)) {
-            $this->assertInstanceOf(
-                'Indigo\\Queue\\Job\\BeanstalkdJob',
-                $job
-            );
-
-            $this->assertEquals($payload, $job->getPayload());
-
-            if ($payload['job'] == 'Job@runThis') {
-                $this->assertTrue($this->connector->delete($job));
-            } else {
-                $this->assertTrue($this->connector->bury($job));
-            }
-        } else {
-            $this->assertNull($job);
-        }
-
-        $this->assertNull($this->connector->pop('null'));
-    }
-
-    /**
-     * @covers       ::pop
-     * @covers       ::release
-     * @dataProvider payloadProvider
-     * @group        Queue
-     */
-    public function testRelease($payload)
-    {
-        $queue = 'test_release_' . uniqid();
-        $this->connector->push($queue, $payload);
-
-        if ($job = $this->connector->pop($queue)) {
-            $this->assertInstanceOf(
-                'Indigo\\Queue\\Job\\BeanstalkdJob',
-                $job
-            );
-
-            $this->assertTrue($this->connector->release($job));
-        } else {
-            $this->assertNull($job);
-        }
+        $this->assertEquals(1, $this->connector->count('test'));
     }
 }

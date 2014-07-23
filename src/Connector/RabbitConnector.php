@@ -11,14 +11,12 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Job\JobInterface;
-use Indigo\Queue\Job\RabbitJob;
-use PhpAmqpLib\Connection\AbstractConnection;
+use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Job;
+use Indigo\Queue\Exception\QueueEmptyException;
+use PhpAmqpLib\Connection\AbstractConnection as AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
-use Psr\Log\NullLogger;
 
 /**
  * Rabbit connector
@@ -49,101 +47,29 @@ class RabbitConnector extends AbstractConnector
     protected $persistent = true;
 
     /**
-     * Message options
+     * Creates a new RabbitConnector
      *
-     * @var array
+     * @param AMQPConnection $amqp
+     * @param boolean        $persistent
      */
-    protected $messageOptions = array(
-        "content_type"        => "string",
-        "content_encoding"    => "string",
-        "application_headers" => "array",
-        "delivery_mode"       => "integer",
-        "priority"            => "integer",
-        "correlation_id"      => "string",
-        "reply_to"            => "string",
-        "expiration"          => "string",
-        "message_id"          => "string",
-        "timestamp"           => "string",
-        "type"                => "string",
-        "user_id"             => "string",
-        "app_id"              => "string",
-        "cluster_id"          => "string"
-    );
-
-    /**
-     * Message resolver
-     *
-     * @var OptionsResolverInterface
-     */
-    protected $messageResolver;
-
-    /**
-     * @codeCoverageIgnore
-     */
-    public function __construct(AbstractConnection $amqp, $persistent = true)
+    public function __construct(AMQPConnection $amqp, $persistent = true)
     {
         $this->amqp       = $amqp;
-        $this->logger     = new NullLogger;
         $this->persistent = $persistent;
 
         $this->regenerateChannel();
+
+        parent::__construct();
     }
 
     /**
-     * Resolve AMQPMessage options
-     *
-     * @param  array $options
-     * @return array Resolved options
-     *
-     * @codeCoverageIgnore
-     */
-    protected function resolveMessageOptions(array $options)
-    {
-        static $resolver;
-
-        if (!$resolver instanceof OptionsResolver) {
-            $resolver = new OptionsResolver;
-            $this->setDefaultMessageOptions($resolver);
-        }
-
-        return $resolver->resolve($options);
-    }
-
-    /**
-     * Set default message options
-     *
-     * @param OptionsResolverInterface $resolver
-     *
-     * @codeCoverageIgnore
-     */
-    protected function setDefaultMessageOptions(OptionsResolverInterface $resolver)
-    {
-        $resolver->setOptional(array_keys($this->messageOptions));
-        $resolver->setAllowedTypes($this->messageOptions);
-        $resolver->setDefaults(array(
-            'delivery_mode' => 2,
-        ));
-    }
-
-    /**
-     * Check whether persistent queues and exchanges are used
+     * Checks whether persistent queues and exchanges are used
      *
      * @return boolean
      */
     public function isPersistent()
     {
         return $this->persistent;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     */
-    public function __destruct()
-    {
-        if ($this->isConnected()) {
-            // $this->channel->close();
-            // $this->amqp->close();
-        }
     }
 
     /**
@@ -155,18 +81,66 @@ class RabbitConnector extends AbstractConnector
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the AMQP object
+     *
+     * @return AMQPConnection
      */
-    public function push($queue, array $payload, array $options = array())
+    public function getAMQP()
     {
-        $msg = $this->prepareMessage($queue, $payload, $options);
-        $this->channel->basic_publish($msg, '', $queue);
+        return $this->amqp;
+    }
+
+    /**
+     * Sets AMQP object
+     *
+     * @param AMQPConnection $amqp
+     *
+     * @return this
+     */
+    public function setAMQP(AMQPConnection $amqp)
+    {
+        $this->amqp = $amqp;
+
+        return $this;
+    }
+
+    /**
+     * Returns a channel
+     *
+     * @return AMQPChannel
+     */
+    public function getChannel()
+    {
+        return $this->channel;
+    }
+
+    /**
+     * Regenerates a channel
+     *
+     * @return AMQPChannel Old channel
+     */
+    public function regenerateChannel()
+    {
+        $channel = $this->channel;
+        $this->channel = $this->amqp->channel();
+
+        return $channel;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delayed($queue, $delay, array $payload, array $options = array())
+    public function push($queue, Job $job)
+    {
+        $msg = $this->prepareMessage($queue, $job);
+
+        return $this->channel->basic_publish($msg, '', $queue);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delayed($queue, $delay, Job $job)
     {
         $this->exchangeDeclare('delay');
 
@@ -184,28 +158,41 @@ class RabbitConnector extends AbstractConnector
 
         $this->channel->queue_bind($queue, 'delay', $queue);
 
-        $msg = $this->prepareMessage($queue, $payload, $options);
-        $this->channel->basic_publish($msg, '', $tmpQueue);
+        $msg = $this->prepareMessage($queue, $job);
+
+        return $this->channel->basic_publish($msg, '', reset($tmpQueue));
     }
 
     /**
+     * Prepares a message
+     *
+     * @param string $queue
+     * @param Job    $job
+     *
+     * @return AMQPMessage
+     *
      * @codeCoverageIgnore
      */
-    private function prepareMessage($queue, array $payload, array $options = array())
+    protected function prepareMessage($queue, Job $job)
     {
-        $options = $this->resolveMessageOptions($options);
-
         $this->queueDeclare($queue);
 
-        return new AMQPMessage(json_encode($payload), $options);
+        return new AMQPMessage(json_encode($job->createPayload()), $job->getOptions());
     }
 
     /**
+     * Declares a new queue
+     *
+     * @param string $queue
+     * @param []     $arguments
+     *
+     * @return mixed
+     *
      * @codeCoverageIgnore
      */
-    public function queueDeclare($queue = '', array $arguments = array())
+    protected function queueDeclare($queue = '', array $arguments = [])
     {
-        $queue = $this->channel->queue_declare(
+        return $this->channel->queue_declare(
             $queue,
             false,
             $this->persistent,
@@ -214,16 +201,19 @@ class RabbitConnector extends AbstractConnector
             false,
             $arguments
         );
-
-        return reset($queue);
     }
 
     /**
+     * Declares a new exchange
+     *
+     * @param string $exchange
+     * @param string $type
+     *
      * @codeCoverageIgnore
      */
     protected function exchangeDeclare($exchange, $type = 'direct')
     {
-        $this->channel->exchange_declare(
+        return $this->channel->exchange_declare(
             $exchange,
             $type,
             false,
@@ -239,30 +229,42 @@ class RabbitConnector extends AbstractConnector
     {
         $this->queueDeclare($queue);
 
-        $job = $this->channel->basic_get($queue);
+        $message = $this->channel->basic_get($queue);
+
+        // @codeCoverageIgnoreStart
         if ($timeout > 0) {
             $start = microtime(true);
 
-            while (is_null($job) and $timeout > microtime(true) - $start) {
+            while (is_null($message) and $timeout > microtime(true) - $start) {
                 sleep(1);
-                $job = $this->channel->basic_get($queue);
+                $message = $this->channel->basic_get($queue);
             }
         }
+        // @codeCoverageIgnoreEnd
 
-        if ($job instanceof AMQPMessage) {
-            $job = new RabbitJob($job, $this);
-            $job->setQueue($queue);
-
-            return $job;
+        if ($message instanceof AMQPMessage) {
+            return new $this->managerClass($queue, $message, $this);
         }
+
+        throw new QueueEmptyException($queue);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete(JobInterface $job)
+    public function count($queue)
     {
-        $job->getChannel()->basic_ack($job->getMessage()->delivery_info['delivery_tag']);
+        $queue = $this->queueDeclare($queue);
+
+        return $queue[1];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(ManagerInterface $manager)
+    {
+        $manager->getChannel()->basic_ack($manager->getMessage()->delivery_info['delivery_tag']);
 
         return true;
     }
@@ -270,65 +272,31 @@ class RabbitConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function release(JobInterface $job, $delay = 0)
+    public function clear($queue)
     {
-        $payload = $job->getPayload();
+        $this->channel->queue_purge($queue, true);
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function release(ManagerInterface $manager, $delay = 0)
+    {
+        $payload = $manager->getPayload();
         $payload['attempts'] = isset($payload['attempts']) ? $payload['attempts'] + 1 : 2;
 
-        $this->delete($job);
+        $this->delete($manager);
+
+        $job = Job::createFromPayload($payload);
 
         if ($delay > 0) {
-            $this->delayed($job->getQueue(), $delay, $payload);
+            $this->delayed($manager->getQueue(), $delay, $job);
         } else {
-            $this->push($job->getQueue(), $payload);
+            $this->push($manager->getQueue(), $job);
         }
 
         return true;
-    }
-
-    /**
-     * Return AMQP object
-     *
-     * @return AbstractConnection
-     */
-    public function getAMQP()
-    {
-        return $this->amqp;
-    }
-
-    /**
-     * Set AMQP object
-     *
-     * @param  AbstractConnection $amqp
-     * @return RabbitConnector
-     */
-    public function setAMQP(AbstractConnection $amqp)
-    {
-        $this->amqp = $amqp;
-
-        return $this;
-    }
-
-    /**
-     * Get channel
-     *
-     * @return AMQPChannel
-     */
-    public function getChannel()
-    {
-        return $this->channel;
-    }
-
-    /**
-     * Regenerate channel
-     *
-     * @return AMQPChannel Old channel
-     */
-    public function regenerateChannel()
-    {
-        $channel = $this->channel;
-        $this->channel = $this->amqp->channel();
-
-        return $channel;
     }
 }

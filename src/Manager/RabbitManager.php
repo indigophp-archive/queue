@@ -9,18 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Connector\RabbitConnector;
 use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\NullLogger;
 
 /**
- * Rabbit Job
+ * Rabbit Manager
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class RabbitJob extends AbstractJob
+class RabbitManager extends AbstractManager
 {
     /**
      * AMQPMessage
@@ -37,16 +37,19 @@ class RabbitJob extends AbstractJob
     protected $channel;
 
     /**
-     * @codeCoverageIgnore
+     * Creates a new RabbitManager
+     *
+     * @param string          $queue
+     * @param AMQPMessage     $message
+     * @param RabbitConnector $connector
      */
-    public function __construct(AMQPMessage $message, RabbitConnector $connector)
+    public function __construct($queue, AMQPMessage $message, RabbitConnector $connector)
     {
-        $this->message   = $message;
-        $this->connector = $connector;
-        $this->channel   = $connector->regenerateChannel();
-        $this->logger    = new NullLogger;
+        $this->channel = $connector->regenerateChannel();
+        $this->message = $message;
+        $this->payload = json_decode($message->body, true);
 
-        $this->setPayload(json_decode($message->body, true));
+        parent::__construct($queue, $connector);
     }
 
     /**
@@ -60,7 +63,7 @@ class RabbitJob extends AbstractJob
     }
 
     /**
-     * Get message
+     * Returns the message
      *
      * @return AMQPMessage
      */
@@ -70,7 +73,7 @@ class RabbitJob extends AbstractJob
     }
 
     /**
-     * Get channel
+     * Returns the channel
      *
      * @return AMQPChannel
      */

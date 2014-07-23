@@ -11,6 +11,8 @@ use Codeception\TestCase\Test;
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
  * @coversDefaultClass Indigo\Queue\Job
+ * @group              Queue
+ * @group              Main
  */
 class JobTest extends Test
 {
@@ -27,22 +29,28 @@ class JobTest extends Test
     }
 
     /**
-     * @covers ::_construct
-     * @group  Queue
+     * @covers ::__construct
+     * @covers ::createFromPayload
      */
     public function testConstruct()
     {
-        $job = new Job('Fake\\Class', ['data'], ['options']);
+        $job = new Job('Fake\\Class', ['data'], ['options'], ['extras']);
 
         $this->assertEquals('Fake\\Class', $job->getJob());
         $this->assertEquals(['data'], $job->getData());
         $this->assertEquals(['options'], $job->getOptions());
+        $this->assertEquals(['extras'], $job->getExtras());
+
+        $job = Job::createFromPayload($job->createPayload());
+
+        $this->assertEquals('Fake\\Class', $job->getJob());
+        $this->assertEquals(['data'], $job->getData());
+        $this->assertEquals(['extras'], $job->getExtras());
     }
 
     /**
      * @covers ::getJob
      * @covers ::setJob
-     * @group  Queue
      */
     public function testJob()
     {
@@ -53,7 +61,6 @@ class JobTest extends Test
     /**
      * @covers ::getData
      * @covers ::setData
-     * @group  Queue
      */
     public function testData()
     {
@@ -64,7 +71,6 @@ class JobTest extends Test
     /**
      * @covers ::getOptions
      * @covers ::setOptions
-     * @group  Queue
      */
     public function testOptions()
     {
@@ -73,8 +79,17 @@ class JobTest extends Test
     }
 
     /**
+     * @covers ::getExtras
+     * @covers ::setExtras
+     */
+    public function testExtras()
+    {
+        $this->assertSame($this->job, $this->job->setExtras(['test']));
+        $this->assertEquals(['test'], $this->job->getExtras());
+    }
+
+    /**
      * @covers ::createPayload
-     * @group  Queue
      */
     public function testPayload()
     {
@@ -91,7 +106,6 @@ class JobTest extends Test
 
     /**
      * @covers ::createPayload
-     * @group  Queue
      */
     public function testClosurePayload()
     {
@@ -100,8 +114,8 @@ class JobTest extends Test
 
         $this->assertEquals(
             [
-                'job'     => 'Indigo\\Queue\\ClosureJob',
-                'closure' => $closure,
+                'job'     => 'Indigo\\Queue\\Job\\ClosureJob',
+                'closure' => serialize(new SerializableClosure($closure)),
                 'data'    => ['data'],
             ],
             $job->createPayload()

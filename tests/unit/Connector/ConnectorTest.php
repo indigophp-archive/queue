@@ -1,39 +1,28 @@
 <?php
 
-namespace Indigo\Queue\Test\Connector;
+namespace Test\Unit;
 
-use Jeremeamia\SuperClosure\SerializableClosure;
-
-require __DIR__.'/../../resources/Job.php';
-
-abstract class ConnectorTest extends \PHPUnit_Framework_TestCase
+/**
+ * Tests for AbstractConnector
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @coversDefaultClass Indigo\Queue\Connector\AbstractConnector
+ * @group              Queue
+ * @group              Connector
+ */
+class ConnectorTest extends AbstractConnectorTest
 {
-    protected $connector;
-    protected $queue;
-
-    public function payloadProvider()
+    public function _before()
     {
-        return array(
-            array(array(
-                'job' => 'Job@runThis',
-                'data' => array(),
-            )),
-            array(array(
-                'job' => 'Indigo\\Queue\\Closure',
-                'data' => array(),
-                'closure' => serialize(new SerializableClosure(function () {
-                    return true;
-                })),
-            )),
-        );
+        $this->connector = new \DummyConnector;
     }
 
     /**
-     * @covers ::isConnected
-     * @group  Queue
+     * @covers ::getManagerClass
      */
-    public function testConnection()
+    public function testManager()
     {
-        $this->assertTrue($this->connector->isConnected());
+        $this->assertEquals('Fake\\Class', $this->connector->getManagerClass());
     }
 }

@@ -9,19 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Connector\BeanstalkdConnector;
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
-use Psr\Log\NullLogger;
 
 /**
- * Beanstalkd Job
+ * Beanstalkd Manager
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class BeanstalkdJob extends AbstractJob
+class BeanstalkdManager extends AbstractManager
 {
     /**
      * Pheanstalk Job
@@ -31,15 +30,18 @@ class BeanstalkdJob extends AbstractJob
     protected $pheanstalkJob;
 
     /**
-     * @codeCoverageIgnore
+     * Creates a new BeanstalkdManager
+     *
+     * @param string              $queue
+     * @param Pheanstalk_Job      $job
+     * @param BeanstalkdConnector $connector
      */
-    public function __construct(Pheanstalk_Job $job, BeanstalkdConnector $connector)
+    public function __construct($queue, Pheanstalk_Job $job, BeanstalkdConnector $connector)
     {
         $this->pheanstalkJob = $job;
-        $this->connector     = $connector;
-        $this->logger        = new NullLogger;
+        $this->payload = json_decode($job->getData(), true);
 
-        $this->setPayload(json_decode($job->getData(), true));
+        parent::__construct($queue, $connector);
     }
 
     /**
@@ -53,7 +55,7 @@ class BeanstalkdJob extends AbstractJob
     }
 
     /**
-     * Get Pheanstalk Job
+     * Returns the Pheanstalk Job
      *
      * @return Pheanstalk_Job
      */

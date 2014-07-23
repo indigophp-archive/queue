@@ -22,7 +22,7 @@ class DummyJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function fail(ManagerInterface $manager)
+    public function fail(ManagerInterface $manager, \Exception $e = null)
     {
         return true;
     }

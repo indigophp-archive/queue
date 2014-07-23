@@ -9,27 +9,29 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Connector\DirectConnector;
-use Psr\Log\NullLogger;
 
 /**
- * Direct Job
+ * Direct Manager
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class DirectJob extends AbstractJob
+class DirectManager extends AbstractManager
 {
     /**
-     * @codeCoverageIgnore
+     * Creates a new DirectManager
+     *
+     * @param string          $queue
+     * @param []              $payload
+     * @param DirectConnector $connector
      */
-    public function __construct(array $payload, DirectConnector $connector)
+    public function __construct($queue, array $payload, DirectConnector $connector)
     {
-        $this->connector = $connector;
-        $this->logger    = new NullLogger;
+        $this->payload = $payload;
 
-        $this->setPayload($payload);
+        parent::__construct($queue, $connector);
     }
 
     /**

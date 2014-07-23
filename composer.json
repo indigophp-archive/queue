@@ -11,10 +11,10 @@
         }
     ],
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.4.0",
         "psr/log": "~1.0",
         "jeremeamia/SuperClosure": "~1.0.0",
-        "symfony/options-resolver": "~2.4.0"
+        "symfony/options-resolver": "~2.4"
     },
     "require-dev": {
         "pda/pheanstalk": "~2.1.0",

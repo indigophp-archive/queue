@@ -1,61 +1,74 @@
 <?php
 
-namespace Indigo\Queue\Test\Connector;
+namespace Test\Unit;
 
 use Indigo\Queue\Connector\DirectConnector;
 
 /**
- * Tests for Direct Connector
+ * Tests for DirectConnector
  *
- * @author  Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass  Indigo\Queue\Connector\DirectConnector
+ * @coversDefaultClass Indigo\Queue\Connector\DirectConnector
+ * @group              Queue
+ * @group              Connector
+ * @group              Direct
  */
-class DirectConnectorTest extends ConnectorTest
+class DirectConnectorTest extends AbstractConnectorTest
 {
-    protected $job;
-
-    public function setUp()
+    public function _before()
     {
         $this->connector = new DirectConnector;
     }
 
     /**
-     * @covers       ::push
-     * @covers       ::pop
-     * @covers       ::delete
-     * @dataProvider payloadProvider
-     * @group        Queue
+     * @covers ::isConnected
      */
-    public function testPush($payload)
+    public function testConnection()
     {
-        $job = $this->connector->push('test', $payload);
-
-        $this->assertInstanceOf(
-            'Indigo\\Queue\\Job\\DirectJob',
-            $job
-        );
-
-        $this->assertTrue($this->connector->delete($job));
+        $this->assertTrue($this->connector->isConnected());
     }
 
     /**
-     * @covers       ::push
-     * @covers       ::pop
-     * @covers       ::delayed
-     * @covers       ::release
-     * @dataProvider payloadProvider
-     * @group        Queue
+     * @covers                   ::pop
+     * @covers                   Indigo\Queue\Exception\QueueEmptyException
+     * @expectedException        Indigo\Queue\Exception\QueueEmptyException
+     * @expectedExceptionMessage Queue test is empty.
      */
-    public function testDelayed($payload)
+    public function testEmptyPop()
     {
-        $job = $this->connector->delayed('test', 0.5, $payload);
+        $this->connector->pop('test');
+    }
 
-        $this->assertInstanceOf(
-            'Indigo\\Queue\\Job\\DirectJob',
-            $job
-        );
+    /**
+     * @covers ::count
+     */
+    public function testCount()
+    {
+        $this->assertEquals(1, $this->connector->count(''));
+    }
 
-        $this->assertTrue($this->connector->release($job));
+    /**
+     * @covers ::delete
+     */
+    public function testDelete()
+    {
+        $this->assertTrue($this->connector->delete($this->getManagerMock()));
+    }
+
+    /**
+     * @covers ::clear
+     */
+    public function testClear()
+    {
+        $this->assertTrue($this->connector->clear(''));
+    }
+
+    /**
+     * @covers ::release
+     */
+    public function testRelease()
+    {
+        $this->assertTrue($this->connector->release($this->getManagerMock()));
     }
 }

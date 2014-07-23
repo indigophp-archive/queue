@@ -9,31 +9,37 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Job;
+namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Connector\IronConnector;
-use Psr\Log\NullLogger;
-use stdClass;
 
 /**
- * Iron Job
+ * Iron Manager
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class IronJob extends AbstractJob
+class IronManager extends AbstractManager
 {
+    /**
+     * Iron job
+     *
+     * @var stdClass
+     */
     protected $ironJob;
 
     /**
-     * @codeCoverageIgnore
+     * Creates a new IronManager
+     *
+     * @param string        $queue
+     * @param stdClass      $job
+     * @param IronConnector $connector
      */
-    public function __construct(stdClass $job, IronConnector $connector)
+    public function __construct($queue, \stdClass $job, IronConnector $connector)
     {
         $this->ironJob   = $job;
-        $this->connector = $connector;
-        $this->logger    = new NullLogger;
+        $this->payload = json_decode($job->body, true);
 
-        $this->setPayload(json_decode($job->body, true));
+        parent::__construct($queue, $connector);
     }
 
     /**
@@ -45,7 +51,7 @@ class IronJob extends AbstractJob
     }
 
     /**
-     * Get Iron Job
+     * Returns the Iron Job
      *
      * @return stdClass
      */

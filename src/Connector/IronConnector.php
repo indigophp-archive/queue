@@ -11,14 +11,12 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Job\JobInterface;
-use Indigo\Queue\Job\IronJob;
-use IronMQ;
-use Psr\Log\NullLogger;
-use stdClass;
+use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Job;
+use Indigo\Queue\Exception\QueueEmptyException;
 
 /**
- * Iron connector
+ * Iron Connector
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -29,15 +27,18 @@ class IronConnector extends AbstractConnector
      *
      * @var IronMQ
      */
-    protected $iron = null;
+    protected $iron;
 
     /**
-     * @codeCoverageIgnore
+     * Creates a new IronConnector
+     *
+     * @param IronMQ $iron
      */
-    public function __construct(IronMQ $iron)
+    public function __construct(\IronMQ $iron)
     {
-        $this->iron   = $iron;
-        $this->logger = new NullLogger;
+        $this->iron = $iron;
+
+        parent::__construct();
     }
 
     /**
@@ -51,25 +52,27 @@ class IronConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function push($queue, array $payload, array $options = array())
+    public function push($queue, Job $job)
     {
-        $options = $this->resolveJobOptions($options);
-
         return $this->iron->postMessage(
             $queue,
-            json_encode($payload),
-            $options
+            json_encode($job->createPayload()),
+            $job->getOptions()
         );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delayed($queue, $delay, array $payload, array $options = array())
+    public function delayed($queue, $delay, Job $job)
     {
+        $options = $job->getOptions();
+
         $options['delay'] = $delay;
 
-        return $this->push($queue, $payload, $options);
+        $job->setOptions($options);
+
+        return $this->push($queue, $job);
     }
 
     /**
@@ -79,20 +82,29 @@ class IronConnector extends AbstractConnector
     {
         $job = $this->iron->getMessage($queue, $timeout);
 
-        if ($job instanceof stdClass) {
-            $job = new IronJob($job, $this);
-            $job->setQueue($queue);
-
-            return $job;
+        if ($job instanceof \stdClass) {
+            return new $this->managerClass($queue, $job, $this);
         }
+
+        throw new QueueEmptyException($queue);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete(JobInterface $job)
+    public function count($queue)
     {
-        $this->iron->deleteMessage($job->getQueue(), $job->getIronJob()->id);
+        $stat = $this->iron->getQueue($queue);
+
+        return (int) $stat->size;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(ManagerInterface $manager)
+    {
+        $this->iron->deleteMessage($manager->getQueue(), $manager->getIronJob()->id);
 
         return true;
     }
@@ -100,15 +112,25 @@ class IronConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function release(JobInterface $job, $delay = 0)
+    public function clear($queue)
     {
-        $this->iron->releaseMessage($job->getQueue(), $job->getIronJob()->id, $delay);
+        $this->iron->clearQueue($queue);
 
         return true;
     }
 
     /**
-     * Return IronMQ object
+     * {@inheritdoc}
+     */
+    public function release(ManagerInterface $manager, $delay = 0)
+    {
+        $this->iron->releaseMessage($manager->getQueue(), $manager->getIronJob()->id, $delay);
+
+        return true;
+    }
+
+    /**
+     * Returns the IronMQ object
      *
      * @return IronMQ
      */
@@ -118,12 +140,13 @@ class IronConnector extends AbstractConnector
     }
 
     /**
-     * Set IronMQ object
+     * Sets the IronMQ object
      *
-     * @param  IronMQ        $iron
-     * @return IronConnector
+     * @param IronMQ $iron
+     *
+     * @return this
      */
-    public function setIron(IronMQ $iron)
+    public function setIron(\IronMQ $iron)
     {
         $this->iron = $iron;
 

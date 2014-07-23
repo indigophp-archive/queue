@@ -47,9 +47,9 @@ class Queue
     public function __construct($queue, ConnectorInterface $connector)
     {
         $this->queue = $queue;
-        $this->connector = $connector;
 
-        $this->setLogger(new NullLogger);
+        $this->setConnector($connector)
+            ->setLogger(new NullLogger);
     }
 
     /**

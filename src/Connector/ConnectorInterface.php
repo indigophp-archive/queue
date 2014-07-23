@@ -12,9 +12,10 @@
 namespace Indigo\Queue\Connector;
 
 use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Job;
 
 /**
- * Connector Inteface
+ * Connector inteface
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -56,25 +57,27 @@ interface ConnectorInterface
     *
     * @return ManagerInterface
     *
-    * @throws NoJobFoundException If no job can be returned
+    * @throws QueueEmptyException If no job can be returned
     */
     public function pop($queue, $timeout = 0);
 
     /**
      * Returns the count of jobs
      *
+     * @param string $queue
+     *
      * @return integer
      */
-    public function count();
+    public function count($queue);
 
     /**
-     * Deletes job from queue
+     * Deletes a job from queue
      *
-     * @param ManagerInterface $job Job to delete
+     * @param ManagerInterface $manager
      *
      * @return boolean Always true
      */
-    public function delete(ManagerInterface $job);
+    public function delete(ManagerInterface $manager);
 
     /**
      * Clears the queue
@@ -88,10 +91,10 @@ interface ConnectorInterface
     /**
      * Releases a job back to the queue
      *
-     * @param ManagerInterface $job   Job to release
-     * @param integer          $delay Delay the job with x seconds, 0 means no delay
+     * @param ManagerInterface $manager
+     * @param integer          $delay  Delay the job with x seconds, 0 means no delay
      *
      * @return boolean Always true
      */
-    public function release(ManagerInterface $job, $delay = 0);
+    public function release(ManagerInterface $manager, $delay = 0);
 }

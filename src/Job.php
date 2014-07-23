@@ -11,6 +11,8 @@
 
 namespace Indigo\Queue;
 
+use Jeremeamia\SuperClosure\SerializableClosure;
+
 /**
  * Job class
  *
@@ -42,6 +44,13 @@ class Job
     protected $options = [];
 
     /**
+     * Extras
+     *
+     * @var []
+     */
+    protected $extras = [];
+
+    /**
      * Closure class name
      *
      * @var string
@@ -55,11 +64,12 @@ class Job
      * @param []     $data
      * @param []     $options
      */
-    public function __construct($job, array $data = [], array $options = [])
+    public function __construct($job, array $data = [], array $options = [], array $extras = [])
     {
         $this->job = $job;
         $this->data = $data;
         $this->options = $options;
+        $this->extras = $extras;
     }
 
     /**
@@ -135,16 +145,40 @@ class Job
     }
 
     /**
+     * Returns the extras
+     *
+     * @return []
+     */
+    public function getExtras()
+    {
+        return $this->extras;
+    }
+
+    /**
+     * Sets the extras
+     *
+     * @param [] $extras
+     *
+     * @return this
+     */
+    public function setExtras(array $extras)
+    {
+        $this->extras = $extras;
+
+        return $this;
+    }
+
+    /**
     * Creates a serialized payload
     *
     * @return []
     */
     public function createPayload()
     {
-        $payload = [
-            'job'   => $this->job,
-            'data'  => $this->data,
-        ];
+        $payload = $this->extras;
+
+        $payload['job'] = $this->job;
+        $payload['data'] = $this->data;
 
         // Create special payload if it is a Closure
         if ($this->job instanceof \Closure) {
@@ -153,5 +187,22 @@ class Job
         }
 
         return $payload;
+    }
+
+    /**
+     * Creates a new Job from payload
+     *
+     * @param [] $payload
+     *
+     * @return self
+     */
+    public static function createFromPayload(array $payload)
+    {
+        $job = $payload['job'];
+        $data = $payload['data'];
+
+        unset($payload['job'], $payload['data']);
+
+        return new static($job, $data, [], $payload);
     }
 }

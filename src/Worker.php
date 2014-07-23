@@ -15,8 +15,8 @@ use Indigo\Queue\Connector\ConnectorInterface;
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Connector\DirectConnector;
 use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Indigo\Queue\Exception\QueueEmptyException;
 use Exception;
 use InvalidArgumentException;
 
@@ -24,9 +24,13 @@ use InvalidArgumentException;
  * Worker class
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ *
+ * @codeCoverageIgnore
  */
-class Worker implements LoggerAwareInterface
+class Worker
 {
+    use \Psr\Log\LoggerAwareTrait;
+
     /**
      * Queue name
      *
@@ -42,41 +46,39 @@ class Worker implements LoggerAwareInterface
     protected $connector;
 
     /**
-     * Logger instance
-     *
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
      * Config values
      *
-     * @var array
+     * @var []
      */
-    protected static $config = array(
+    protected static $config = [
         'retry'  => 0,
         'delay'  => 0,
-        'delete' => false
-    );
+        'delete' => false,
+    ];
 
+    /**
+     * Creates a new Worker
+     *
+     * @param string             $queue
+     * @param ConnectorInterface $connector
+     */
     public function __construct($queue, ConnectorInterface $connector)
     {
         if ($connector instanceof DirectConnector) {
             throw new InvalidArgumentException('DirectConnector should not be used in a Worker');
         }
 
-        $this->queue     = $queue;
-        $this->connector = $connector;
-        $this->logger    = new NullLogger;
+        $this->queue = $queue;
+
+        $this->setConnector($connector)
+            ->setLogger(new NullLogger);
     }
 
     /**
-     * Listen to queue
+     * Listens to queue
      *
      * @param float   $interval Sleep for certain time if no job is available
      * @param integer $timeout  Wait timeout for pop
-     *
-     * @codeCoverageIgnore
      */
     public function listen($interval = 5, $timeout = 0)
     {
@@ -92,10 +94,11 @@ class Worker implements LoggerAwareInterface
     }
 
     /**
-     * Process one job from the queue
+     * Processes one job from the queue
      *
-     * @param  integer $timeout Wait timeout for pop
-     * @return mixed   Job return value
+     * @param integer $timeout Wait timeout for pop
+     *
+     * @return mixed Job return value
      */
     public function work($timeout = 0)
     {
@@ -106,15 +109,19 @@ class Worker implements LoggerAwareInterface
     }
 
     /**
-     * Get JobInterface
+     * Returns a ManagerInterface
      *
-     * @param  integer      $timeout Wait timeout for pop
-     * @return JobInterface Returns null if $job is not a valid JobIterface
+     * @param integer $timeout Wait timeout for pop
+     *
+     * @return ManagerInterface Returns null if $job is not a valid JobIterface
      */
     protected function getJob($timeout = 0)
     {
-        // Pop job from the queue
-        $job = $this->connector->pop($this->queue, $timeout);
+        try {
+            $job = $this->connector->pop($this->queue, $timeout);
+        } catch (QueueEmptyException $e) {
+            return false;
+        }
 
         if ($job instanceof LoggerAwareInterface) {
             $job->setLogger($this->logger);
@@ -127,8 +134,6 @@ class Worker implements LoggerAwareInterface
      * Sleep for a certain time
      *
      * @param float $interval
-     *
-     * @codeCoverageIgnore
      */
     protected function sleep($interval)
     {
@@ -137,84 +142,6 @@ class Worker implements LoggerAwareInterface
             usleep($interval);
         } else {
             sleep($interval);
-        }
-    }
-
-    /**
-     * Sets a logger
-     *
-     * @param LoggerInterface $logger
-     *
-     * @codeCoverageIgnore
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    public static function execute(JobInterface $job)
-    {
-        $payload = $job->getPayload();
-
-        $raw = static::parseJob($payload['job']);
-
-        list($class, $execute, $failure) = $raw;
-
-        try {
-            $class = static::resolveClass($class);
-        } catch (Exception $e) {
-            $this->connector->delete($job);
-
-            return false;
-        }
-    }
-
-    /**
-     * Parse job string
-     *
-     * @param  string $job Job@execute:failure
-     * @return array
-     */
-    protected static function parseJob($job)
-    {
-        $job = preg_split('/[:@]/', $job);
-
-        // Make sure we have default values
-        return $job + array(null, 'execute', 'failure');
-    }
-
-    protected static function resolveClass($class, array $data, JobInterface $job)
-    {
-        if (!class_exists($class)) {
-            $this->logger->log('error', 'Job ' . $class . ' is not found.', $job->getPayload());
-
-        }
-
-        return new $class($job, $data);
-    }
-
-    /**
-     * Resolve the job
-     *
-     * @param  array   $payload Job payload
-     * @return boolean
-     */
-    protected static function resolve(array $payload)
-    {
-        $job = $this->parseJob($payload['job']);
-
-        list($job, $execute, $failure) = $job;
-
-        if (!class_exists($job)) {
-            $this->logger->log('error', 'Job ' . $job . ' is not found.');
-        }
-
-        $this->job = new $job($this, $payload['data']);
-        $this->execute = $this->getCallback($execute);
-        $this->failure = $this->getCallback($failure);
-
-        if (property_exists($job, 'config')) {
-            $this->config = array_merge($this->config, $job->config);
         }
     }
 }
