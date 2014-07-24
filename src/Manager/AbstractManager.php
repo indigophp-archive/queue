@@ -130,6 +130,9 @@ abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
      *
      * @return mixed
      *
+     * @throws JobNotFoundException If job cannot be found
+     * @throws InvalidJobException  If $class is not subclass of JobInterface
+     *
      * @codeCoverageIgnore
      */
     protected function resolve($class)
