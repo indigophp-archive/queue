@@ -12,7 +12,6 @@
 namespace Indigo\Queue;
 
 use Indigo\Queue\Connector\ConnectorInterface;
-use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Connector\DirectConnector;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Indigo\Queue\Exception\QueueEmptyException;

@@ -13,6 +13,7 @@ namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Connector\ConnectorInterface;
 use Indigo\Queue\Exception\JobNotFoundException;
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -22,7 +23,7 @@ use Psr\Log\NullLogger;
  *
  * @codeCoverageIgnore
  */
-abstract class AbstractManager implements ManagerInterface
+abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
 {
     use \Psr\Log\LoggerAwareTrait;
 

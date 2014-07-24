@@ -13,6 +13,7 @@ namespace Indigo\Queue;
 
 use Indigo\Queue\Connector\ConnectorInterface;
 use Jeremeamia\SuperClosure\SerializableClosure;
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -20,7 +21,7 @@ use Psr\Log\NullLogger;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class Queue
+class Queue implements LoggerAwareInterface
 {
     use \Psr\Log\LoggerAwareTrait;
 

@@ -11,8 +11,7 @@
 
 namespace Indigo\Queue\Connector;
 
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -20,7 +19,7 @@ use Psr\Log\NullLogger;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractConnector implements ConnectorInterface
+abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInterface
 {
     use \Psr\Log\LoggerAwareTrait;
 
