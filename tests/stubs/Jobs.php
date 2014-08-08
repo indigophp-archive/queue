@@ -10,8 +10,14 @@
  */
 
 use Indigo\Queue\Job\JobInterface;
+use Indigo\Queue\Job\AbstractJob;
 use Indigo\Queue\Manager\ManagerInterface;
 
+/**
+ * Dummy Job
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
 class DummyJob implements JobInterface
 {
     public $config = array(
@@ -32,6 +38,22 @@ class DummyJob implements JobInterface
      * {@inheritdoc}
      */
     public function fail(ManagerInterface $manager, \Exception $e = null)
+    {
+        return true;
+    }
+}
+
+/**
+ * Dummy Job
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
+class AdvancedJob extends AbstractJob
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function execute(ManagerInterface $manager)
     {
         return true;
     }

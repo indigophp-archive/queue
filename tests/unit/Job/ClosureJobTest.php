@@ -9,11 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Test\Unit;
+namespace Test\Unit\Job;
 
 use Indigo\Queue\Job\ClosureJob;
 use Jeremeamia\SuperClosure\SerializableClosure;
-use Codeception\TestCase\Test;
 
 /**
  * Tests for ClosureJob
@@ -24,26 +23,8 @@ use Codeception\TestCase\Test;
  * @group              Queue
  * @group              Job
  */
-class ClosureJobTest extends Test
+class ClosureJobTest extends AbstractJobTest
 {
-    /**
-     * Manager mock
-     *
-     * @var Indigo\Queue\Manager\ManagerInterface
-     */
-    protected $manager;
-
-    public function _before()
-    {
-        $this->manager = \Mockery::mock('Indigo\\Queue\\Manager\\ManagerInterface');
-        $this->manager->shouldReceive('getPayload')
-            ->andReturn([
-                'closure' => serialize(new SerializableClosure(function() {
-                    return true;
-                })),
-            ]);
-    }
-
     /**
      * @covers ::execute
      * @covers ::fail
@@ -52,9 +33,18 @@ class ClosureJobTest extends Test
     {
         $config = ['delete' => true, 'test' => true];
 
+        $manager = $this->getManagerMock();
+
+        $manager->shouldReceive('getPayload')
+            ->andReturn([
+                'closure' => serialize(new SerializableClosure(function() {
+                    return true;
+                })),
+            ]);
+
         $closure = new ClosureJob;
 
-        $this->assertTrue($closure->execute($this->manager));
-        $this->assertNull($closure->fail($this->manager));
+        $this->assertTrue($closure->execute($manager));
+        $this->assertNull($closure->fail($manager));
     }
 }

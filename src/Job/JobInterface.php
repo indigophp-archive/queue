@@ -39,5 +39,5 @@ interface JobInterface
      *
      * @return mixed
      */
-    public function fail(ManagerInterface $manager, \Exception $e = null);
+    public function fail(ManagerInterface $manager, \Exception $e);
 }

@@ -13,6 +13,11 @@ use Indigo\Queue\Connector\AbstractConnector;
 use Indigo\Queue\Job;
 use Indigo\Queue\Manager\ManagerInterface;
 
+/**
+ * Dummy Connector
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
 class DummyConnector extends AbstractConnector
 {
     /**

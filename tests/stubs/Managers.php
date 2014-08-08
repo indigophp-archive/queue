@@ -11,6 +11,11 @@
 
 use Indigo\Queue\Manager\AbstractManager;
 
+/**
+ * Dummy Manager
+ *
+ * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ */
 class DummyManager extends AbstractManager
 {
     /**
