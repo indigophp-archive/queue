@@ -50,6 +50,8 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
         }
 
         $this->connector->clear('test');
+        $this->connector->clear('test_clear');
+        $this->connector->clear('test_count');
     }
 
     /**

@@ -57,6 +57,8 @@ class IronConnectorTest extends AbstractMQConnectorTest
         $this->connector = new IronConnector($iron);
 
         $this->connector->clear('test');
+        $this->connector->clear('test_clear');
+        $this->connector->clear('test_count');
     }
 
     /**
