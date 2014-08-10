@@ -68,10 +68,11 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
     public function testCount()
     {
         $this->connector->clear('test_count');
+        $count = (int) $this->connector->count('test_count');
 
         $jobs = $this->pushJobs('test_count');
 
-        $this->assertEquals(count($jobs), $this->connector->count('test_count'));
+        $this->assertEquals($count + count($jobs), $this->connector->count('test_count'));
 
         $this->connector->clear('test_count');
     }
