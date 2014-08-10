@@ -147,14 +147,10 @@ abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
             throw new JobNotFoundException($message);
         }
 
-        if (is_subclass_of($class, 'Indigo\\Queue\\Job\\FactoryInterface')) {
-            $job = $class::factory($this);
-        } else {
-            $job = new $class;
-        }
+        $job = $this->resolveClass($class);
 
         if ($class instanceof JobInterface === false) {
-            throw new InvalidJobException($class . 'is not an instance of Indigo\\Queue\\Job\\JobInterface');
+            throw new InvalidJobException($class . ' is not an instance of Indigo\\Queue\\Job\\JobInterface');
         }
 
 
@@ -163,6 +159,24 @@ abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
         }
 
         return $job;
+    }
+
+    /**
+     * Returns a new job class
+     *
+     * @param string $class
+     *
+     * @return mixed
+     *
+     * @codeCoverageIgnore
+     */
+    protected function resolveClass($class)
+    {
+        if (is_subclass_of($class, 'Indigo\\Queue\\Job\\FactoryInterface')) {
+            return $class::factory($this);
+        }
+
+        return new $class;
     }
 
     /**

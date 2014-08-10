@@ -27,6 +27,9 @@ class DummyJob implements JobInterface, FactoryInterface
         'bury'   => true,
     );
 
+    /**
+     * {@inheritdoc}
+     */
     public static function factory(ManagerInterface $manager)
     {
         return new static;
