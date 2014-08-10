@@ -12,6 +12,7 @@
 namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Connector\ConnectorInterface;
+use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
@@ -143,11 +144,18 @@ abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
             $this->log('error', $message);
 
             throw new JobNotFoundException($message);
-        } elseif (is_subclass_of($class, 'Indigo\\Queue\\Job\\JobInterface') === false) {
-            throw new InvalidJobException($class . 'is not a subclass of Indigo\\Queue\\Job\\JobInterface');
         }
 
-        $job = new $class;
+        if (is_subclass_of($class, 'Indigo\\Queue\\Job\\FactoryInterface')) {
+            $job = $class::factory($this);
+        } else {
+            $job = new $class;
+        }
+
+        if ($class instanceof JobInterface === false) {
+            throw new InvalidJobException($class . 'is not an instance of Indigo\\Queue\\Job\\JobInterface');
+        }
+
 
         if (isset($job->config)) {
             $this->config = array_merge($this->config, $job->config);
