@@ -14,6 +14,7 @@ namespace Indigo\Queue\Manager;
 use Indigo\Queue\Connector\ConnectorInterface;
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Exception\JobNotFoundException;
+use Indigo\Queue\Exception\InvalidJobException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
 
