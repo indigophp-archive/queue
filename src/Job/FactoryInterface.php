@@ -24,5 +24,12 @@ use Indigo\Queue\Manager\ManagerInterface;
  */
 interface FactoryInterface
 {
+    /**
+     * Factory method
+     *
+     * @param ManagerInterface $manager
+     *
+     * @return mixed
+     */
     public static function factory(ManagerInterface $manager);
 }
