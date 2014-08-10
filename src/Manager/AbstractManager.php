@@ -149,10 +149,9 @@ abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
 
         $job = $this->resolveClass($class);
 
-        if ($class instanceof JobInterface === false) {
+        if ($job instanceof JobInterface === false) {
             throw new InvalidJobException($class . ' is not an instance of Indigo\\Queue\\Job\\JobInterface');
         }
-
 
         if (isset($job->config)) {
             $this->config = array_merge($this->config, $job->config);
