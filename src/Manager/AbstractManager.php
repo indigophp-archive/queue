@@ -171,7 +171,7 @@ abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
      */
     protected function resolveClass($class)
     {
-        if (is_subclass_of($class, 'Indigo\\Queue\\Job\\FactoryInterface')) {
+        if (is_subclass_of($class, 'Indigo\\Queue\\Manager\\FactoryInterface')) {
             return $class::factory($this);
         }
 

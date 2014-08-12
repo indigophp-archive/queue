@@ -11,7 +11,7 @@
 
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\AbstractJob;
-use Indigo\Queue\Job\FactoryInterface;
+use Indigo\Queue\Manager\FactoryInterface;
 use Indigo\Queue\Manager\ManagerInterface;
 
 /**

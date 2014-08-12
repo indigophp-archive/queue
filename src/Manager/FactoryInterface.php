@@ -9,12 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Job;
-
-use Indigo\Queue\Manager\ManagerInterface;
+namespace Indigo\Queue\Manager;
 
 /**
- * Job Factory
+ * Manager Factory
  *
  * Queue instantiable class by adding a factory method
  *
