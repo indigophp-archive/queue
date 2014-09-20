@@ -21,15 +21,15 @@ use Psr\Log\LoggerAwareInterface;
  */
 abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 {
-	use \Psr\Log\LoggerAwareTrait;
+    use \Psr\Log\LoggerAwareTrait;
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function fail(Manager $manager, \Exception $e)
-	{
-		$this->logger->error($e->getMessage());
+    /**
+     * {@inheritdoc}
+     */
+    public function fail(Manager $manager, \Exception $e)
+    {
+        $this->logger->error($e->getMessage());
 
-		return true;
-	}
+        return true;
+    }
 }
