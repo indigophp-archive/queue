@@ -12,7 +12,7 @@
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\AbstractJob;
 use Indigo\Queue\Manager\FactoryInterface;
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Manager;
 
 /**
  * Dummy Job
@@ -30,7 +30,7 @@ class DummyJob implements JobInterface, FactoryInterface
     /**
      * {@inheritdoc}
      */
-    public static function factory(ManagerInterface $manager)
+    public static function factory(Manager $manager)
     {
         return new static;
     }
@@ -38,7 +38,7 @@ class DummyJob implements JobInterface, FactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function execute(ManagerInterface $manager)
+    public function execute(Manager $manager)
     {
         return true;
     }
@@ -46,7 +46,7 @@ class DummyJob implements JobInterface, FactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function fail(ManagerInterface $manager, \Exception $e = null)
+    public function fail(Manager $manager, \Exception $e = null)
     {
         return true;
     }
@@ -62,7 +62,7 @@ class AdvancedJob extends AbstractJob
     /**
      * {@inheritdoc}
      */
-    public function execute(ManagerInterface $manager)
+    public function execute(Manager $manager)
     {
         return true;
     }

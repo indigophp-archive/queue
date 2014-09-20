@@ -29,7 +29,6 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
 {
     public function _before()
     {
-
         $host = $GLOBALS['beanstalkd_host'];
         $port = $GLOBALS['beanstalkd_port'];
 

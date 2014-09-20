@@ -28,7 +28,7 @@ class QueueTest extends Test
     /**
      * Connector mock
      *
-     * @var Indigo\Queue\Connector\ConnectorInterface
+     * @var Indigo\Queue\Connector
      */
     protected $connector;
 
@@ -41,7 +41,7 @@ class QueueTest extends Test
 
     public function _before()
     {
-        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
+        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector');
 
         $this->queue = new Queue('test', $this->connector);
     }

@@ -14,7 +14,7 @@ namespace Test\Functional;
 use Indigo\Queue\Job;
 
 /**
- * Tests for MQ's ConnectorInterface
+ * Tests for MQ's Connector
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -22,7 +22,9 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
 {
     public function _after()
     {
-        $this->connector->clear('test');
+        if (!is_null($this->connector)) {
+            $this->connector->clear('test');
+        }
     }
 
     /**

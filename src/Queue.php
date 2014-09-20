@@ -11,7 +11,6 @@
 
 namespace Indigo\Queue;
 
-use Indigo\Queue\Connector\ConnectorInterface;
 use Jeremeamia\SuperClosure\SerializableClosure;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
@@ -28,7 +27,7 @@ class Queue implements LoggerAwareInterface
     /**
      * Connector object
      *
-     * @var ConnectorInterface
+     * @var Connector
      */
     protected $connector;
 
@@ -42,10 +41,10 @@ class Queue implements LoggerAwareInterface
     /**
      * Creates a new Queue
      *
-     * @param string             $queue
-     * @param ConnectorInterface $connector
+     * @param string    $queue
+     * @param Connector $connector
      */
-    public function __construct($queue, ConnectorInterface $connector)
+    public function __construct($queue, Connector $connector)
     {
         $this->queue = $queue;
 
@@ -66,7 +65,7 @@ class Queue implements LoggerAwareInterface
     /**
      * Returns the connector
      *
-     * @return ConnectorInterface
+     * @return Connector
      */
     public function getConnector()
     {
@@ -76,11 +75,11 @@ class Queue implements LoggerAwareInterface
     /**
      * Sets the connector
      *
-     * @param ConnectorInterface $connector
+     * @param Connector $connector
      *
      * @return this
      */
-    public function setConnector(ConnectorInterface $connector)
+    public function setConnector(Connector $connector)
     {
         $this->connector = $connector;
 

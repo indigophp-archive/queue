@@ -11,7 +11,8 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Connector;
+use Indigo\Queue\Manager;
 use Indigo\Queue\Job;
 use Indigo\Queue\Exception\QueueEmptyException;
 use Pheanstalk\Job as PheanstalkJob;
@@ -142,7 +143,7 @@ class BeanstalkdConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function delete(ManagerInterface $manager)
+    public function delete(Manager $manager)
     {
         $this->pheanstalk->delete($manager->getPheanstalkJob());
 
@@ -186,11 +187,11 @@ class BeanstalkdConnector extends AbstractConnector
     /**
      * Bury the job
      *
-     * @param ManagerInterface $manager
+     * @param Manager $manager
      *
      * @return boolean Always true
      */
-    public function bury(ManagerInterface $manager)
+    public function bury(Manager $manager)
     {
         $this->pheanstalk->bury($manager->getPheanstalkJob());
 
@@ -202,7 +203,7 @@ class BeanstalkdConnector extends AbstractConnector
      *
      * @param integer|null $priority
      */
-    public function release(ManagerInterface $manager, $delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
+    public function release(Manager $manager, $delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
     {
         $this->pheanstalk->release($manager->getPheanstalkJob(), $priority, $delay);
 

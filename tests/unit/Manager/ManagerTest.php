@@ -22,7 +22,7 @@ class ManagerTest extends AbstractManagerTest
 {
     public function _before()
     {
-        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface');
+        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector');
         $this->manager = new \DummyManager('test', $this->connector);
     }
 

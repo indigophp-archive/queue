@@ -14,7 +14,7 @@ namespace Test\Unit;
 use Codeception\TestCase\Test;
 
 /**
- * Tests for ConnectorInterface
+ * Tests for Connector
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -23,17 +23,17 @@ abstract class AbstractConnectorTest extends Test
     /**
      * Connector object
      *
-     * @var ConnectorInterface
+     * @var Connector
      */
     protected $connector;
 
     /**
      * Returns manager mock
      *
-     * @return ManagerInterface
+     * @return Manager
      */
     public function getManagerMock()
     {
-        return \Mockery::mock('Indigo\\Queue\\Manager\\ManagerInterface');
+        return \Mockery::mock('Indigo\\Queue\\Manager');
     }
 }

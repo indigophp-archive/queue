@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Manager;
+namespace Indigo\Queue;
 
 /**
- * Manager interface
+ * Manages one job from the queue
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-interface ManagerInterface
+interface Manager
 {
     /**
     * Executes the job
@@ -49,7 +49,7 @@ interface ManagerInterface
     /**
      * Returns the connector
      *
-     * @return ConnectorIterface
+     * @return Connector
      */
     public function getConnector();
 }

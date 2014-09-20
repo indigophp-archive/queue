@@ -9,17 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue;
 
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Manager;
 use Indigo\Queue\Job;
 
 /**
- * Connector inteface
+ * Implements connection details
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-interface ConnectorInterface
+interface Connector
 {
     /**
      * Checks whether connection is available
@@ -55,7 +55,7 @@ interface ConnectorInterface
     * @param string  $queue   Name of the queue
     * @param integer $timeout Wait timeout
     *
-    * @return ManagerInterface
+    * @return Manager
     *
     * @throws QueueEmptyException If no job can be returned
     */
@@ -73,11 +73,11 @@ interface ConnectorInterface
     /**
      * Deletes a job from queue
      *
-     * @param ManagerInterface $manager
+     * @param Manager $manager
      *
      * @return boolean Always true
      */
-    public function delete(ManagerInterface $manager);
+    public function delete(Manager $manager);
 
     /**
      * Clears the queue
@@ -91,10 +91,10 @@ interface ConnectorInterface
     /**
      * Releases a job back to the queue
      *
-     * @param ManagerInterface $manager
+     * @param Manager $manager
      * @param integer          $delay  Delay the job with x seconds, 0 means no delay
      *
      * @return boolean Always true
      */
-    public function release(ManagerInterface $manager, $delay = 0);
+    public function release(Manager $manager, $delay = 0);
 }

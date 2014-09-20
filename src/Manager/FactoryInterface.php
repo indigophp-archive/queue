@@ -11,6 +11,8 @@
 
 namespace Indigo\Queue\Manager;
 
+use Indigo\Queue\Manager;
+
 /**
  * Manager Factory
  *
@@ -25,9 +27,9 @@ interface FactoryInterface
     /**
      * Factory method
      *
-     * @param ManagerInterface $manager
+     * @param Manager $manager
      *
      * @return mixed
      */
-    public static function factory(ManagerInterface $manager);
+    public static function factory(Manager $manager);
 }

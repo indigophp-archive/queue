@@ -11,6 +11,7 @@
 
 namespace Indigo\Queue\Connector;
 
+use Indigo\Queue\Connector;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
 
@@ -19,7 +20,7 @@ use Psr\Log\NullLogger;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractConnector implements ConnectorInterface, LoggerAwareInterface
+abstract class AbstractConnector implements Connector, LoggerAwareInterface
 {
     use \Psr\Log\LoggerAwareTrait;
 

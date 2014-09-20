@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue\Job;
 
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Manager;
 use Psr\Log\LoggerAwareInterface;
 
 /**
@@ -26,7 +26,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface
 	/**
 	 * {@inheritdoc}
 	 */
-	public function fail(ManagerInterface $manager, \Exception $e)
+	public function fail(Manager $manager, \Exception $e)
 	{
 		$this->logger->error($e->getMessage());
 

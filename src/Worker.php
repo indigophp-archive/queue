@@ -11,7 +11,6 @@
 
 namespace Indigo\Queue;
 
-use Indigo\Queue\Connector\ConnectorInterface;
 use Indigo\Queue\Connector\DirectConnector;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Indigo\Queue\Exception\QueueEmptyException;
@@ -39,7 +38,7 @@ class Worker implements LoggerAwareInterface
     /**
      * Connector
      *
-     * @var ConnectorInterface
+     * @var Connector
      */
     protected $connector;
 
@@ -58,9 +57,9 @@ class Worker implements LoggerAwareInterface
      * Creates a new Worker
      *
      * @param string             $queue
-     * @param ConnectorInterface $connector
+     * @param Connector $connector
      */
-    public function __construct($queue, ConnectorInterface $connector)
+    public function __construct($queue, Connector $connector)
     {
         if ($connector instanceof DirectConnector) {
             throw new \InvalidArgumentException('DirectConnector should not be used in a Worker');
@@ -107,11 +106,11 @@ class Worker implements LoggerAwareInterface
     }
 
     /**
-     * Returns a ManagerInterface
+     * Returns a Manager
      *
      * @param integer $timeout Wait timeout for pop
      *
-     * @return ManagerInterface Returns null if $manager is not a valid ManagerIterface
+     * @return Manager Returns null if $manager is not a valid ManagerIterface
      */
     protected function getManager($timeout = 0)
     {

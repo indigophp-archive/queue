@@ -15,7 +15,7 @@ use Indigo\Queue\Job;
 use Codeception\TestCase\Test;
 
 /**
- * Tests for ConnectorInterface
+ * Tests for Connector
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -24,7 +24,7 @@ abstract class AbstractConnectorTest extends Test
     /**
      * Connector object
      *
-     * @var ConnectorInterface
+     * @var Connector
      */
     protected $connector;
 

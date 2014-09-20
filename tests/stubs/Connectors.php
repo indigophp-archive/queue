@@ -11,7 +11,7 @@
 
 use Indigo\Queue\Connector\AbstractConnector;
 use Indigo\Queue\Job;
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Manager;
 
 /**
  * Dummy Connector
@@ -68,7 +68,7 @@ class DummyConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function delete(ManagerInterface $manager)
+    public function delete(Manager $manager)
     {
         return true;
     }
@@ -84,7 +84,7 @@ class DummyConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function release(ManagerInterface $manager, $delay = 0)
+    public function release(Manager $manager, $delay = 0)
     {
         return true;
     }

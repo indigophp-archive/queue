@@ -11,7 +11,8 @@
 
 namespace Indigo\Queue\Manager;
 
-use Indigo\Queue\Connector\ConnectorInterface;
+use Indigo\Queue\Manager;
+use Indigo\Queue\Connector;
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Indigo\Queue\Exception\InvalidJobException;
@@ -25,14 +26,14 @@ use Psr\Log\NullLogger;
  *
  * @codeCoverageIgnore
  */
-abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
+abstract class AbstractManager implements Manager, LoggerAwareInterface
 {
     use \Psr\Log\LoggerAwareTrait;
 
     /**
      * Connector object
      *
-     * @var ConnectorInterface
+     * @var Connector
      */
     protected $connector;
 
@@ -64,10 +65,10 @@ abstract class AbstractManager implements ManagerInterface, LoggerAwareInterface
     /**
      * Creates a new connector
      *
-     * @param string             $queue
-     * @param ConnectorInterface $connector
+     * @param string    $queue
+     * @param Connector $connector
      */
-    public function __construct($queue, ConnectorInterface $connector)
+    public function __construct($queue, Connector $connector)
     {
         $this->queue = $queue;
         $this->connector = $connector;

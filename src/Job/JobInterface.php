@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue\Job;
 
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Manager;
 
 /**
  * Job interface
@@ -25,19 +25,19 @@ interface JobInterface
     /**
      * This is the execute callback
      *
-     * @param ManagerInterface $manager
+     * @param Manager $manager
      *
      * @return mixed
      */
-    public function execute(ManagerInterface $manager);
+    public function execute(Manager $manager);
 
     /**
      * This is the failure callback
      *
-     * @param ManagerInterface $manager
+     * @param Manager $manager
      * @param Exception        $e Any exceptions thrown during execution
      *
      * @return mixed
      */
-    public function fail(ManagerInterface $manager, \Exception $e);
+    public function fail(Manager $manager, \Exception $e);
 }

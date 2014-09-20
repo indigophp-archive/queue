@@ -11,7 +11,8 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Connector;
+use Indigo\Queue\Manager;
 use Indigo\Queue\Job;
 use Indigo\Queue\Exception\QueueEmptyException;
 use PhpAmqpLib\Connection\AbstractConnection as AMQPConnection;
@@ -262,7 +263,7 @@ class RabbitConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function delete(ManagerInterface $manager)
+    public function delete(Manager $manager)
     {
         $manager->getChannel()->basic_ack($manager->getMessage()->delivery_info['delivery_tag']);
 
@@ -284,7 +285,7 @@ class RabbitConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function release(ManagerInterface $manager, $delay = 0)
+    public function release(Manager $manager, $delay = 0)
     {
         $payload = $manager->getPayload();
         $payload['attempts'] = isset($payload['attempts']) ? $payload['attempts'] + 1 : 2;

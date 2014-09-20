@@ -11,7 +11,8 @@
 
 namespace Indigo\Queue\Connector;
 
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Connector;
+use Indigo\Queue\Manager;
 use Indigo\Queue\Job;
 use Indigo\Queue\Exception\QueueEmptyException;
 
@@ -102,7 +103,7 @@ class IronConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function delete(ManagerInterface $manager)
+    public function delete(Manager $manager)
     {
         $this->iron->deleteMessage($manager->getQueue(), $manager->getIronJob()->id);
 
@@ -122,7 +123,7 @@ class IronConnector extends AbstractConnector
     /**
      * {@inheritdoc}
      */
-    public function release(ManagerInterface $manager, $delay = 0)
+    public function release(Manager $manager, $delay = 0)
     {
         $this->iron->releaseMessage($manager->getQueue(), $manager->getIronJob()->id, $delay);
 

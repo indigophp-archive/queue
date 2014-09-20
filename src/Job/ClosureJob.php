@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue\Job;
 
-use Indigo\Queue\Manager\ManagerInterface;
+use Indigo\Queue\Manager;
 
 /**
  * Closure job
@@ -32,7 +32,7 @@ class ClosureJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function execute(ManagerInterface $manager)
+    public function execute(Manager $manager)
     {
         $payload = $manager->getPayload();
         $closure = unserialize($payload['closure']);
@@ -43,7 +43,7 @@ class ClosureJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function fail(ManagerInterface $manager, \Exception $e = null)
+    public function fail(Manager $manager, \Exception $e = null)
     {
     }
 }

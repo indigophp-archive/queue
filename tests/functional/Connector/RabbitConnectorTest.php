@@ -39,6 +39,9 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
         try {
             $amqp = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
         } catch (AMQPRuntimeException $e) {
+            $this->markTestSkipped(
+                'Rabbit credentials are not available.'
+            );
         }
 
         $this->connector = new RabbitConnector($amqp);

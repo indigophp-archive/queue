@@ -21,13 +21,13 @@ use Codeception\TestCase\Test;
 abstract class AbstractJobTest extends Test
 {
     /**
-     * Returns a new ManagerInterface
+     * Returns a new Manager
      *
-     * @return ManagerInterface
+     * @return Manager
      */
     public function getManagerMock()
     {
-        $mock = \Mockery::mock('Indigo\\Queue\\Manager\\ManagerInterface');
+        $mock = \Mockery::mock('Indigo\\Queue\\Manager');
 
         $mock->shouldReceive('getPayload')
             ->andReturn([])

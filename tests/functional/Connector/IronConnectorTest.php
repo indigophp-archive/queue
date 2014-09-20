@@ -43,8 +43,6 @@ class IronConnectorTest extends AbstractMQConnectorTest
             $this->markTestSkipped(
                 'IronMQ credentials are not available.'
             );
-
-            return;
         }
 
         $config['protocol'] = 'http';
