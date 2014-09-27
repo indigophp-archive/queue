@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue\Manager;
 
-use Indigo\Queue\Connector\IronConnector;
+use Indigo\Queue\Adapter\IronAdapter;
 
 /**
  * Iron Manager
@@ -32,14 +32,14 @@ class IronManager extends AbstractManager
      *
      * @param string        $queue
      * @param stdClass      $job
-     * @param IronConnector $connector
+     * @param IronAdapter $adapter
      */
-    public function __construct($queue, \stdClass $job, IronConnector $connector)
+    public function __construct($queue, \stdClass $job, IronAdapter $adapter)
     {
         $this->ironJob   = $job;
         $this->payload = json_decode($job->body, true);
 
-        parent::__construct($queue, $connector);
+        parent::__construct($queue, $adapter);
     }
 
     /**

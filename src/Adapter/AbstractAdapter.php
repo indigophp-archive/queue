@@ -9,18 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue\Adapter;
 
-use Indigo\Queue\Connector;
+use Indigo\Queue\Adapter;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\NullLogger;
 
 /**
- * Abstract Connector class
+ * Abstract Adapter class
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractConnector implements Connector, LoggerAwareInterface
+abstract class AbstractAdapter implements Adapter, LoggerAwareInterface
 {
     use \Psr\Log\LoggerAwareTrait;
 
@@ -42,7 +42,7 @@ abstract class AbstractConnector implements Connector, LoggerAwareInterface
     protected $managerClass;
 
     /**
-     * Creates a new Connector
+     * Creates a new Adapter
      *
      * @codeCoverageIgnore
      */
@@ -51,12 +51,12 @@ abstract class AbstractConnector implements Connector, LoggerAwareInterface
         $this->setLogger(new NullLogger);
 
         if (empty($this->managerClass)) {
-            $this->managerClass = str_replace('Connector', 'Manager', get_called_class());
+            $this->managerClass = str_replace('Adapter', 'Manager', get_called_class());
         }
     }
 
     /**
-     * Returns the manager class for connector
+     * Returns the manager class for Adapter
      *
      * @return string
      */

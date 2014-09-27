@@ -11,25 +11,25 @@
 
 namespace Test\Unit;
 
-use Indigo\Queue\Connector\IronConnector;
+use Indigo\Queue\Adapter\IronAdapter;
 
 /**
- * Tests for IronConnector
+ * Tests for IronAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\IronConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\IronAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Iron
  */
-class IronConnectorTest extends AbstractConnectorTest
+class IronAdapterTest extends AbstractAdapterTest
 {
     public function _before()
     {
         $iron = \Mockery::mock('IronMQ');
 
-        $this->connector = new IronConnector($iron);
+        $this->adapter = new IronAdapter($iron);
     }
 
     /**
@@ -39,9 +39,9 @@ class IronConnectorTest extends AbstractConnectorTest
     {
         $iron = \Mockery::mock('IronMQ');
 
-        $connector = new IronConnector($iron);
+        $adapter = new IronAdapter($iron);
 
-        $this->assertSame($iron, $connector->getIron());
+        $this->assertSame($iron, $adapter->getIron());
     }
 
     /**
@@ -49,7 +49,7 @@ class IronConnectorTest extends AbstractConnectorTest
      */
     public function testConnection()
     {
-        $this->assertTrue($this->connector->isConnected());
+        $this->assertTrue($this->adapter->isConnected());
     }
 
     /**
@@ -60,8 +60,8 @@ class IronConnectorTest extends AbstractConnectorTest
     {
         $iron = \Mockery::mock('IronMQ');
 
-        $this->assertSame($this->connector, $this->connector->setIron($iron));
-        $this->assertSame($iron, $this->connector->getIron());
+        $this->assertSame($this->adapter, $this->adapter->setIron($iron));
+        $this->assertSame($iron, $this->adapter->getIron());
     }
 
     /**
@@ -72,12 +72,12 @@ class IronConnectorTest extends AbstractConnectorTest
      */
     public function testEmptyPop()
     {
-        $iron = $this->connector->getIron();
+        $iron = $this->adapter->getIron();
 
         $iron->shouldReceive('getMessage')
             ->andReturn(null);
 
-        $this->connector->pop('test');
+        $this->adapter->pop('test');
     }
 
     /**
@@ -88,11 +88,11 @@ class IronConnectorTest extends AbstractConnectorTest
         $stat = new \stdClass;
         $stat->size = 1;
 
-        $iron = $this->connector->getIron();
+        $iron = $this->adapter->getIron();
 
         $iron->shouldReceive('getQueue')
             ->andReturn($stat);
 
-        $this->assertEquals(1, $this->connector->count('test'));
+        $this->assertEquals(1, $this->adapter->count('test'));
     }
 }

@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue\Manager;
 
-use Indigo\Queue\Connector\DirectConnector;
+use Indigo\Queue\Adapter\DirectAdapter;
 
 /**
  * Direct Manager
@@ -25,13 +25,13 @@ class DirectManager extends AbstractManager
      *
      * @param string          $queue
      * @param []              $payload
-     * @param DirectConnector $connector
+     * @param DirectAdapter $adapter
      */
-    public function __construct($queue, array $payload, DirectConnector $connector)
+    public function __construct($queue, array $payload, DirectAdapter $adapter)
     {
         $this->payload = $payload;
 
-        parent::__construct($queue, $connector);
+        parent::__construct($queue, $adapter);
     }
 
     /**

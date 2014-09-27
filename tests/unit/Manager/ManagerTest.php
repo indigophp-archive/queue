@@ -22,17 +22,17 @@ class ManagerTest extends AbstractManagerTest
 {
     public function _before()
     {
-        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector');
-        $this->manager = new \DummyManager('test', $this->connector);
+        $this->adapter = \Mockery::mock('Indigo\\Queue\\Adapter');
+        $this->manager = new \DummyManager('test', $this->adapter);
     }
 
     /**
-     * @covers ::getConnector
+     * @covers ::getAdapter
      * @group  Queue
      */
-    public function testConnector()
+    public function testAdapter()
     {
-        $this->assertSame($this->connector, $this->manager->getConnector());
+        $this->assertSame($this->adapter, $this->manager->getAdapter());
     }
 
     /**

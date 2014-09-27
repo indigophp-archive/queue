@@ -19,7 +19,7 @@ use Indigo\Queue\Job;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-interface Connector
+interface Adapter
 {
     /**
      * Checks whether connection is available

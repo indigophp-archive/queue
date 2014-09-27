@@ -14,18 +14,18 @@ namespace Test\Unit;
 use Codeception\TestCase\Test;
 
 /**
- * Tests for Connector
+ * Tests for Adapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractConnectorTest extends Test
+abstract class AbstractAdapterTest extends Test
 {
     /**
-     * Connector object
+     * Adapter object
      *
-     * @var Connector
+     * @var Adapter
      */
-    protected $connector;
+    protected $adapter;
 
     /**
      * Returns manager mock

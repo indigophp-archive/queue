@@ -12,19 +12,19 @@
 namespace Test\Unit;
 
 /**
- * Tests for AbstractConnector
+ * Tests for AbstractAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\AbstractConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\AbstractAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  */
-class ConnectorTest extends AbstractConnectorTest
+class AdapterTest extends AbstractAdapterTest
 {
     public function _before()
     {
-        $this->connector = new \DummyConnector;
+        $this->adapter = new \DummyAdapter;
     }
 
     /**
@@ -32,6 +32,6 @@ class ConnectorTest extends AbstractConnectorTest
      */
     public function testManager()
     {
-        $this->assertEquals('Fake\\Class', $this->connector->getManagerClass());
+        $this->assertEquals('Fake\\Class', $this->adapter->getManagerClass());
     }
 }

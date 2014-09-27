@@ -11,21 +11,21 @@
 
 namespace Test\Functional;
 
-use Indigo\Queue\Connector\IronConnector;
+use Indigo\Queue\Adapter\IronAdapter;
 use Indigo\Queue\Job;
 use IronMQ;
 
 /**
- * Tests for IronConnector
+ * Tests for IronAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\IronConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\IronAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Iron
  */
-class IronConnectorTest extends AbstractMQConnectorTest
+class IronAdapterTest extends AbstractMQAdapterTest
 {
     public function _before()
     {
@@ -52,11 +52,11 @@ class IronConnectorTest extends AbstractMQConnectorTest
 
         $iron->ssl_verifypeer = false;
 
-        $this->connector = new IronConnector($iron);
+        $this->adapter = new IronAdapter($iron);
 
-        $this->connector->clear('test');
-        $this->connector->clear('test_clear');
-        $this->connector->clear('test_count');
+        $this->adapter->clear('test');
+        $this->adapter->clear('test_clear');
+        $this->adapter->clear('test_count');
     }
 
     /**
@@ -65,7 +65,7 @@ class IronConnectorTest extends AbstractMQConnectorTest
      */
     public function testPush(Job $job)
     {
-        $push = $this->connector->push('test', $job);
+        $push = $this->adapter->push('test', $job);
 
         $this->assertInstanceOf('stdClass', $push);
     }
@@ -76,7 +76,7 @@ class IronConnectorTest extends AbstractMQConnectorTest
      */
     public function testDelayed(Job $job)
     {
-        $delayed = $this->connector->delayed('test', 1, $job);
+        $delayed = $this->adapter->delayed('test', 1, $job);
 
         $this->assertInstanceOf('stdClass', $delayed);
     }

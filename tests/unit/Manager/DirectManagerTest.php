@@ -27,9 +27,9 @@ class DirectManagerTest extends AbstractManagerTest
 {
     public function _before()
     {
-        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\DirectConnector');
+        $this->adapter = \Mockery::mock('Indigo\\Queue\\Adapter\\DirectAdapter');
 
-        $this->manager = new DirectManager('test', ['payload'], $this->connector);
+        $this->manager = new DirectManager('test', ['payload'], $this->adapter);
     }
 
     /**
@@ -37,11 +37,11 @@ class DirectManagerTest extends AbstractManagerTest
      */
     public function testConstruct()
     {
-        $manager = new DirectManager('test', ['payload'], $this->connector);
+        $manager = new DirectManager('test', ['payload'], $this->adapter);
 
         $this->assertEquals('test', $manager->getQueue());
         $this->assertEquals(['payload'], $manager->getPayload());
-        $this->assertSame($this->connector, $manager->getConnector());
+        $this->assertSame($this->adapter, $manager->getAdapter());
     }
 
     /**

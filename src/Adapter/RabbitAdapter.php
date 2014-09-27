@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue\Adapter;
 
-use Indigo\Queue\Connector;
+use Indigo\Queue\Adapter;
 use Indigo\Queue\Manager;
 use Indigo\Queue\Job;
 use Indigo\Queue\Exception\QueueEmptyException;
@@ -20,11 +20,11 @@ use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
 
 /**
- * Rabbit connector
+ * Rabbit Adapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class RabbitConnector extends AbstractConnector
+class RabbitAdapter extends AbstractAdapter
 {
     /**
      * AMQP object
@@ -48,7 +48,7 @@ class RabbitConnector extends AbstractConnector
     protected $persistent = true;
 
     /**
-     * Creates a new RabbitConnector
+     * Creates a new RabbitAdapter
      *
      * @param AMQPConnection $amqp
      * @param boolean        $persistent

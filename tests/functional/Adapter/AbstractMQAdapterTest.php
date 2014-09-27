@@ -14,16 +14,16 @@ namespace Test\Functional;
 use Indigo\Queue\Job;
 
 /**
- * Tests for MQ's Connector
+ * Tests for MQ's Adapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractMQConnectorTest extends AbstractConnectorTest
+abstract class AbstractMQAdapterTest extends AbstractAdapterTest
 {
     public function _after()
     {
-        if (!is_null($this->connector)) {
-            $this->connector->clear('test');
+        if (!is_null($this->adapter)) {
+            $this->adapter->clear('test');
         }
     }
 
@@ -39,7 +39,7 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
         foreach ($jobs as $job) {
             $job = reset($job);
 
-            $this->connector->push($queue, $job);
+            $this->adapter->push($queue, $job);
         }
 
         return $jobs;
@@ -52,16 +52,16 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testPop(Job $job)
     {
-        $this->connector->push('test', $job);
+        $this->adapter->push('test', $job);
 
-        $manager = $this->connector->pop('test');
+        $manager = $this->adapter->pop('test');
 
         $this->assertInstanceOf(
-            $this->connector->getManagerClass(),
+            $this->adapter->getManagerClass(),
             $manager
         );
 
-        $this->assertTrue($this->connector->delete($manager));
+        $this->assertTrue($this->adapter->delete($manager));
     }
 
     /**
@@ -69,14 +69,14 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testCount()
     {
-        $this->connector->clear('test_count');
-        $count = (int) $this->connector->count('test_count');
+        $this->adapter->clear('test_count');
+        $count = (int) $this->adapter->count('test_count');
 
         $jobs = $this->pushJobs('test_count');
 
-        $this->assertEquals($count + count($jobs), $this->connector->count('test_count'));
+        $this->assertEquals($count + count($jobs), $this->adapter->count('test_count'));
 
-        $this->connector->clear('test_count');
+        $this->adapter->clear('test_count');
     }
 
     /**
@@ -84,8 +84,8 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testClear()
     {
-        $this->assertTrue($this->connector->clear('test_clear'));
-        $this->assertEquals(0, $this->connector->count('test_clear'));
+        $this->assertTrue($this->adapter->clear('test_clear'));
+        $this->assertEquals(0, $this->adapter->count('test_clear'));
     }
 
     /**
@@ -95,10 +95,10 @@ abstract class AbstractMQConnectorTest extends AbstractConnectorTest
      */
     public function testRelease(Job $job)
     {
-        $this->connector->push('test', $job);
+        $this->adapter->push('test', $job);
 
-        $manager = $this->connector->pop('test');
+        $manager = $this->adapter->pop('test');
 
-        $this->assertTrue($this->connector->release($manager));
+        $this->assertTrue($this->adapter->release($manager));
     }
 }

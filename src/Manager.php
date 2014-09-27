@@ -47,9 +47,9 @@ interface Manager
     public function getQueue();
 
     /**
-     * Returns the connector
+     * Returns the adapter
      *
-     * @return Connector
+     * @return Adapter
      */
-    public function getConnector();
+    public function getAdapter();
 }

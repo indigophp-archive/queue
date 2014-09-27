@@ -11,23 +11,23 @@
 
 namespace Test\Unit;
 
-use Indigo\Queue\Connector\DirectConnector;
+use Indigo\Queue\Adapter\DirectAdapter;
 
 /**
- * Tests for DirectConnector
+ * Tests for DirectAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\DirectConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\DirectAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Direct
  */
-class DirectConnectorTest extends AbstractConnectorTest
+class DirectAdapterTest extends AbstractAdapterTest
 {
     public function _before()
     {
-        $this->connector = new DirectConnector;
+        $this->adapter = new DirectAdapter;
     }
 
     /**
@@ -35,7 +35,7 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testConnection()
     {
-        $this->assertTrue($this->connector->isConnected());
+        $this->assertTrue($this->adapter->isConnected());
     }
 
     /**
@@ -46,7 +46,7 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testEmptyPop()
     {
-        $this->connector->pop('test');
+        $this->adapter->pop('test');
     }
 
     /**
@@ -54,7 +54,7 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testCount()
     {
-        $this->assertEquals(1, $this->connector->count(''));
+        $this->assertEquals(1, $this->adapter->count(''));
     }
 
     /**
@@ -62,7 +62,7 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testDelete()
     {
-        $this->assertTrue($this->connector->delete($this->getManagerMock()));
+        $this->assertTrue($this->adapter->delete($this->getManagerMock()));
     }
 
     /**
@@ -70,7 +70,7 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testClear()
     {
-        $this->assertTrue($this->connector->clear(''));
+        $this->assertTrue($this->adapter->clear(''));
     }
 
     /**
@@ -78,6 +78,6 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testRelease()
     {
-        $this->assertTrue($this->connector->release($this->getManagerMock()));
+        $this->assertTrue($this->adapter->release($this->getManagerMock()));
     }
 }

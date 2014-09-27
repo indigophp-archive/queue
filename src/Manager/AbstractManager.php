@@ -12,7 +12,7 @@
 namespace Indigo\Queue\Manager;
 
 use Indigo\Queue\Manager;
-use Indigo\Queue\Connector;
+use Indigo\Queue\Adapter;
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Indigo\Queue\Exception\InvalidJobException;
@@ -31,11 +31,11 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
     use \Psr\Log\LoggerAwareTrait;
 
     /**
-     * Connector object
+     * Adapter object
      *
-     * @var Connector
+     * @var Adapter
      */
-    protected $connector;
+    protected $adapter;
 
     /**
      * Payload
@@ -63,15 +63,15 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
     ];
 
     /**
-     * Creates a new connector
+     * Creates a new Adapter
      *
      * @param string    $queue
-     * @param Connector $connector
+     * @param Adapter $adapter
      */
-    public function __construct($queue, Connector $connector)
+    public function __construct($queue, Adapter $adapter)
     {
         $this->queue = $queue;
-        $this->connector = $connector;
+        $this->adapter = $adapter;
 
         $this->setLogger(new NullLogger);
     }
@@ -95,9 +95,9 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function getConnector()
+    public function getAdapter()
     {
-        return $this->connector;
+        return $this->adapter;
     }
 
 
@@ -203,7 +203,7 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
     protected function autoRetry()
     {
         if ($this->attempts() <= $this->config['retry']) {
-            return $this->connector->release($this, $this->config['delay']);
+            return $this->adapter->release($this, $this->config['delay']);
         }
     }
 
@@ -216,7 +216,7 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
      */
     protected function autoDelete()
     {
-        return $this->config['delete'] === true and $this->connector->delete($this);
+        return $this->config['delete'] === true and $this->adapter->delete($this);
     }
 
     /**

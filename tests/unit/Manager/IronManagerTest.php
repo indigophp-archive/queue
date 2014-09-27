@@ -32,9 +32,9 @@ class IronManagerTest extends AbstractManagerTest
         $this->ironJob->body = json_encode([]);
         $this->ironJob->reserved_count = 1;
 
-        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\IronConnector');
+        $this->adapter = \Mockery::mock('Indigo\\Queue\\Adapter\\IronAdapter');
 
-        $this->manager = new IronManager('test', $this->ironJob, $this->connector);
+        $this->manager = new IronManager('test', $this->ironJob, $this->adapter);
     }
 
     /**
@@ -42,7 +42,7 @@ class IronManagerTest extends AbstractManagerTest
      */
     public function testConstruct()
     {
-        $manager = new IronManager('test', $this->ironJob, $this->connector);
+        $manager = new IronManager('test', $this->ironJob, $this->adapter);
 
         $this->assertSame($this->ironJob, $this->manager->getIronJob());
     }

@@ -39,9 +39,9 @@ class BeanstalkdManagerTest extends AbstractManagerTest
         $this->pheanstalkJob->shouldReceive('getData')
             ->andReturn(json_encode([]));
 
-        $this->connector = \Mockery::mock('Indigo\Queue\Connector\BeanstalkdConnector');
+        $this->adapter = \Mockery::mock('Indigo\\Queue\\Adapter\\BeanstalkdAdapter');
 
-        $this->manager = new BeanstalkdManager('test', $this->pheanstalkJob, $this->connector);
+        $this->manager = new BeanstalkdManager('test', $this->pheanstalkJob, $this->adapter);
     }
 
     /**
@@ -49,7 +49,7 @@ class BeanstalkdManagerTest extends AbstractManagerTest
      */
     public function testConstruct()
     {
-        $manager = new BeanstalkdManager('test', $this->pheanstalkJob, $this->connector);
+        $manager = new BeanstalkdManager('test', $this->pheanstalkJob, $this->adapter);
 
         $this->assertSame($this->pheanstalkJob, $this->manager->getPheanstalkJob());
     }
@@ -62,7 +62,7 @@ class BeanstalkdManagerTest extends AbstractManagerTest
         $stat = new \stdClass;
         $stat->reserves = 1;
 
-        $this->connector->shouldReceive('getPheanstalk->statsJob')
+        $this->adapter->shouldReceive('getPheanstalk->statsJob')
             ->andReturn($stat);
 
         $this->assertEquals(1, $this->manager->attempts());

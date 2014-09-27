@@ -26,11 +26,11 @@ use Codeception\TestCase\Test;
 class QueueTest extends Test
 {
     /**
-     * Connector mock
+     * Adapter mock
      *
-     * @var Indigo\Queue\Connector
+     * @var Indigo\Queue\Adapter
      */
-    protected $connector;
+    protected $adapter;
 
     /**
      * Queue object
@@ -41,9 +41,9 @@ class QueueTest extends Test
 
     public function _before()
     {
-        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector');
+        $this->adapter = \Mockery::mock('Indigo\\Queue\\Adapter');
 
-        $this->queue = new Queue('test', $this->connector);
+        $this->queue = new Queue('test', $this->adapter);
     }
 
     /**
@@ -53,9 +53,9 @@ class QueueTest extends Test
      */
     public function testConstruct()
     {
-        $queue = new Queue('test', $this->connector);
+        $queue = new Queue('test', $this->adapter);
 
-        $this->assertSame($this->connector, $queue->getConnector());
+        $this->assertSame($this->adapter, $queue->getAdapter());
         $this->assertEquals('test', $queue->getQueue());
     }
 
@@ -72,15 +72,15 @@ class QueueTest extends Test
     }
 
     /**
-     * @covers ::getConnector
-     * @covers ::setConnector
+     * @covers ::getAdapter
+     * @covers ::setAdapter
      * @group  Queue
      * @group  Main
      */
-    public function testConnector()
+    public function testAdapter()
     {
-        $this->assertSame($this->queue, $this->queue->setConnector($this->connector));
-        $this->assertSame($this->connector, $this->queue->getConnector());
+        $this->assertSame($this->queue, $this->queue->setAdapter($this->adapter));
+        $this->assertSame($this->adapter, $this->queue->getAdapter());
     }
 
     /**
@@ -90,7 +90,7 @@ class QueueTest extends Test
      */
     public function testPush()
     {
-        $this->connector->shouldReceive('push')
+        $this->adapter->shouldReceive('push')
             ->andReturn(null);
 
         $job = \Mockery::mock('Indigo\\Queue\\Job');
@@ -105,7 +105,7 @@ class QueueTest extends Test
      */
     public function testDelayed()
     {
-        $this->connector->shouldReceive('delayed')
+        $this->adapter->shouldReceive('delayed')
             ->andReturn(null);
 
         $job = \Mockery::mock('Indigo\\Queue\\Job');

@@ -11,22 +11,22 @@
 
 namespace Test\Functional;
 
-use Indigo\Queue\Connector\RabbitConnector;
+use Indigo\Queue\Adapter\RabbitAdapter;
 use Indigo\Queue\Job;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
 
 /**
- * Tests for RabbitConnector
+ * Tests for RabbitAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\RabbitConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\RabbitAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Rabbit
  */
-class RabbitConnectorTest extends AbstractMQConnectorTest
+class RabbitAdapterTest extends AbstractMQAdapterTest
 {
     public function _before()
     {
@@ -44,17 +44,17 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
             );
         }
 
-        $this->connector = new RabbitConnector($amqp);
+        $this->adapter = new RabbitAdapter($amqp);
 
-        if ($this->connector->isConnected() === false) {
+        if ($this->adapter->isConnected() === false) {
             $this->markTestSkipped(
                 'RabbitMQ connection not available.'
             );
         }
 
-        $this->connector->clear('test');
-        $this->connector->clear('test_clear');
-        $this->connector->clear('test_count');
+        $this->adapter->clear('test');
+        $this->adapter->clear('test_clear');
+        $this->adapter->clear('test_count');
     }
 
     /**
@@ -62,7 +62,7 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
      */
     public function testConnected()
     {
-        $this->assertTrue($this->connector->isConnected());
+        $this->assertTrue($this->adapter->isConnected());
     }
 
     /**
@@ -71,7 +71,7 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
      */
     public function testPush(Job $job)
     {
-        $this->assertNull($this->connector->push('test', $job));
+        $this->assertNull($this->adapter->push('test', $job));
     }
 
     /**
@@ -80,7 +80,7 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
      */
     public function testDelayed(Job $job)
     {
-        $this->assertNull($this->connector->delayed('test', 1, $job));
+        $this->assertNull($this->adapter->delayed('test', 1, $job));
     }
 
     /**
@@ -91,7 +91,7 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
      */
     public function testEmptyPop()
     {
-        $this->connector->pop('test');
+        $this->adapter->pop('test');
     }
 
     /**
@@ -100,11 +100,11 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
      */
     public function testReleaseDelayed(Job $job)
     {
-        $this->connector->push('test', $job);
+        $this->adapter->push('test', $job);
 
-        $manager = $this->connector->pop('test');
+        $manager = $this->adapter->pop('test');
 
-        $this->assertTrue($this->connector->release($manager, 1));
+        $this->assertTrue($this->adapter->release($manager, 1));
     }
 
     /**
@@ -113,11 +113,11 @@ class RabbitConnectorTest extends AbstractMQConnectorTest
      */
     public function testChannel()
     {
-        $expected = $this->connector->getChannel();
+        $expected = $this->adapter->getChannel();
 
         $this->assertInstanceOf('PhpAmqpLib\\Channel\\AMQPChannel', $expected);
 
-        $actual = $this->connector->regenerateChannel();
+        $actual = $this->adapter->regenerateChannel();
 
         $this->assertInstanceOf('PhpAmqpLib\\Channel\\AMQPChannel', $actual);
 

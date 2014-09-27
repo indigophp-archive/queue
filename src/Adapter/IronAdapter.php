@@ -9,19 +9,19 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue\Adapter;
 
-use Indigo\Queue\Connector;
+use Indigo\Queue\Adapter;
 use Indigo\Queue\Manager;
 use Indigo\Queue\Job;
 use Indigo\Queue\Exception\QueueEmptyException;
 
 /**
- * Iron Connector
+ * Iron Adapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class IronConnector extends AbstractConnector
+class IronAdapter extends AbstractAdapter
 {
     /**
      * IronMQ object
@@ -31,7 +31,7 @@ class IronConnector extends AbstractConnector
     protected $iron;
 
     /**
-     * Creates a new IronConnector
+     * Creates a new IronAdapter
      *
      * @param IronMQ $iron
      */

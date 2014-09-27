@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Connector;
+namespace Indigo\Queue\Adapter;
 
-use Indigo\Queue\Connector;
+use Indigo\Queue\Adapter;
 use Indigo\Queue\Manager;
 use Indigo\Queue\Job;
 use Indigo\Queue\Exception\QueueEmptyException;
@@ -20,11 +20,11 @@ use Pheanstalk\PheanstalkInterface;
 use Pheanstalk\Exception\ServerException;
 
 /**
- * Beanstalkd Connector
+ * Beanstalkd Adapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class BeanstalkdConnector extends AbstractConnector
+class BeanstalkdAdapter extends AbstractAdapter
 {
     /**
      * {@inheritdoc}
@@ -43,7 +43,7 @@ class BeanstalkdConnector extends AbstractConnector
     protected $pheanstalk;
 
     /**
-     * Creates a new BeanstalkdConnector
+     * Creates a new BeanstalkdAdapter
      *
      * @param PheanstalkInterface $pheanstalk
      */
@@ -69,7 +69,7 @@ class BeanstalkdConnector extends AbstractConnector
      *
      * @param PheanstalkInterface $pheanstalk
      *
-     * @return BeanstalkdConnector
+     * @return BeanstalkdAdapter
      */
     public function setPheanstalk(PheanstalkInterface $pheanstalk)
     {

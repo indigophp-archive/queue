@@ -11,24 +11,24 @@
 
 namespace Test\Functional;
 
-use Indigo\Queue\Connector\DirectConnector;
+use Indigo\Queue\Adapter\DirectAdapter;
 use Indigo\Queue\Job;
 
 /**
- * Tests for DirectConnector
+ * Tests for DirectAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\DirectConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\DirectAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Direct
  */
-class DirectConnectorTest extends AbstractConnectorTest
+class DirectAdapterTest extends AbstractAdapterTest
 {
     public function _before()
     {
-        $this->connector = new DirectConnector;
+        $this->adapter = new DirectAdapter;
     }
 
     /**
@@ -38,7 +38,7 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testPush(Job $job)
     {
-        $this->assertTrue($this->connector->push('test', $job));
+        $this->assertTrue($this->adapter->push('test', $job));
     }
 
     /**
@@ -49,6 +49,6 @@ class DirectConnectorTest extends AbstractConnectorTest
      */
     public function testDelayed(Job $job)
     {
-        $this->assertTrue($this->connector->delayed('test', 0.5, $job));
+        $this->assertTrue($this->adapter->delayed('test', 0.5, $job));
     }
 }

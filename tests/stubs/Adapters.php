@@ -9,26 +9,21 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Queue\Connector;
-
-use Indigo\Queue\Connector;
-use Indigo\Queue\Manager;
+use Indigo\Queue\Adapter\AbstractAdapter;
 use Indigo\Queue\Job;
-use Indigo\Queue\Exception\QueueEmptyException;
+use Indigo\Queue\Manager;
 
 /**
- * Direct Connector for running jobs immediately
+ * Dummy Adapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class DirectConnector extends AbstractConnector
+class DummyAdapter extends AbstractAdapter
 {
     /**
-     * Last added job
-     *
-     * @var Job
+     * {@inheritdoc}
      */
-    protected $job;
+    protected $managerClass = 'Fake\\Class';
 
     /**
      * {@inheritdoc}
@@ -43,11 +38,7 @@ class DirectConnector extends AbstractConnector
      */
     public function push($queue, Job $job)
     {
-        $this->job = $job;
-
-        $manager = $this->pop($queue);
-
-        return $manager->execute();
+        return true;
     }
 
     /**
@@ -55,9 +46,7 @@ class DirectConnector extends AbstractConnector
      */
     public function delayed($queue, $delay, Job $job)
     {
-        sleep($delay);
-
-        return $this->push($queue, $job);
+        return true;
     }
 
     /**
@@ -65,14 +54,7 @@ class DirectConnector extends AbstractConnector
      */
     public function pop($queue, $timeout = 0)
     {
-        if ($this->job === null) {
-            throw new QueueEmptyException($queue);
-        }
-
-        $payload = $this->job->createPayload();
-        $this->job = null;
-
-        return new $this->managerClass($queue, $payload, $this);
+        return true;
     }
 
     /**

@@ -25,11 +25,11 @@ class Queue implements LoggerAwareInterface
     use \Psr\Log\LoggerAwareTrait;
 
     /**
-     * Connector object
+     * Adapter object
      *
-     * @var Connector
+     * @var Adapter
      */
-    protected $connector;
+    protected $adapter;
 
     /**
      * Queue name
@@ -42,13 +42,13 @@ class Queue implements LoggerAwareInterface
      * Creates a new Queue
      *
      * @param string    $queue
-     * @param Connector $connector
+     * @param Adapter $adapter
      */
-    public function __construct($queue, Connector $connector)
+    public function __construct($queue, Adapter $adapter)
     {
         $this->queue = $queue;
 
-        $this->setConnector($connector)
+        $this->setAdapter($adapter)
             ->setLogger(new NullLogger);
     }
 
@@ -63,25 +63,25 @@ class Queue implements LoggerAwareInterface
     }
 
     /**
-     * Returns the connector
+     * Returns the Adapter
      *
-     * @return Connector
+     * @return Adapter
      */
-    public function getConnector()
+    public function getAdapter()
     {
-        return $this->connector;
+        return $this->adapter;
     }
 
     /**
-     * Sets the connector
+     * Sets the Adapter
      *
-     * @param Connector $connector
+     * @param Adapter $adapter
      *
      * @return this
      */
-    public function setConnector(Connector $connector)
+    public function setAdapter(Adapter $adapter)
     {
-        $this->connector = $connector;
+        $this->adapter = $adapter;
 
         return $this;
     }
@@ -95,7 +95,7 @@ class Queue implements LoggerAwareInterface
     */
     public function push(Job $job)
     {
-        return $this->connector->push($this->queue, $job);
+        return $this->adapter->push($this->queue, $job);
     }
 
     /**
@@ -108,7 +108,7 @@ class Queue implements LoggerAwareInterface
     */
     public function delayed($delay, Job $job)
     {
-        return $this->connector->delayed($this->queue, $delay, $job);
+        return $this->adapter->delayed($this->queue, $delay, $job);
     }
 
     /**

@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue\Manager;
 
-use Indigo\Queue\Connector\RabbitConnector;
+use Indigo\Queue\Adapter\RabbitAdapter;
 use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\NullLogger;
 
@@ -41,15 +41,15 @@ class RabbitManager extends AbstractManager
      *
      * @param string          $queue
      * @param AMQPMessage     $message
-     * @param RabbitConnector $connector
+     * @param RabbitAdapter $adapter
      */
-    public function __construct($queue, AMQPMessage $message, RabbitConnector $connector)
+    public function __construct($queue, AMQPMessage $message, RabbitAdapter $adapter)
     {
-        $this->channel = $connector->regenerateChannel();
+        $this->channel = $adapter->regenerateChannel();
         $this->message = $message;
         $this->payload = json_decode($message->body, true);
 
-        parent::__construct($queue, $connector);
+        parent::__construct($queue, $adapter);
     }
 
     /**

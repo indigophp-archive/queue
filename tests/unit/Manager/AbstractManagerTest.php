@@ -22,11 +22,11 @@ use Codeception\TestCase\Test;
 abstract class AbstractManagerTest extends Test
 {
     /**
-     * Connector mock
+     * Adapter mock
      *
-     * @var ConnectorInterface
+     * @var Adapter
      */
-    protected $connector;
+    protected $adapter;
 
     /**
      * Manager object

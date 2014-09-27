@@ -11,25 +11,25 @@
 
 namespace Test\Unit;
 
-use Indigo\Queue\Connector\BeanstalkdConnector;
+use Indigo\Queue\Adapter\BeanstalkdAdapter;
 
 /**
- * Tests for BeanstalkdConnector
+ * Tests for BeanstalkdAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\BeanstalkdConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\BeanstalkdAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Beanstalkd
  */
-class BeanstalkdConnectorTest extends AbstractConnectorTest
+class BeanstalkdAdapterTest extends AbstractAdapterTest
 {
     public function _before()
     {
         $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
 
-        $this->connector = new BeanstalkdConnector($pheanstalk);
+        $this->adapter = new BeanstalkdAdapter($pheanstalk);
     }
 
     /**
@@ -39,9 +39,9 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
     {
         $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
 
-        $connector = new BeanstalkdConnector($pheanstalk);
+        $adapter = new BeanstalkdAdapter($pheanstalk);
 
-        $this->assertSame($pheanstalk, $connector->getPheanstalk());
+        $this->assertSame($pheanstalk, $adapter->getPheanstalk());
     }
 
     /**
@@ -49,12 +49,12 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
      */
     public function testConnection()
     {
-        $pheanstalk = $this->connector->getPheanstalk();
+        $pheanstalk = $this->adapter->getPheanstalk();
 
         $pheanstalk->shouldReceive('getConnection->isServiceListening')
             ->andReturn(true);
 
-        $this->assertTrue($this->connector->isConnected());
+        $this->assertTrue($this->adapter->isConnected());
     }
 
     /**
@@ -65,9 +65,9 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
     {
         $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
 
-        $this->assertSame($this->connector, $this->connector->setPheanstalk($pheanstalk));
+        $this->assertSame($this->adapter, $this->adapter->setPheanstalk($pheanstalk));
 
-        $this->assertSame($pheanstalk, $this->connector->getPheanstalk());
+        $this->assertSame($pheanstalk, $this->adapter->getPheanstalk());
     }
 
     /**
@@ -78,12 +78,12 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
      */
     public function testEmptyPop()
     {
-        $pheanstalk = $this->connector->getPheanstalk();
+        $pheanstalk = $this->adapter->getPheanstalk();
 
         $pheanstalk->shouldReceive('reserveFromTube')
             ->andReturn(null);
 
-        $this->connector->pop('test');
+        $this->adapter->pop('test');
     }
 
     /**
@@ -91,11 +91,11 @@ class BeanstalkdConnectorTest extends AbstractConnectorTest
      */
     public function testCount()
     {
-        $pheanstalk = $this->connector->getPheanstalk();
+        $pheanstalk = $this->adapter->getPheanstalk();
 
         $pheanstalk->shouldReceive('statsTube')
             ->andReturn(['current-jobs-ready' => 1]);
 
-        $this->assertEquals(1, $this->connector->count('test'));
+        $this->assertEquals(1, $this->adapter->count('test'));
     }
 }

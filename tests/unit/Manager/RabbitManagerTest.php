@@ -36,12 +36,12 @@ class RabbitManagerTest extends AbstractManagerTest
     {
         $this->message = \Mockery::mock('PhpAmqpLib\\Message\\AMQPMessage');
 
-        $this->connector = \Mockery::mock('Indigo\\Queue\\Connector\\RabbitConnector');
+        $this->adapter = \Mockery::mock('Indigo\\Queue\\Adapter\\RabbitAdapter');
 
-        $this->connector->shouldReceive('regenerateChannel')
+        $this->adapter->shouldReceive('regenerateChannel')
             ->andReturn(null);
 
-        $this->manager = new RabbitManager('test', $this->message, $this->connector);
+        $this->manager = new RabbitManager('test', $this->message, $this->adapter);
     }
 
     /**
@@ -49,7 +49,7 @@ class RabbitManagerTest extends AbstractManagerTest
      */
     public function testConstruct()
     {
-        $manager = new RabbitManager('test', $this->message, $this->connector);
+        $manager = new RabbitManager('test', $this->message, $this->adapter);
 
         $this->assertSame($this->message, $this->manager->getMessage());
     }

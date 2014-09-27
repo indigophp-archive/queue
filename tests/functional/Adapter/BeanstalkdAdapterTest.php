@@ -11,21 +11,21 @@
 
 namespace Test\Functional;
 
-use Indigo\Queue\Connector\BeanstalkdConnector;
+use Indigo\Queue\Adapter\BeanstalkdAdapter;
 use Indigo\Queue\Job;
 use Pheanstalk\Pheanstalk;
 
 /**
- * Tests for BeanstalkdConnector
+ * Tests for BeanstalkdAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\BeanstalkdConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\BeanstalkdAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Beanstalkd
  */
-class BeanstalkdConnectorTest extends AbstractMQConnectorTest
+class BeanstalkdAdapterTest extends AbstractMQAdapterTest
 {
     public function _before()
     {
@@ -34,9 +34,9 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
 
         $pheanstalk = new Pheanstalk($host, $port);
 
-        $this->connector = new BeanstalkdConnector($pheanstalk);
+        $this->adapter = new BeanstalkdAdapter($pheanstalk);
 
-        if ($this->connector->isConnected() === false) {
+        if ($this->adapter->isConnected() === false) {
             $this->markTestSkipped(
                 'Beanstalkd connection not available.'
             );
@@ -44,7 +44,7 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
             return;
         }
 
-        $this->connector->clear('test');
+        $this->adapter->clear('test');
     }
 
     /**
@@ -53,7 +53,7 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
      */
     public function testPush(Job $job)
     {
-        $push = $this->connector->push('test', $job);
+        $push = $this->adapter->push('test', $job);
 
         $this->assertInternalType('integer', $push);
     }
@@ -65,7 +65,7 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
      */
     public function testDelayed(Job $job)
     {
-        $delayed = $this->connector->delayed('test', 100, $job);
+        $delayed = $this->adapter->delayed('test', 100, $job);
 
         $this->assertInternalType('integer', $delayed);
     }
@@ -78,8 +78,8 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
      */
     public function testPop(Job $job)
     {
-        $this->connector->push('test', $job);
-        $manager = $this->connector->pop('test');
+        $this->adapter->push('test', $job);
+        $manager = $this->adapter->pop('test');
 
         $this->assertInstanceOf(
             'Indigo\\Queue\\Manager\\BeanstalkdManager',
@@ -89,9 +89,9 @@ class BeanstalkdConnectorTest extends AbstractMQConnectorTest
         $payload = $manager->getPayload();
 
         if ($payload['job'] == 'Indigo\\Queue\\Job\\ClosureJob') {
-            $this->assertTrue($this->connector->delete($manager));
+            $this->assertTrue($this->adapter->delete($manager));
         } else {
-            $this->assertTrue($this->connector->bury($manager));
+            $this->assertTrue($this->adapter->bury($manager));
         }
     }
 }

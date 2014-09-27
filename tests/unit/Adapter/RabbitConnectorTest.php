@@ -11,19 +11,19 @@
 
 namespace Test\Unit;
 
-use Indigo\Queue\Connector\RabbitConnector;
+use Indigo\Queue\Adapter\RabbitAdapter;
 
 /**
- * Tests for RabbitConnector
+ * Tests for RabbitAdapter
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  *
- * @coversDefaultClass Indigo\Queue\Connector\RabbitConnector
+ * @coversDefaultClass Indigo\Queue\Adapter\RabbitAdapter
  * @group              Queue
- * @group              Connector
+ * @group              Adapter
  * @group              Rabbit
  */
-class RabbitConnectorTest extends AbstractConnectorTest
+class RabbitAdapterTest extends AbstractAdapterTest
 {
     /**
      * AMQP mock
@@ -39,7 +39,7 @@ class RabbitConnectorTest extends AbstractConnectorTest
         $this->amqp->shouldReceive('channel')
             ->andReturn(null);
 
-        $this->connector = new RabbitConnector($this->amqp);
+        $this->adapter = new RabbitAdapter($this->amqp);
     }
 
     /**
@@ -47,10 +47,10 @@ class RabbitConnectorTest extends AbstractConnectorTest
      */
     public function testConstruct()
     {
-        $connector = new RabbitConnector($this->amqp);
+        $adapter = new RabbitAdapter($this->amqp);
 
-        $this->assertSame($this->amqp, $connector->getAMQP());
-        $this->assertTrue($this->connector->isPersistent());
+        $this->assertSame($this->amqp, $adapter->getAMQP());
+        $this->assertTrue($this->adapter->isPersistent());
     }
 
     /**
@@ -58,7 +58,7 @@ class RabbitConnectorTest extends AbstractConnectorTest
      */
     public function testPersistent()
     {
-        $this->assertTrue($this->connector->isPersistent());
+        $this->assertTrue($this->adapter->isPersistent());
     }
 
     /**
@@ -67,9 +67,9 @@ class RabbitConnectorTest extends AbstractConnectorTest
      */
     public function testAMQP()
     {
-        $amqp = $this->connector->getAMQP();
+        $amqp = $this->adapter->getAMQP();
 
-        $this->assertSame($this->connector, $this->connector->setAMQP($amqp));
-        $this->assertSame($amqp, $this->connector->getAMQP());
+        $this->assertSame($this->adapter, $this->adapter->setAMQP($amqp));
+        $this->assertSame($amqp, $this->adapter->getAMQP());
     }
 }

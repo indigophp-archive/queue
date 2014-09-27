@@ -11,7 +11,7 @@
 
 namespace Indigo\Queue;
 
-use Indigo\Queue\Connector\DirectConnector;
+use Indigo\Queue\Adapter\DirectAdapter;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Indigo\Queue\Exception\QueueEmptyException;
 use Psr\Log\LoggerAwareInterface;
@@ -36,11 +36,11 @@ class Worker implements LoggerAwareInterface
     protected $queue;
 
     /**
-     * Connector
+     * Adapter
      *
-     * @var Connector
+     * @var Adapter
      */
-    protected $connector;
+    protected $adapter;
 
     /**
      * Config values
@@ -57,16 +57,16 @@ class Worker implements LoggerAwareInterface
      * Creates a new Worker
      *
      * @param string             $queue
-     * @param Connector $connector
+     * @param Adapter $adapter
      */
-    public function __construct($queue, Connector $connector)
+    public function __construct($queue, Adapter $adapter)
     {
-        if ($connector instanceof DirectConnector) {
-            throw new \InvalidArgumentException('DirectConnector should not be used in a Worker');
+        if ($adapter instanceof DirectAdapter) {
+            throw new \InvalidArgumentException('DirectAdapter should not be used in a Worker');
         }
 
         $this->queue = $queue;
-        $this->connector = $connector;
+        $this->adapter = $adapter;
 
         $this->setLogger(new NullLogger);
     }
@@ -115,9 +115,9 @@ class Worker implements LoggerAwareInterface
     protected function getManager($timeout = 0)
     {
         try {
-            $manager = $this->connector->pop($this->queue, $timeout);
+            $manager = $this->adapter->pop($this->queue, $timeout);
         } catch (JobNotFoundException $e) {
-            $this->connector->delete($manager);
+            $this->adapter->delete($manager);
 
             return false;
         } catch (QueueEmptyException $e) {
