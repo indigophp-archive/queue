@@ -16,8 +16,6 @@ use Indigo\Queue\Adapter;
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Indigo\Queue\Exception\InvalidJobException;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\NullLogger;
 
 /**
  * Abstract Job class
@@ -26,10 +24,8 @@ use Psr\Log\NullLogger;
  *
  * @codeCoverageIgnore
  */
-abstract class AbstractManager implements Manager, LoggerAwareInterface
+abstract class AbstractManager implements Manager
 {
-    use \Psr\Log\LoggerAwareTrait;
-
     /**
      * Adapter object
      *
@@ -72,8 +68,6 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
     {
         $this->queue = $queue;
         $this->adapter = $adapter;
-
-        $this->setLogger(new NullLogger);
     }
 
     /**
@@ -115,7 +109,6 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
             // Here comes the funny part: execute the job
             $execute = $job->execute($this);
 
-            $this->log('debug', 'Job ' . $payload['job'] . ' finished');
             $this->autoDelete();
 
             return $execute;
@@ -142,8 +135,6 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
     {
         if (class_exists($class) === false) {
             $message = 'Job ' . $class . ' is not found.';
-
-            $this->log('error', $message);
 
             throw new JobNotFoundException($message);
         }
@@ -217,18 +208,5 @@ abstract class AbstractManager implements Manager, LoggerAwareInterface
     protected function autoDelete()
     {
         return $this->config['delete'] === true and $this->adapter->delete($this);
-    }
-
-    /**
-     * Always include payload as a context in logger
-     *
-     * @param string $level
-     * @param string $message
-     *
-     * @codeCoverageIgnore
-     */
-    protected function log($level, $message)
-    {
-        return $this->logger->log($level, $message, $this->getPayload());
     }
 }
