@@ -12,18 +12,14 @@
 namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\NullLogger;
 
 /**
  * Abstract Adapter class
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractAdapter implements Adapter, LoggerAwareInterface
+abstract class AbstractAdapter implements Adapter
 {
-    use \Psr\Log\LoggerAwareTrait;
-
     /**
      * Default job options
      *
@@ -41,15 +37,8 @@ abstract class AbstractAdapter implements Adapter, LoggerAwareInterface
      */
     protected $managerClass;
 
-    /**
-     * Creates a new Adapter
-     *
-     * @codeCoverageIgnore
-     */
     public function __construct()
     {
-        $this->setLogger(new NullLogger);
-
         if (empty($this->managerClass)) {
             $this->managerClass = str_replace('Adapter', 'Manager', get_called_class());
         }
