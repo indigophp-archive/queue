@@ -12,18 +12,14 @@
 namespace Indigo\Queue;
 
 use Jeremeamia\SuperClosure\SerializableClosure;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\NullLogger;
 
 /**
- * Queue class
+ * Handles sending jobs to backend
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class Queue implements LoggerAwareInterface
+class Queue
 {
-    use \Psr\Log\LoggerAwareTrait;
-
     /**
      * Adapter object
      *
@@ -48,8 +44,7 @@ class Queue implements LoggerAwareInterface
     {
         $this->queue = $queue;
 
-        $this->setAdapter($adapter)
-            ->setLogger(new NullLogger);
+        $this->setAdapter($adapter);
     }
 
     /**
