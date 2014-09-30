@@ -10,7 +10,7 @@
  */
 
 use Indigo\Queue\Adapter\AbstractAdapter;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 use Indigo\Queue\Manager;
 
 /**
@@ -36,15 +36,7 @@ class DummyAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Job $job)
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delayed($queue, $delay, Job $job)
+    public function push($queue, Message $message)
     {
         return true;
     }

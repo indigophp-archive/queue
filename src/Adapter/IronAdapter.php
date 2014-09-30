@@ -13,7 +13,7 @@ namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
 use Indigo\Queue\Manager;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
 
 /**
@@ -53,27 +53,13 @@ class IronAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Job $job)
+    public function push($queue, Message $message)
     {
         return $this->iron->postMessage(
             $queue,
-            json_encode($job->createPayload()),
-            $job->getOptions()
+            json_encode($message->createPayload()),
+            $message->getOptions()
         );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delayed($queue, $delay, Job $job)
-    {
-        $options = $job->getOptions();
-
-        $options['delay'] = $delay;
-
-        $job->setOptions($options);
-
-        return $this->push($queue, $job);
     }
 
     /**

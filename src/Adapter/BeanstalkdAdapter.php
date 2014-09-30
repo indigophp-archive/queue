@@ -13,7 +13,7 @@ namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
 use Indigo\Queue\Manager;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
 use Pheanstalk\Job as PheanstalkJob;
 use Pheanstalk\PheanstalkInterface;
@@ -89,31 +89,17 @@ class BeanstalkdAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Job $job)
+    public function push($queue, Message $message)
     {
-        $options = $this->options + $job->getOptions();
+        $options = $this->options + $message->getOptions();
 
         return $this->pheanstalk->putInTube(
             $queue,
-            json_encode($job->createPayload()),
+            json_encode($message->createPayload()),
             $options['priority'],
             $options['delay'],
             $options['timeout']
         );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delayed($queue, $delay, Job $job)
-    {
-        $options = $job->getOptions();
-
-        $options['delay'] = $delay;
-
-        $job->setOptions($options);
-
-        return $this->push($queue, $job);
     }
 
     /**

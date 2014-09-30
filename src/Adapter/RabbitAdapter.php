@@ -13,7 +13,7 @@ namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
 use Indigo\Queue\Manager;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
 use PhpAmqpLib\Connection\AbstractConnection as AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -131,54 +131,28 @@ class RabbitAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Job $job)
+    public function push($queue, Message $message)
     {
-        $msg = $this->prepareMessage($queue, $job);
+        $msg = $this->prepareMessage($queue, $message);
 
         return $this->channel->basic_publish($msg, '', $queue);
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function delayed($queue, $delay, Job $job)
-    {
-        $this->exchangeDeclare('delay');
-
-        $delay = $delay * 1000;
-
-        $tmpQueue = $this->queueDeclare(
-            '',
-            array(
-                'x-expires'                 => array('I', $delay + 2000),
-                'x-message-ttl'             => array('I', $delay),
-                'x-dead-letter-exchange'    => array('S', 'delay'),
-                'x-dead-letter-routing-key' => array('S', $queue),
-            )
-        );
-
-        $this->channel->queue_bind($queue, 'delay', $queue);
-
-        $msg = $this->prepareMessage($queue, $job);
-
-        return $this->channel->basic_publish($msg, '', reset($tmpQueue));
-    }
-
-    /**
      * Prepares a message
      *
-     * @param string $queue
-     * @param Job    $job
+     * @param string  $queue
+     * @param Message $message
      *
      * @return AMQPMessage
      *
      * @codeCoverageIgnore
      */
-    protected function prepareMessage($queue, Job $job)
+    protected function prepareMessage($queue, Message $message)
     {
         $this->queueDeclare($queue);
 
-        return new AMQPMessage(json_encode($job->createPayload()), $job->getOptions());
+        return new AMQPMessage(json_encode($message->createPayload()), $message->getOptions());
     }
 
     /**
@@ -292,12 +266,12 @@ class RabbitAdapter extends AbstractAdapter
 
         $this->delete($manager);
 
-        $job = Job::createFromPayload($payload);
+        $message = Message::createFromPayload($payload);
 
         if ($delay > 0) {
-            $this->delayed($manager->getQueue(), $delay, $job);
+            $this->delayed($manager->getQueue(), $delay, $message);
         } else {
-            $this->push($manager->getQueue(), $job);
+            $this->push($manager->getQueue(), $message);
         }
 
         return true;

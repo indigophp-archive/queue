@@ -13,7 +13,7 @@ namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
 use Indigo\Queue\Manager;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
 
 /**
@@ -24,11 +24,11 @@ use Indigo\Queue\Exception\QueueEmptyException;
 class DirectAdapter extends AbstractAdapter
 {
     /**
-     * Last added job
+     * Last added message
      *
-     * @var Job
+     * @var Message
      */
-    protected $job;
+    protected $message;
 
     /**
      * {@inheritdoc}
@@ -41,9 +41,9 @@ class DirectAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Job $job)
+    public function push($queue, Message $message)
     {
-        $this->job = $job;
+        $this->message = $message;
 
         $manager = $this->pop($queue);
 
@@ -53,24 +53,14 @@ class DirectAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function delayed($queue, $delay, Job $job)
-    {
-        sleep($delay);
-
-        return $this->push($queue, $job);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function pop($queue, $timeout = 0)
     {
-        if ($this->job === null) {
+        if ($this->message === null) {
             throw new QueueEmptyException($queue);
         }
 
-        $payload = $this->job->createPayload();
-        $this->job = null;
+        $payload = $this->message->createPayload();
+        $this->message = null;
 
         return new $this->managerClass($queue, $payload, $this);
     }
