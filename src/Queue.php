@@ -11,10 +11,8 @@
 
 namespace Indigo\Queue;
 
-use Jeremeamia\SuperClosure\SerializableClosure;
-
 /**
- * Handles sending jobs to backend
+ * Handles sending messages to backend
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -35,8 +33,6 @@ class Queue
     protected $queue;
 
     /**
-     * Creates a new Queue
-     *
      * @param string  $queue
      * @param Adapter $adapter
      */
@@ -82,15 +78,15 @@ class Queue
     }
 
     /**
-    * Pushes a new job onto the queue
+    * Pushes a new message onto the queue
     *
-    * @param Job $job
+    * @param Message $message
     *
     * @return mixed
     */
-    public function push(Job $job)
+    public function push(Message $message)
     {
-        return $this->adapter->push($this->queue, $job);
+        return $this->adapter->push($this->queue, $message);
     }
 
     /**

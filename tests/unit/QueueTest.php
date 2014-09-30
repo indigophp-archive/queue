@@ -11,7 +11,6 @@
 
 namespace Indigo\Queue;
 
-use Jeremeamia\SuperClosure\SerializableClosure;
 use Codeception\TestCase\Test;
 
 /**
@@ -85,8 +84,8 @@ class QueueTest extends Test
         $this->adapter->shouldReceive('push')
             ->andReturn(null);
 
-        $job = \Mockery::mock('Indigo\\Queue\\Job');
+        $message = \Mockery::mock('Indigo\\Queue\\Message');
 
-        $this->assertNull($this->queue->push($job));
+        $this->assertNull($this->queue->push($message));
     }
 }
