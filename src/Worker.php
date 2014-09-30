@@ -14,8 +14,6 @@ namespace Indigo\Queue;
 use Indigo\Queue\Adapter\DirectAdapter;
 use Indigo\Queue\Exception\JobNotFoundException;
 use Indigo\Queue\Exception\QueueEmptyException;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\NullLogger;
 
 /**
  * Worker class
@@ -24,10 +22,8 @@ use Psr\Log\NullLogger;
  *
  * @codeCoverageIgnore
  */
-class Worker implements LoggerAwareInterface
+class Worker
 {
-    use \Psr\Log\LoggerAwareTrait;
-
     /**
      * Queue name
      *
@@ -56,7 +52,7 @@ class Worker implements LoggerAwareInterface
     /**
      * Creates a new Worker
      *
-     * @param string             $queue
+     * @param string  $queue
      * @param Adapter $adapter
      */
     public function __construct($queue, Adapter $adapter)
@@ -67,8 +63,6 @@ class Worker implements LoggerAwareInterface
 
         $this->queue = $queue;
         $this->adapter = $adapter;
-
-        $this->setLogger(new NullLogger);
     }
 
     /**
@@ -122,10 +116,6 @@ class Worker implements LoggerAwareInterface
             return false;
         } catch (QueueEmptyException $e) {
             return false;
-        }
-
-        if ($manager instanceof LoggerAwareInterface) {
-            $manager->setLogger($this->logger);
         }
 
         return $manager;
