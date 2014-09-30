@@ -59,18 +59,6 @@ class BeanstalkdAdapterTest extends AbstractMQAdapterTest
     }
 
     /**
-     * @covers       ::delayed
-     * @covers       ::push
-     * @dataProvider jobProvider
-     */
-    public function testDelayed(Job $job)
-    {
-        $delayed = $this->adapter->delayed('test', 100, $job);
-
-        $this->assertInternalType('integer', $delayed);
-    }
-
-    /**
      * @covers       ::pop
      * @covers       ::delete
      * @covers       ::bury

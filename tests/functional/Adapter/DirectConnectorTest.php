@@ -40,15 +40,4 @@ class DirectAdapterTest extends AbstractAdapterTest
     {
         $this->assertTrue($this->adapter->push('test', $job));
     }
-
-    /**
-     * @covers       ::push
-     * @covers       ::pop
-     * @covers       ::delayed
-     * @dataProvider jobProvider
-     */
-    public function testDelayed(Job $job)
-    {
-        $this->assertTrue($this->adapter->delayed('test', 0.5, $job));
-    }
 }

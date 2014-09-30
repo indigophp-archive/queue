@@ -75,15 +75,6 @@ class RabbitAdapterTest extends AbstractMQAdapterTest
     }
 
     /**
-     * @covers       ::delayed
-     * @dataProvider jobProvider
-     */
-    public function testDelayed(Job $job)
-    {
-        $this->assertNull($this->adapter->delayed('test', 1, $job));
-    }
-
-    /**
      * @covers                   ::pop
      * @covers                   Indigo\Queue\Exception\QueueEmptyException
      * @expectedException        Indigo\Queue\Exception\QueueEmptyException

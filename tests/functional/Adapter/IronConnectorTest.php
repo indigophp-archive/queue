@@ -69,15 +69,4 @@ class IronAdapterTest extends AbstractMQAdapterTest
 
         $this->assertInstanceOf('stdClass', $push);
     }
-
-    /**
-     * @covers       ::delayed
-     * @dataProvider jobProvider
-     */
-    public function testDelayed(Job $job)
-    {
-        $delayed = $this->adapter->delayed('test', 1, $job);
-
-        $this->assertInstanceOf('stdClass', $delayed);
-    }
 }
