@@ -12,7 +12,7 @@
 namespace Indigo\Queue;
 
 use Indigo\Queue\Manager;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 
 /**
  * Implements connection details
@@ -29,25 +29,14 @@ interface Adapter
     public function isConnected();
 
     /**
-    * Pushes a new job onto the queue
-    *
-    * @param string $queue
-    * @param Job    $job
-    *
-    * @return mixed
-    */
-    public function push($queue, Job $job);
-
-    /**
-    * Pushes a new job onto the queue after a delay
+    * Pushes a new message onto the queue
     *
     * @param string  $queue
-    * @param integer $delay
-    * @param Job     $job
+    * @param Message $message
     *
     * @return mixed
     */
-    public function delayed($queue, $delay, Job $job);
+    public function push($queue, Message $message);
 
     /**
     * Pops the next job off of the queue
@@ -92,7 +81,7 @@ interface Adapter
      * Releases a job back to the queue
      *
      * @param Manager $manager
-     * @param integer          $delay  Delay the job with x seconds, 0 means no delay
+     * @param integer $delay   Delay the job with x seconds, 0 means no delay
      *
      * @return boolean Always true
      */
