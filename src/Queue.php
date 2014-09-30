@@ -37,7 +37,7 @@ class Queue
     /**
      * Creates a new Queue
      *
-     * @param string    $queue
+     * @param string  $queue
      * @param Adapter $adapter
      */
     public function __construct($queue, Adapter $adapter)
@@ -72,7 +72,7 @@ class Queue
      *
      * @param Adapter $adapter
      *
-     * @return this
+     * @return self
      */
     public function setAdapter(Adapter $adapter)
     {
@@ -94,20 +94,9 @@ class Queue
     }
 
     /**
-    * Pushes a new job onto the queue after a delay
-    *
-    * @param integer $delay
-    * @param Job     $job
-    *
-    * @return mixed
-    */
-    public function delayed($delay, Job $job)
-    {
-        return $this->adapter->delayed($this->queue, $delay, $job);
-    }
-
-    /**
-     * Alias to getQueue()
+     * Returns queue name
+     *
+     * @return string
      */
     public function __toString()
     {
