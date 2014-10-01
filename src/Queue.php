@@ -78,7 +78,7 @@ class Queue
     }
 
     /**
-    * Pushes a new message onto the queue
+    * Pushes a new job onto the queue
     *
     * @param Message $message
     *

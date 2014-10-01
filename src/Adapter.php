@@ -29,7 +29,7 @@ interface Adapter
     public function isConnected();
 
     /**
-    * Pushes a new message onto the queue
+    * Pushes a new job onto the queue
     *
     * @param string  $queue
     * @param Message $message
