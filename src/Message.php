@@ -22,6 +22,10 @@ interface Message
      * Returns the Message ID
      *
      * In case of responses it should return the job ID
+     * In case of "requests" it can be ommited (depending on backend?)
+     *
+     * Do not mix the words request/response with HTTP Messages
+     * They are just used here for simplicity
      *
      * @return mixed
      */
