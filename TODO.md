@@ -9,3 +9,4 @@
 - [ ] Create event based job processing
 - [ ] Create specific adapter events
 - [ ] Implement delay logic in adapters
+- [ ] Implement serializers
