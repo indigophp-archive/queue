@@ -11,7 +11,6 @@
 
 namespace Indigo\Queue;
 
-use Indigo\Queue\Manager;
 use Indigo\Queue\Message;
 
 /**
@@ -22,14 +21,14 @@ use Indigo\Queue\Message;
 interface Adapter
 {
     /**
-     * Checks whether connection is available
+     * Checks whether a connection is available
      *
      * @return boolean
      */
     public function isConnected();
 
     /**
-    * Pushes a new job onto the queue
+    * Pushes a new message onto the queue
     *
     * @param string  $queue
     * @param Message $message
@@ -39,19 +38,19 @@ interface Adapter
     public function push($queue, Message $message);
 
     /**
-    * Pops the next job off of the queue
+    * Pops the next message off the queue
     *
     * @param string  $queue   Name of the queue
     * @param integer $timeout Wait timeout
     *
-    * @return Manager
+    * @return Message
     *
-    * @throws QueueEmptyException If no job can be returned
+    * @throws QueueEmptyException If the queue is empty or no message is received
     */
     public function pop($queue, $timeout = 0);
 
     /**
-     * Returns the count of jobs
+     * Returns the count of messages
      *
      * @param string $queue
      *
@@ -60,30 +59,29 @@ interface Adapter
     public function count($queue);
 
     /**
-     * Deletes a job from queue
+     * Deletes a message from queue
      *
-     * @param Manager $manager
+     * @param Message $message
      *
-     * @return boolean Always true
+     * @return boolean Returns false on detectable failure, true otherwise
      */
-    public function delete(Manager $manager);
+    public function delete(Message $message);
 
     /**
      * Clears the queue
      *
      * @param string $queue
      *
-     * @return boolean Always true
+     * @return boolean Returns false on detectable failure, true otherwise
      */
     public function clear($queue);
 
     /**
-     * Releases a job back to the queue
+     * Releases a message back to the queue
      *
-     * @param Manager $manager
-     * @param integer $delay   Delay the job with x seconds, 0 means no delay
+     * @param Message $message
      *
-     * @return boolean Always true
+     * @return boolean Returns false on detectable failure, true otherwise
      */
-    public function release(Manager $manager, $delay = 0);
+    public function release(Message $message);
 }
