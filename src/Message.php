@@ -32,6 +32,22 @@ interface Message
     public function getId();
 
     /**
+     * Returns the queue
+     *
+     * @return string
+     */
+    public function getQueue();
+
+    /**
+     * Sets the queue
+     *
+     * @param string $queue
+     *
+     * @return self
+     */
+    public function setQueue($queue);
+
+    /**
      * Returns the message data
      *
      * @return []
@@ -48,18 +64,12 @@ interface Message
     public function setData(array $data);
 
     /**
-     * Returns the options
-     *
-     * @return []
-     */
-    public function getOptions();
-
-    /**
-     * Sets the options
-     *
-     * @param [] $options
-     *
-     * @return self
-     */
-    public function setOptions(array $options);
+    * Returns the number of times the message has been reserved
+    *
+    * By definition zero should be returned
+    * if the message has not been pushed to the queue yet
+    *
+    * @return integer
+    */
+    public function getAttempts();
 }

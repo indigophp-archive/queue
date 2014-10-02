@@ -11,8 +11,6 @@
 
 namespace Indigo\Queue\Adapter;
 
-use Indigo\Queue\Adapter;
-use Indigo\Queue\Manager;
 use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
 use Pheanstalk\Job as PheanstalkJob;
@@ -50,8 +48,6 @@ class BeanstalkdAdapter extends AbstractAdapter
     public function __construct(PheanstalkInterface $pheanstalk)
     {
         $this->pheanstalk = $pheanstalk;
-
-        parent::__construct();
     }
 
     /**
@@ -69,7 +65,7 @@ class BeanstalkdAdapter extends AbstractAdapter
      *
      * @param PheanstalkInterface $pheanstalk
      *
-     * @return BeanstalkdAdapter
+     * @return self
      */
     public function setPheanstalk(PheanstalkInterface $pheanstalk)
     {
@@ -89,17 +85,32 @@ class BeanstalkdAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Message $message)
+    public function push(Message $message)
     {
-        $options = $this->options + $message->getOptions();
+        $arguments = [
+            $message->getQueue(),
+            json_encode($message->getData()),
+            $this->getPriority($message),
+            $this->getDelay($message),
+        ];
 
-        return $this->pheanstalk->putInTube(
-            $queue,
-            json_encode($message->createPayload()),
-            $options['priority'],
-            $options['delay'],
-            $options['timeout']
-        );
+        return call_user_func_array([$this->pheanstalk, 'putInTube'], $arguments);
+    }
+
+    /**
+     * Returns the message priority
+     *
+     * @param Message $message
+     *
+     * @return integer
+     */
+    protected function getPriority(Message $message)
+    {
+        if ($message instanceof Priority) {
+            return $message->getPriority();
+        }
+
+        return PheanstalkInterface::DEFAULT_PRIORITY;
     }
 
     /**
@@ -107,10 +118,17 @@ class BeanstalkdAdapter extends AbstractAdapter
      */
     public function pop($queue, $timeout = 0)
     {
-        $job = $this->pheanstalk->reserveFromTube($queue, $timeout);
+        $message = $this->pheanstalk->reserveFromTube($queue, $timeout);
 
-        if ($job instanceof PheanstalkJob) {
-            return new $this->managerClass($queue, $job, $this);
+        if ($message instanceof PheanstalkJob) {
+            $stats = $this->pheanstalk->statsJob($message);
+
+            return new $this->messageClass(
+                $queue,
+                json_decode($message->getData(), true),
+                $message->getId(),
+                (int) $stats->reserves
+            );
         }
 
         throw new QueueEmptyException($queue);
@@ -129,9 +147,9 @@ class BeanstalkdAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function delete(Manager $manager)
+    public function delete(Message $message)
     {
-        $this->pheanstalk->delete($manager->getPheanstalkJob());
+        $this->pheanstalk->delete($message);
 
         return true;
     }
@@ -161,10 +179,11 @@ class BeanstalkdAdapter extends AbstractAdapter
     protected function doClear($queue, $state)
     {
         try {
-            while ($item = $this->pheanstalk->{'peek'.$state}($queue)) {
+            while ($item = $this->pheanstalk->{'peek'.ucfirst($state)}($queue)) {
                 $this->pheanstalk->delete($item);
             }
         } catch (ServerException $e) {
+            // There is no more items in the queue
         }
 
         return true;
@@ -173,13 +192,13 @@ class BeanstalkdAdapter extends AbstractAdapter
     /**
      * Bury the job
      *
-     * @param Manager $manager
+     * @param Message $message
      *
      * @return boolean Always true
      */
-    public function bury(Manager $manager)
+    public function bury(Message $message)
     {
-        $this->pheanstalk->bury($manager->getPheanstalkJob());
+        $this->pheanstalk->bury($message);
 
         return true;
     }
@@ -189,9 +208,13 @@ class BeanstalkdAdapter extends AbstractAdapter
      *
      * @param integer|null $priority
      */
-    public function release(Manager $manager, $delay = 0, $priority = PheanstalkInterface::DEFAULT_PRIORITY)
+    public function release(Message $message)
     {
-        $this->pheanstalk->release($manager->getPheanstalkJob(), $priority, $delay);
+        $this->pheanstalk->release(
+            $message,
+            $this->getPriority($message),
+            $this->getDelay($message)
+        );
 
         return true;
     }

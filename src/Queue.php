@@ -86,7 +86,9 @@ class Queue
     */
     public function push(Message $message)
     {
-        return $this->adapter->push($this->queue, $message);
+        $message->setQueue($this->queue);
+
+        return $this->adapter->push($message);
     }
 
     /**

@@ -12,6 +12,8 @@
 namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
+use Indigo\Queue\Message;
+use Indigo\Queue\Message\Delayed;
 
 /**
  * Abstract Adapter class
@@ -30,27 +32,31 @@ abstract class AbstractAdapter implements Adapter
         'timeout' => 60,
     ];
 
-    /**
-     * Manager class to be instantiated
-     *
-     * @var string
-     */
-    protected $managerClass;
-
-    public function __construct()
-    {
-        if (empty($this->managerClass)) {
-            $this->managerClass = str_replace('Adapter', 'Manager', get_called_class());
-        }
-    }
+    protected $messageClass = 'Indigo\\Queue\\Message\\Message';
 
     /**
-     * Returns the manager class for Adapter
+     * Returns the message class
      *
      * @return string
      */
-    public function getManagerClass()
+    public function getMessageClass()
     {
-        return $this->managerClass;
+        return $this->messageClass;
+    }
+
+    /**
+     * Returns the message delay
+     *
+     * @param Message $message
+     *
+     * @return integer
+     */
+    protected function getDelay(Message $message)
+    {
+        if ($message instanceof Delayed) {
+            return $message->getDelay();
+        }
+
+        return $this->options['delay'];
     }
 }

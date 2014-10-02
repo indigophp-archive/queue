@@ -12,23 +12,40 @@
 namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
-use Indigo\Queue\Manager;
 use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
+use Indigo\Queue\Worker;
+use LogicException;
 
 /**
  * Direct Adapter for running jobs immediately
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class DirectAdapter extends AbstractAdapter
+class DirectAdapter implements Adapter
 {
     /**
      * Last added message
      *
      * @var Message
      */
-    protected $message;
+    private $message;
+
+    /**
+     * Worker instance
+     *
+     * @var Worker
+     */
+    private $worker;
+
+    /**
+     * @param Worker $worker
+     */
+    public function __construct(Worker $worker)
+    {
+        // Queue and adapter should be consistent
+        $this->worker = $worker;
+    }
 
     /**
      * {@inheritdoc}
@@ -41,13 +58,11 @@ class DirectAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Message $message)
+    public function push(Message $message)
     {
         $this->message = $message;
 
-        $manager = $this->pop($queue);
-
-        return $manager->execute();
+        return $this->worker->work();
     }
 
     /**
@@ -55,14 +70,15 @@ class DirectAdapter extends AbstractAdapter
      */
     public function pop($queue, $timeout = 0)
     {
-        if ($this->message === null) {
+        if (is_null($this->message)) {
             throw new QueueEmptyException($queue);
         }
 
-        $payload = $this->message->createPayload();
+        $message = $this->message;
+
         $this->message = null;
 
-        return new $this->managerClass($queue, $payload, $this);
+        return $message;
     }
 
     /**
@@ -76,8 +92,10 @@ class DirectAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function delete(Manager $manager)
+    public function delete(Message $message)
     {
+        $this->message = null;
+
         return true;
     }
 
@@ -86,13 +104,15 @@ class DirectAdapter extends AbstractAdapter
      */
     public function clear($queue)
     {
+        $this->message = null;
+
         return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function release(Manager $manager, $delay = 0)
+    public function release(Message $message)
     {
         return true;
     }

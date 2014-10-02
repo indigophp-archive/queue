@@ -27,57 +27,33 @@ class DirectAdapterTest extends AbstractAdapterTest
 {
     public function _before()
     {
-        $this->adapter = new DirectAdapter;
+        $worker = \Mockery::mock('Indigo\\Queue\\Worker');
+
+        $worker->shouldReceive('work')
+            ->andReturn(true);
+
+        $this->adapter = new DirectAdapter($worker);
     }
 
     /**
-     * @covers ::isConnected
+     * @covers ::push
+     * @covers ::pop
      */
-    public function testConnection()
+    public function testPush()
     {
-        $this->assertTrue($this->adapter->isConnected());
+        parent::testPush();
     }
 
     /**
-     * @covers                   ::pop
-     * @covers                   Indigo\Queue\Exception\QueueEmptyException
-     * @expectedException        Indigo\Queue\Exception\QueueEmptyException
-     * @expectedExceptionMessage Queue test is empty.
+     * @covers ::pop
      */
-    public function testEmptyPop()
+    public function testPop()
     {
-        $this->adapter->pop('test');
+        // This test is is run with testPush
     }
 
-    /**
-     * @covers ::count
-     */
-    public function testCount()
+    public function testMessage()
     {
-        $this->assertEquals(1, $this->adapter->count(''));
-    }
-
-    /**
-     * @covers ::delete
-     */
-    public function testDelete()
-    {
-        $this->assertTrue($this->adapter->delete($this->getManagerMock()));
-    }
-
-    /**
-     * @covers ::clear
-     */
-    public function testClear()
-    {
-        $this->assertTrue($this->adapter->clear(''));
-    }
-
-    /**
-     * @covers ::release
-     */
-    public function testRelease()
-    {
-        $this->assertTrue($this->adapter->release($this->getManagerMock()));
+        // This adapter does not need a messageClass
     }
 }

@@ -29,10 +29,12 @@ Via Composer
 First of all you have decide which MQ do you want to use. Currently supported MQs:
 
 * [Beanstalkd](http://kr.github.io/beanstalkd/)
-* [RabbitMQ](http://www.rabbitmq.com/)
+* [RabbitMQ](http://www.rabbitmq.com/) **(EXPERIMENTAL)**
 * [IronMQ](http://www.iron.io/)
 
 There is also a special implementation, where to message is not sent to a queue, but processed immediately.
+
+**Note:** The RabbitMQ (AMQP) implementation became experimental as it has some features missing. Only use it if you don't rely on these. (Mainly the count of messages and releasing a message back to the queue are effected)
 
 ### Adapter
 

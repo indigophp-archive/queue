@@ -11,7 +11,6 @@
 
 use Indigo\Queue\Job\JobInterface;
 use Indigo\Queue\Job\AbstractJob;
-use Indigo\Queue\Manager\FactoryInterface;
 use Indigo\Queue\Manager;
 
 /**
@@ -19,7 +18,7 @@ use Indigo\Queue\Manager;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class DummyJob implements JobInterface, FactoryInterface
+class DummyJob implements JobInterface
 {
     public $config = array(
         'retry'  => 2,

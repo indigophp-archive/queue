@@ -30,12 +30,11 @@ interface Adapter
     /**
     * Pushes a new message onto the queue
     *
-    * @param string  $queue
     * @param Message $message
     *
     * @return mixed
     */
-    public function push($queue, Message $message);
+    public function push(Message $message);
 
     /**
     * Pops the next message off the queue
@@ -59,11 +58,11 @@ interface Adapter
     public function count($queue);
 
     /**
-     * Deletes a message from queue
+     * Removes a message from the queue
      *
      * @param Message $message
      *
-     * @return boolean Returns false on detectable failure, true otherwise
+     * @return boolean Returns true on success, false otherwise
      */
     public function delete(Message $message);
 
@@ -72,7 +71,7 @@ interface Adapter
      *
      * @param string $queue
      *
-     * @return boolean Returns false on detectable failure, true otherwise
+     * @return boolean Returns true on success, false otherwise
      */
     public function clear($queue);
 
@@ -81,7 +80,7 @@ interface Adapter
      *
      * @param Message $message
      *
-     * @return boolean Returns false on detectable failure, true otherwise
+     * @return boolean Returns true on success, false otherwise
      */
     public function release(Message $message);
 }

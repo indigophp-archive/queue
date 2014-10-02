@@ -25,11 +25,18 @@ use Indigo\Queue\Adapter\IronAdapter;
  */
 class IronAdapterTest extends AbstractAdapterTest
 {
+    /**
+     * IronMQ mock
+     *
+     * @var IronMQ
+     */
+    protected $iron;
+
     public function _before()
     {
-        $iron = \Mockery::mock('IronMQ');
+        $this->iron = \Mockery::mock('IronMQ');
 
-        $this->adapter = new IronAdapter($iron);
+        $this->adapter = new IronAdapter($this->iron);
     }
 
     /**
@@ -37,19 +44,9 @@ class IronAdapterTest extends AbstractAdapterTest
      */
     public function testConstruct()
     {
-        $iron = \Mockery::mock('IronMQ');
+        $adapter = new IronAdapter($this->iron);
 
-        $adapter = new IronAdapter($iron);
-
-        $this->assertSame($iron, $adapter->getIron());
-    }
-
-    /**
-     * @covers ::isConnected
-     */
-    public function testConnection()
-    {
-        $this->assertTrue($this->adapter->isConnected());
+        $this->assertSame($this->iron, $adapter->getIron());
     }
 
     /**
@@ -65,19 +62,45 @@ class IronAdapterTest extends AbstractAdapterTest
     }
 
     /**
+     * @covers ::push
+     */
+    public function testPush()
+    {
+        $this->iron
+            ->shouldReceive('postMessage')
+            ->andReturn(true);
+
+        parent::testPush();
+    }
+
+    /**
+     * @covers ::pop
+     */
+    public function testPop()
+    {
+        $message = new \stdClass;
+        $message->id = 1;
+        $message->body = json_encode([]);
+        $message->reserved_count = 1;
+
+        $this->iron
+            ->shouldReceive('getMessage')
+            ->andReturn($message);
+
+        parent::testPop();
+    }
+
+    /**
      * @covers                   ::pop
      * @covers                   Indigo\Queue\Exception\QueueEmptyException
      * @expectedException        Indigo\Queue\Exception\QueueEmptyException
-     * @expectedExceptionMessage Queue test is empty.
+     * @expectedExceptionMessage Queue test is empty
      */
     public function testEmptyPop()
     {
-        $iron = $this->adapter->getIron();
+        $this->iron->shouldReceive('getMessage');
 
-        $iron->shouldReceive('getMessage')
-            ->andReturn(null);
-
-        $this->adapter->pop('test');
+        parent::testEmptyPop();
     }
 
     /**
@@ -88,11 +111,39 @@ class IronAdapterTest extends AbstractAdapterTest
         $stat = new \stdClass;
         $stat->size = 1;
 
-        $iron = $this->adapter->getIron();
-
-        $iron->shouldReceive('getQueue')
+        $this->iron->shouldReceive('getQueue')
             ->andReturn($stat);
 
-        $this->assertEquals(1, $this->adapter->count('test'));
+        parent::testCount();
+    }
+
+    /**
+     * @covers ::delete
+     */
+    public function testDelete()
+    {
+        $this->iron->shouldReceive('deleteMessage');
+
+        parent::testDelete();
+    }
+
+    /**
+     * @covers ::clear
+     */
+    public function testClear()
+    {
+        $this->iron->shouldReceive('clearQueue');
+
+        parent::testClear();
+    }
+
+    /**
+     * @covers ::release
+     */
+    public function testRelease()
+    {
+        $this->iron->shouldReceive('releaseMessage');
+
+        parent::testRelease();
     }
 }

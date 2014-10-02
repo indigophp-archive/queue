@@ -11,10 +11,10 @@
 
 namespace Indigo\Queue\Adapter;
 
-use Indigo\Queue\Adapter;
-use Indigo\Queue\Manager;
 use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
+use IronMQ;
+use stdClass;
 
 /**
  * Iron Adapter
@@ -31,15 +31,11 @@ class IronAdapter extends AbstractAdapter
     protected $iron;
 
     /**
-     * Creates a new IronAdapter
-     *
      * @param IronMQ $iron
      */
-    public function __construct(\IronMQ $iron)
+    public function __construct(IronMQ $iron)
     {
         $this->iron = $iron;
-
-        parent::__construct();
     }
 
     /**
@@ -53,12 +49,11 @@ class IronAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function push($queue, Message $message)
+    public function push(Message $message)
     {
         return $this->iron->postMessage(
-            $queue,
-            json_encode($message->createPayload()),
-            $message->getOptions()
+            $message->getQueue(),
+            json_encode($message->getData())
         );
     }
 
@@ -67,10 +62,15 @@ class IronAdapter extends AbstractAdapter
      */
     public function pop($queue, $timeout = 0)
     {
-        $job = $this->iron->getMessage($queue, $timeout);
+        $message = $this->iron->getMessage($queue, $timeout);
 
-        if ($job instanceof \stdClass) {
-            return new $this->managerClass($queue, $job, $this);
+        if ($message instanceof stdClass) {
+            return new $this->messageClass(
+                $queue,
+                json_decode($message->body, true),
+                $message->id,
+                $message->reserved_count
+            );
         }
 
         throw new QueueEmptyException($queue);
@@ -89,9 +89,9 @@ class IronAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function delete(Manager $manager)
+    public function delete(Message $message)
     {
-        $this->iron->deleteMessage($manager->getQueue(), $manager->getIronJob()->id);
+        $this->iron->deleteMessage($message->getQueue(), $message->getId());
 
         return true;
     }
@@ -109,9 +109,13 @@ class IronAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function release(Manager $manager, $delay = 0)
+    public function release(Message $message)
     {
-        $this->iron->releaseMessage($manager->getQueue(), $manager->getIronJob()->id, $delay);
+        $this->iron->releaseMessage(
+            $message->getQueue(),
+            $message->getId(),
+            $this->getDelay($message)
+        );
 
         return true;
     }
@@ -131,9 +135,9 @@ class IronAdapter extends AbstractAdapter
      *
      * @param IronMQ $iron
      *
-     * @return this
+     * @return self
      */
-    public function setIron(\IronMQ $iron)
+    public function setIron(IronMQ $iron)
     {
         $this->iron = $iron;
 

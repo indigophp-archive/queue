@@ -85,6 +85,7 @@ class QueueTest extends Test
             ->andReturn(null);
 
         $message = \Mockery::mock('Indigo\\Queue\\Message');
+        $message->shouldReceive('setQueue');
 
         $this->assertNull($this->queue->push($message));
     }

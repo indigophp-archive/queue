@@ -100,11 +100,11 @@ class Worker
     }
 
     /**
-     * Returns a Manager
+     * Returns a Message
      *
      * @param integer $timeout Wait timeout for pop
      *
-     * @return Manager Returns null if $manager is not a valid ManagerIterface
+     * @return Message Returns null if $manager is not a valid ManagerIterface
      */
     protected function getManager($timeout = 0)
     {
