@@ -11,9 +11,7 @@
 
 namespace Indigo\Queue\Adapter;
 
-use Indigo\Queue\Adapter;
-use Indigo\Queue\Manager;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 use Indigo\Queue\Exception\QueueEmptyException;
 use PhpAmqpLib\Connection\AbstractConnection as AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -34,11 +32,11 @@ class RabbitAdapter extends AbstractAdapter
     protected $amqp;
 
     /**
-     * Channel object
+     * Channel objects (one for each queue)
      *
-     * @var AMQPChannel
+     * @var AMQPChannel[]
      */
-    protected $channel;
+    protected $channels = [];
 
     /**
      * Use persistent queues and exchanges
@@ -55,12 +53,8 @@ class RabbitAdapter extends AbstractAdapter
      */
     public function __construct(AMQPConnection $amqp, $persistent = true)
     {
-        $this->amqp       = $amqp;
+        $this->amqp = $amqp;
         $this->persistent = $persistent;
-
-        $this->regenerateChannel();
-
-        parent::__construct();
     }
 
     /**
@@ -78,7 +72,11 @@ class RabbitAdapter extends AbstractAdapter
      */
     public function isConnected()
     {
-        return $this->channel->is_open;
+        if (empty($this->channels)) {
+            return false;
+        }
+
+        return reset($this->channels)->is_open;
     }
 
     /**
@@ -106,94 +104,38 @@ class RabbitAdapter extends AbstractAdapter
     }
 
     /**
-     * Returns a channel
+     * Returns a channel for a queue
      *
      * @return AMQPChannel
      */
-    public function getChannel()
+    public function getChannel($queue)
     {
-        return $this->channel;
-    }
+        if (array_key_exists($queue, $this->channels)) {
+            return $this->channels[$queue];
+        }
 
-    /**
-     * Regenerates a channel
-     *
-     * @return AMQPChannel Old channel
-     */
-    public function regenerateChannel()
-    {
-        $channel = $this->channel;
-        $this->channel = $this->amqp->channel();
+        $channel = $this->amqp->channel();
 
-        return $channel;
-    }
+        $this->queueDeclare($channel, $queue);
+        $this->exchangeDeclare($channel, $queue);
 
-    /**
-     * {@inheritdoc}
-     */
-    public function push($queue, Job $job)
-    {
-        $msg = $this->prepareMessage($queue, $job);
-
-        return $this->channel->basic_publish($msg, '', $queue);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delayed($queue, $delay, Job $job)
-    {
-        $this->exchangeDeclare('delay');
-
-        $delay = $delay * 1000;
-
-        $tmpQueue = $this->queueDeclare(
-            '',
-            array(
-                'x-expires'                 => array('I', $delay + 2000),
-                'x-message-ttl'             => array('I', $delay),
-                'x-dead-letter-exchange'    => array('S', 'delay'),
-                'x-dead-letter-routing-key' => array('S', $queue),
-            )
-        );
-
-        $this->channel->queue_bind($queue, 'delay', $queue);
-
-        $msg = $this->prepareMessage($queue, $job);
-
-        return $this->channel->basic_publish($msg, '', reset($tmpQueue));
-    }
-
-    /**
-     * Prepares a message
-     *
-     * @param string $queue
-     * @param Job    $job
-     *
-     * @return AMQPMessage
-     *
-     * @codeCoverageIgnore
-     */
-    protected function prepareMessage($queue, Job $job)
-    {
-        $this->queueDeclare($queue);
-
-        return new AMQPMessage(json_encode($job->createPayload()), $job->getOptions());
+        return $this->channels[$queue] = $channel;
     }
 
     /**
      * Declares a new queue
      *
-     * @param string $queue
-     * @param []     $arguments
+     * @param AMQPChannel $channel
+     * @param string      $queue
+     * @param []          $arguments
      *
      * @return mixed
      *
      * @codeCoverageIgnore
      */
-    protected function queueDeclare($queue = '', array $arguments = [])
+    protected function queueDeclare(AMQPChannel $channel, $queue = '', array $arguments = [])
     {
-        return $this->channel->queue_declare(
+        return $channel->queue_declare(
             $queue,
             false,
             $this->persistent,
@@ -207,14 +149,15 @@ class RabbitAdapter extends AbstractAdapter
     /**
      * Declares a new exchange
      *
-     * @param string $exchange
-     * @param string $type
+     * @param AMQPChannel $channel
+     * @param string      $exchange
+     * @param string      $type
      *
      * @codeCoverageIgnore
      */
-    protected function exchangeDeclare($exchange, $type = 'direct')
+    protected function exchangeDeclare(AMQPChannel $channel, $exchange, $type = 'direct')
     {
-        return $this->channel->exchange_declare(
+        return $channel->exchange_declare(
             $exchange,
             $type,
             false,
@@ -226,11 +169,23 @@ class RabbitAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
+    public function push(Message $message)
+    {
+        $queue = $message->getQueue();
+        $channel = $this->getChannel($queue);
+        $amqpMessage = new AMQPMessage(json_encode($message->getData()));
+
+        return $channel->basic_publish($amqpMessage, '', $queue);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function pop($queue, $timeout = 0)
     {
-        $this->queueDeclare($queue);
+        $channel = $this->getChannel($queue);
 
-        $message = $this->channel->basic_get($queue);
+        $message = $channel->basic_get($queue);
 
         // @codeCoverageIgnoreStart
         if ($timeout > 0) {
@@ -238,13 +193,18 @@ class RabbitAdapter extends AbstractAdapter
 
             while (is_null($message) and $timeout > microtime(true) - $start) {
                 sleep(1);
-                $message = $this->channel->basic_get($queue);
+                $message = $channel->basic_get($queue);
             }
         }
         // @codeCoverageIgnoreEnd
 
         if ($message instanceof AMQPMessage) {
-            return new $this->managerClass($queue, $message, $this);
+            return new $this->messageClass(
+                $queue,
+                json_decode($message->body, true),
+                $message->delivery_info['delivery_tag'],
+                1 // TODO
+            );
         }
 
         throw new QueueEmptyException($queue);
@@ -255,17 +215,15 @@ class RabbitAdapter extends AbstractAdapter
      */
     public function count($queue)
     {
-        $queue = $this->queueDeclare($queue);
-
-        return (int) $queue[1];
+        return 1;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete(Manager $manager)
+    public function delete(Message $message)
     {
-        $manager->getChannel()->basic_ack($manager->getMessage()->delivery_info['delivery_tag']);
+        $this->getChannel($message->getQueue())->basic_ack($message->getId());
 
         return true;
     }
@@ -275,9 +233,7 @@ class RabbitAdapter extends AbstractAdapter
      */
     public function clear($queue)
     {
-        $this->queueDeclare($queue);
-
-        $this->channel->queue_purge($queue);
+        $this->getChannel($queue)->queue_purge($queue);
 
         return true;
     }
@@ -285,20 +241,9 @@ class RabbitAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function release(Manager $manager, $delay = 0)
+    public function release(Message $message)
     {
-        $payload = $manager->getPayload();
-        $payload['attempts'] = isset($payload['attempts']) ? $payload['attempts'] + 1 : 2;
-
-        $this->delete($manager);
-
-        $job = Job::createFromPayload($payload);
-
-        if ($delay > 0) {
-            $this->delayed($manager->getQueue(), $delay, $job);
-        } else {
-            $this->push($manager->getQueue(), $job);
-        }
+        $this->delete($message);
 
         return true;
     }

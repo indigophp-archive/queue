@@ -1,14 +1,14 @@
 # Indigo Queue
 
-[![Build Status](https://travis-ci.org/indigophp/queue.png?branch=develop)](https://travis-ci.org/indigophp/queue)
-[![Code Coverage](https://scrutinizer-ci.com/g/indigophp/queue/badges/coverage.png?s=81febd5af1f6e48a370b7753f4c81416d981e924)](https://scrutinizer-ci.com/g/indigophp/queue/)
-[![Latest Stable Version](https://poser.pugx.org/indigophp/queue/v/stable.png)](https://packagist.org/packages/indigophp/queue)
-[![Total Downloads](https://poser.pugx.org/indigophp/queue/downloads.png)](https://packagist.org/packages/indigophp/queue)
-[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/queue/badges/quality-score.png?s=83208d2af7fe392c2942a17fd1f2641fb0f9032d)](https://scrutinizer-ci.com/g/indigophp/queue/)
-[![License](https://poser.pugx.org/indigophp/queue/license.png)](https://packagist.org/packages/indigophp/queue)
+[![Build Status](https://img.shields.io/travis/indigophp/queue/develop.svg?style=flat-square)](https://travis-ci.org/indigophp/queue)
+[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/indigophp/queue.svg?style=flat-square)](https://scrutinizer-ci.com/g/indigophp/queue)
+[![Packagist Version](https://img.shields.io/packagist/v/indigophp/queue.svg?style=flat-square)](https://packagist.org/packages/indigophp/queue)
+[![Total Downloads](https://img.shields.io/packagist/dt/indigophp/queue.svg?style=flat-square)](https://packagist.org/packages/indigophp/queue)
+[![Quality Score](https://img.shields.io/scrutinizer/g/indigophp/queue.svg?style=flat-square)](https://scrutinizer-ci.com/g/indigophp/queue)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Dependency Status](http://www.versioneye.com/user/projects/53cd7ce82254268535000153/badge.svg?style=flat)](http://www.versioneye.com/user/projects/53cd7ce82254268535000153)
 
-**Indigo Queue manages your queues and processes the jobs you put onto them.**
+**Indigo Queue is a backend agnostic message queue implementation with a work queue implementation on top of it.**
 
 
 ## Install
@@ -29,19 +29,26 @@ Via Composer
 First of all you have decide which MQ do you want to use. Currently supported MQs:
 
 * [Beanstalkd](http://kr.github.io/beanstalkd/)
-* [RabbitMQ](http://www.rabbitmq.com/)
+* [RabbitMQ](http://www.rabbitmq.com/) **(EXPERIMENTAL)**
 * [IronMQ](http://www.iron.io/)
 
-There is also a special implementation, where to job is not sent to a queue, but executed immediately.
+There is also a special implementation, where to message is not sent to a queue, but processed immediately.
 
-### Connector
+**Note:** The RabbitMQ (AMQP) implementation became experimental as it has some features missing. Only use it if you don't rely on these. (Mainly the count of messages and releasing a message back to the queue are effected)
 
-Connector does the communication between the server and the Queue/Worker class.
+### Adapter
+
+Adapter handles the communication between the backend and the Queue/Worker class.
+
+
+### Message
+
+A message contains all relevant data you want to store and get back later. It also holds some other data which is only important if you get your message back. (For example: id, attempts)
 
 
 ### Queue
 
-You use the Queue class to push jobs to a queue. You can also push a job with a delay.
+You use the Queue class to push messages to a queue.
 
 See [Queue example](examples/Queue.php).
 
@@ -53,14 +60,9 @@ You usually set up a console application for your workers.
 See [Worker example](examples/Worker.php).
 
 
-### Job
+### Special adapter: DirectAdapter
 
-See [examples](examples);
-
-
-### Special connector: DirectConnector
-
-This connector does what you think: Executes the pushed job immediately. You can also push a delayed job, BUT BE CAREFUL: this means that your application will sleep for a certain time, so use it wisely.
+This adapter does what you think: Processes the pushed message immediately. Delayed message implementations are not possible since only one message can be in the queue at a time.
 
 
 ## Testing

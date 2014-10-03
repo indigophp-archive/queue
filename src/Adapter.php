@@ -11,8 +11,7 @@
 
 namespace Indigo\Queue;
 
-use Indigo\Queue\Manager;
-use Indigo\Queue\Job;
+use Indigo\Queue\Message;
 
 /**
  * Implements connection details
@@ -22,47 +21,35 @@ use Indigo\Queue\Job;
 interface Adapter
 {
     /**
-     * Checks whether connection is available
+     * Checks whether a connection is available
      *
      * @return boolean
      */
     public function isConnected();
 
     /**
-    * Pushes a new job onto the queue
+    * Pushes a new message onto the queue
     *
-    * @param string $queue
-    * @param Job    $job
-    *
-    * @return mixed
-    */
-    public function push($queue, Job $job);
-
-    /**
-    * Pushes a new job onto the queue after a delay
-    *
-    * @param string  $queue
-    * @param integer $delay
-    * @param Job     $job
+    * @param Message $message
     *
     * @return mixed
     */
-    public function delayed($queue, $delay, Job $job);
+    public function push(Message $message);
 
     /**
-    * Pops the next job off of the queue
+    * Pops the next message off the queue
     *
     * @param string  $queue   Name of the queue
     * @param integer $timeout Wait timeout
     *
-    * @return Manager
+    * @return Message
     *
-    * @throws QueueEmptyException If no job can be returned
+    * @throws QueueEmptyException If the queue is empty or no message is received
     */
     public function pop($queue, $timeout = 0);
 
     /**
-     * Returns the count of jobs
+     * Returns the count of messages
      *
      * @param string $queue
      *
@@ -71,30 +58,29 @@ interface Adapter
     public function count($queue);
 
     /**
-     * Deletes a job from queue
+     * Removes a message from the queue
      *
-     * @param Manager $manager
+     * @param Message $message
      *
-     * @return boolean Always true
+     * @return boolean Returns true on success, false otherwise
      */
-    public function delete(Manager $manager);
+    public function delete(Message $message);
 
     /**
      * Clears the queue
      *
      * @param string $queue
      *
-     * @return boolean Always true
+     * @return boolean Returns true on success, false otherwise
      */
     public function clear($queue);
 
     /**
-     * Releases a job back to the queue
+     * Releases a message back to the queue
      *
-     * @param Manager $manager
-     * @param integer          $delay  Delay the job with x seconds, 0 means no delay
+     * @param Message $message
      *
-     * @return boolean Always true
+     * @return boolean Returns true on success, false otherwise
      */
-    public function release(Manager $manager, $delay = 0);
+    public function release(Message $message);
 }

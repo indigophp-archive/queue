@@ -27,6 +27,6 @@ class QueueEmptyException extends \UnderflowException
      */
     public function __construct($queue)
     {
-        parent::__construct('Queue ' . $queue . ' is empty.');
+        parent::__construct('Queue ' . $queue . ' is empty');
     }
 }

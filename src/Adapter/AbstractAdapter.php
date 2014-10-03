@@ -12,18 +12,16 @@
 namespace Indigo\Queue\Adapter;
 
 use Indigo\Queue\Adapter;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\NullLogger;
+use Indigo\Queue\Message;
+use Indigo\Queue\Message\Delayed;
 
 /**
  * Abstract Adapter class
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-abstract class AbstractAdapter implements Adapter, LoggerAwareInterface
+abstract class AbstractAdapter implements Adapter
 {
-    use \Psr\Log\LoggerAwareTrait;
-
     /**
      * Default job options
      *
@@ -34,34 +32,31 @@ abstract class AbstractAdapter implements Adapter, LoggerAwareInterface
         'timeout' => 60,
     ];
 
-    /**
-     * Manager class to be instantiated
-     *
-     * @var string
-     */
-    protected $managerClass;
+    protected $messageClass = 'Indigo\\Queue\\Message\\Message';
 
     /**
-     * Creates a new Adapter
-     *
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        $this->setLogger(new NullLogger);
-
-        if (empty($this->managerClass)) {
-            $this->managerClass = str_replace('Adapter', 'Manager', get_called_class());
-        }
-    }
-
-    /**
-     * Returns the manager class for Adapter
+     * Returns the message class
      *
      * @return string
      */
-    public function getManagerClass()
+    public function getMessageClass()
     {
-        return $this->managerClass;
+        return $this->messageClass;
+    }
+
+    /**
+     * Returns the message delay
+     *
+     * @param Message $message
+     *
+     * @return integer
+     */
+    protected function getDelay(Message $message)
+    {
+        if ($message instanceof Delayed) {
+            return $message->getDelay();
+        }
+
+        return $this->options['delay'];
     }
 }

@@ -25,11 +25,18 @@ use Indigo\Queue\Adapter\BeanstalkdAdapter;
  */
 class BeanstalkdAdapterTest extends AbstractAdapterTest
 {
+    /**
+     * Pheanstalk mock
+     *
+     * @var Pheanstalk
+     */
+    protected $pheanstalk;
+
     public function _before()
     {
-        $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
+        $this->pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
 
-        $this->adapter = new BeanstalkdAdapter($pheanstalk);
+        $this->adapter = new BeanstalkdAdapter($this->pheanstalk);
     }
 
     /**
@@ -37,11 +44,9 @@ class BeanstalkdAdapterTest extends AbstractAdapterTest
      */
     public function testConstruct()
     {
-        $pheanstalk = \Mockery::mock('Pheanstalk\\Pheanstalk');
+        $adapter = new BeanstalkdAdapter($this->pheanstalk);
 
-        $adapter = new BeanstalkdAdapter($pheanstalk);
-
-        $this->assertSame($pheanstalk, $adapter->getPheanstalk());
+        $this->assertSame($this->pheanstalk, $adapter->getPheanstalk());
     }
 
     /**
@@ -49,12 +54,10 @@ class BeanstalkdAdapterTest extends AbstractAdapterTest
      */
     public function testConnection()
     {
-        $pheanstalk = $this->adapter->getPheanstalk();
-
-        $pheanstalk->shouldReceive('getConnection->isServiceListening')
+        $this->pheanstalk->shouldReceive('getConnection->isServiceListening')
             ->andReturn(true);
 
-        $this->assertTrue($this->adapter->isConnected());
+        parent::testConnection();
     }
 
     /**
@@ -71,19 +74,54 @@ class BeanstalkdAdapterTest extends AbstractAdapterTest
     }
 
     /**
+     * @covers ::push
+     * @covers ::getDelay
+     * @covers ::getPriority
+     */
+    public function testPush()
+    {
+        $this->pheanstalk->shouldReceive('putInTube')
+            ->andReturn(true);
+
+        parent::testPush();
+    }
+
+    /**
+     * @covers ::pop
+     */
+    public function testPop()
+    {
+        $message = \Mockery::mock('Pheanstalk\\Job');
+
+        $message->shouldReceive('getId')
+            ->andReturn(1);
+        $message->shouldReceive('getData')
+            ->andReturn(json_encode([]));
+
+        $this->pheanstalk->shouldReceive('reserveFromTube')
+            ->andReturn($message);
+
+        $stats = new \stdClass;
+        $stats->reserves = 1;
+
+        $this->pheanstalk->shouldReceive('statsJob')
+            ->andReturn($stats);
+
+        parent::testPop();
+    }
+
+    /**
      * @covers                   ::pop
      * @covers                   Indigo\Queue\Exception\QueueEmptyException
      * @expectedException        Indigo\Queue\Exception\QueueEmptyException
-     * @expectedExceptionMessage Queue test is empty.
+     * @expectedExceptionMessage Queue test is empty
      */
     public function testEmptyPop()
     {
-        $pheanstalk = $this->adapter->getPheanstalk();
-
-        $pheanstalk->shouldReceive('reserveFromTube')
+        $this->pheanstalk->shouldReceive('reserveFromTube')
             ->andReturn(null);
 
-        $this->adapter->pop('test');
+        parent::testEmptyPop();
     }
 
     /**
@@ -91,11 +129,59 @@ class BeanstalkdAdapterTest extends AbstractAdapterTest
      */
     public function testCount()
     {
-        $pheanstalk = $this->adapter->getPheanstalk();
-
-        $pheanstalk->shouldReceive('statsTube')
+        $this->pheanstalk->shouldReceive('statsTube')
             ->andReturn(['current-jobs-ready' => 1]);
 
-        $this->assertEquals(1, $this->adapter->count('test'));
+        parent::testCount();
+    }
+
+    /**
+     * @covers ::delete
+     */
+    public function testDelete()
+    {
+        $this->pheanstalk->shouldReceive('delete');
+
+        parent::testDelete();
+    }
+
+    /**
+     * @covers ::bury
+     */
+    public function testBury()
+    {
+        $this->adapter->getPheanstalk()
+            ->shouldReceive('bury');
+
+        $message = $this->getMessageMock();
+
+        $this->assertTrue($this->adapter->bury($message));
+    }
+
+    /**
+     * @covers ::clear
+     */
+    public function testClear()
+    {
+        $this->adapter->getPheanstalk()
+            ->shouldReceive('delete')
+            ->shouldReceive('peekReady')
+            ->shouldReceive('peekBuried')
+            ->shouldReceive('peekDelayed');
+
+        parent::testClear();
+    }
+
+    /**
+     * @covers ::release
+     * @covers ::getPriority
+     * @covers ::getDelay
+     */
+    public function testRelease()
+    {
+        $this->adapter->getPheanstalk()
+            ->shouldReceive('release');
+
+        parent::testRelease();
     }
 }

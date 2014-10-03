@@ -11,7 +11,6 @@
 
 namespace Indigo\Queue;
 
-use Jeremeamia\SuperClosure\SerializableClosure;
 use Codeception\TestCase\Test;
 
 /**
@@ -48,8 +47,6 @@ class QueueTest extends Test
 
     /**
      * @covers ::__construct
-     * @group  Queue
-     * @group  Main
      */
     public function testConstruct()
     {
@@ -62,8 +59,6 @@ class QueueTest extends Test
     /**
      * @covers ::getQueue
      * @covers ::__toString
-     * @group  Queue
-     * @group  Main
      */
     public function testQueue()
     {
@@ -74,8 +69,6 @@ class QueueTest extends Test
     /**
      * @covers ::getAdapter
      * @covers ::setAdapter
-     * @group  Queue
-     * @group  Main
      */
     public function testAdapter()
     {
@@ -85,31 +78,15 @@ class QueueTest extends Test
 
     /**
      * @covers ::push
-     * @group  Queue
-     * @group  Main
      */
     public function testPush()
     {
         $this->adapter->shouldReceive('push')
             ->andReturn(null);
 
-        $job = \Mockery::mock('Indigo\\Queue\\Job');
+        $message = \Mockery::mock('Indigo\\Queue\\Message');
+        $message->shouldReceive('setQueue');
 
-        $this->assertNull($this->queue->push($job));
-    }
-
-    /**
-     * @covers ::delayed
-     * @group  Queue
-     * @group  Main
-     */
-    public function testDelayed()
-    {
-        $this->adapter->shouldReceive('delayed')
-            ->andReturn(null);
-
-        $job = \Mockery::mock('Indigo\\Queue\\Job');
-
-        $this->assertNull($this->queue->delayed(0, $job));
+        $this->assertNull($this->queue->push($message));
     }
 }
